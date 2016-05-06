@@ -1,6 +1,8 @@
 ﻿body
 {
     background-color: greenyellow;
-    //background-image: url(C:\Users\Dan\Documents\Work\baton.jpg);
-    //background-repeat: no-repeat;
 }
+
+.listdemoBasicUsage md-divider {
+  margin-top: 10px;
+  margin-bottom: 10px; }
