@@ -3,6 +3,14 @@
     background-color: greenyellow;
 }
 
-.listdemoBasicUsage md-divider {
-  margin-top: 10px;
-  margin-bottom: 10px; }
+th {
+    font-weight : bold;
+    background-color: green;
+    color: white;
+    padding: 5px 5px 5px 5px;
+    text-align: center;
+}
+
+td {
+  padding: 2px 2px 2px 2px;
+}
