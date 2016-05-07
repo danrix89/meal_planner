@@ -10,3 +10,12 @@ div.top_menu{
     position: relative;
     margin:0 auto;
 }
+
+a.top_menu{
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    font-size:x-large;
+}
+
+li.top_menu_items{
+    font-family:Tahoma;
+}
