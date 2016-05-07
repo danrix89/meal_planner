@@ -16,6 +16,14 @@ a.top_menu{
     font-size:x-large;
 }
 
+ul li {
+    display:inline;
+}
+
 li.top_menu_items{
     font-family:Tahoma;
+}
+
+ul li a{
+    text-decoration:none;
 }
