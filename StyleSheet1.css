@@ -1,29 +1,72 @@
-﻿html { 
-  background: url(great_outdoors_canada.jpg) no-repeat center center fixed;
-  background-size: cover;
+﻿body, html, main {
+	/* important */
+	height: 100%;
+}
+ 
+.fixed-bg {
+	min-height: 100%;
+	background-size: cover;
+	background-attachment: fixed;
+	background-repeat: no-repeat;
+	background-position: center center;
+}
+ 
+.fixed-bg.bg-1 {
+  background-image: url("hike.jpg");
 }
 
-div.top_menu{
-    background-color: rgba(255, 255, 255, 0.3);
+.fixed-bg.bg-2 {
+  background-image: url("great_outdoors_canada.jpg");
+}
+
+.fixed-bg.bg-3 {
+  background-image: url("campfire_silhouettes.jpg");
+}
+
+.fixed-bg.bg-4 {
+  background-image: url("camping_under_stars.jpg");
+}
+ 
+.scrolling-bg {
+	min-height: 75%;
+}
+
+.scrolling-bg-start, .scrolling-bg-end {
+	min-height: 170px;
+}
+.flex-container {
+    background-color: teal;
     width:95%;
     height:150px;
     position: relative;
     margin:0 auto;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    align-items: center;
+    align-content: center;
+    top: 10px;
 }
 
-a.top_menu{
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
-    font-size:x-large;
-}
-
-ul li {
-    display:inline;
-}
-
-li.top_menu_items{
-    font-family:Tahoma;
+.flex-item {
+    width: auto;
+    padding: 5px;
+    color: white;
+    font-weight: bold;
+    font-size: 3em;
+    text-align: center;
 }
 
 ul li a{
+    font-family: Tahoma;
     text-decoration:none;
+    color: white;
+    font-weight: bold;
+    font-size: x-large;
+}
+
+ul li a:hover{
+    color: darkgray;
 }
