@@ -28,7 +28,11 @@
 }
  
 .scrolling-bg {
-	min-height: 75%;
+    padding: 10%;
+	min-height: 10%;
+    color: tomato;
+    font-size: xx-large;
+    font-family: Verdana;
 }
 
 .scrolling-bg-start, .scrolling-bg-end {
@@ -36,7 +40,7 @@
 }
 .flex-container {
     background-color: teal;
-    width:95%;
+    width:100%;
     height:150px;
     position: relative;
     margin:0 auto;
@@ -55,18 +59,28 @@
     padding: 5px;
     color: white;
     font-weight: bold;
-    font-size: 3em;
+    font-size: x-large;
     text-align: center;
+    font-family: Tahoma;
+    text-decoration: none;
 }
 
-ul li a{
+a {
+    color: white;
+    text-decoration: none;
+}
+
+a:hover{
+    color: darkgray;
+}
+
+.flex-item-bottom {
+    width: auto;
+    padding: 5px;
+    color: white;
+    text-align: center;
+    font-size: x-large;
     font-family: Tahoma;
     text-decoration:none;
-    color: white;
-    font-weight: bold;
-    font-size: x-large;
-}
-
-ul li a:hover{
-    color: darkgray;
+    color: lightgray;
 }
