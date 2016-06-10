@@ -1,70 +1,128 @@
 ﻿<!DOCTYPE html>
+
 <html>
-
 <head>
+    <meta charset="utf-8" />
+    <title></title>
     <link rel="stylesheet" type="text/css" href="index_style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="C:\Users\Dan\Documents\GitHub\danrix89.github.io\index.js"></script>
 </head>
-
 <body>
-    <div class="scrolling-bg-header-footer start">
-        <div>
-            <ul class="flex-container">
-                <li class="flex-item"><a href="index.html">Home</a></li>
-                <li class="flex-item"><a href="http://www.amazon.com/camping-hiking/b?ie=UTF8&node=3400371" target="_blank">Find Gear</a></li>
-                <li class="flex-item"><a href="http://www.hipcamp.com" target="_blank">Go Camping!</a></li>
-                <li class="flex-item"><a href="https://www.google.com/webhp?sourceid=chrome-instant&ion=1&espv=2&ie=UTF-8#q=faqs" target="_blank">FAQs</a></li>
-                <li class="flex-item"><a href="video_test.html">About us</a></li>
+    <div class="main_panel">
+        <div class="calendar_title_pane">
+            <ul class="flex_calendar_title_container">
+                <li class="flex_calendar_title_item">
+                    <div class="calendar_button" id="previous_month"></div>
+                </li>
+                <li class="flex_calendar_title_item" id="month_title">
+                    try again...
+                </li>
+                <li class="flex_calendar_title_item">
+                    <div class="calendar_button" id="next_month"></div>
+                </li>
             </ul>
         </div>
-    </div>
+        <div class="calendar">
+            <div class="calendar_days_of_week">
+                <ul class="flex_calendar_days_of_week_container">
+                    <li class="flex_calendar_days_of_week_item">SUN</li>
+                    <li class="flex_calendar_days_of_week_item">MON</li>
+                    <li class="flex_calendar_days_of_week_item">TUE</li>
+                    <li class="flex_calendar_days_of_week_item">WED</li>
+                    <li class="flex_calendar_days_of_week_item">THU</li>
+                    <li class="flex_calendar_days_of_week_item">FRI</li>
+                    <li class="flex_calendar_days_of_week_item">SAT</li>
+                </ul>
+            </div>
+            <div class="calendar_body">
+                <ul class="flex_calendar_body_container">
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                    <li class="flex_calendar_body_item"></li>
+                </ul>
 
-    <div class="scrolling-bg">
-        If you love camping you've come to the right place. Blah Blah Blah. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do 
-        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi 
-        ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla 
-        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-    </div>
-
-    <div class="fixed-bg video-bg">
-        <video id="bgvid" autoplay loop muted>
-            <source src="redwoods_grand_canyon.mp4" type="video/mp4"/>
-        </video>
-    </div>
-
-    <div class="scrolling-bg">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-        minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit
-        in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-        officia deserunt mollit anim id est laborum.
-    </div>
-
-    <div class="fixed-bg bg-1"></div>
-
-    <div class="scrolling-bg">
-        <div class="video-container">
-            <iframe class="hipcamp_video" src="https://www.youtube.com/embed/TNy9E45xHoo" frameborder="0" allowfullscreen></iframe>
-            <iframe class="starwars-video" src="https://www.youtube.com/embed/-ilyiwcet3U" frameborder="0" allowfullscreen></iframe>
+            </div>
         </div>
     </div>
-
-    <div class="fixed-bg bg-2"></div>
-
-    <div class="scrolling-bg"></div>
-
-    <div class="fixed-bg bg-3"></div>
-
-    <div class="scrolling-bg-header-footer end">
-        <div>
-            <ul class="flex-container">
-                <li class="flex-item-bottom">Stuff</li>
-                <li class="flex-item-bottom">Stuff again</li>
-                <li class="flex-item-bottom">Stuff thrice</li>
-                <li class="flex-item-bottom">More stuff...</li>
-                <li class="flex-item-bottom"><a href="http://www.starwars.com" target="_blank">...STAR WARS</a></li>
-            </ul>
+    <div class="side_panel">
+        <div class="side_panel_container">
+            <div class="meal_list">
+                <ul class="flex-meal-container">
+                    <li class="flex-meal-item">Meal 1</li>
+                    <li class="flex-meal-item">Meal 2</li>
+                    <li class="flex-meal-item">Meal 3</li>
+                    <li class="flex-meal-item">Meal 4</li>
+                    <li class="flex-meal-item">Meal 5</li>
+                    <li class="flex-meal-item">Meal 6</li>
+                    <li class="flex-meal-item">Meal 7</li>
+                    <li class="flex-meal-item">Meal 8</li>
+                    <li class="flex-meal-item">Meal 9</li>
+                    <li class="flex-meal-item">Meal 10</li>
+                    <li class="flex-meal-item">Meal 11</li>
+                    <li class="flex-meal-item">Meal 12</li>
+                    <li class="flex-meal-item">Meal 13</li>
+                    <li class="flex-meal-item">Meal 14</li>
+                    <li class="flex-meal-item">Meal 15</li>
+                    <li class="flex-meal-item">Meal 16</li>
+                </ul>
+            </div>
+        </div>
+        <div class="side_panel_container">
+            <div class="meal_editor">
+                <p class="meal_editor_form_header">Meal Name:</p>
+                <br />
+                <input class="meal_name_input" type="text">
+                <br />
+                <p class="meal_editor_form_header">Ingredients:</p>
+                <div class="ingredient_list">
+                    <ul class="flex-ingredient-container">
+                        <li class="flex-ingredient-item">Chicken</li>
+                        <li class="flex-ingredient-item">Carrots</li>
+                        <li class="flex-ingredient-item">Broccolli</li>
+                        <li class="flex-ingredient-item">Potatoes</li>
+                        <li class="flex-ingredient-item">Salt</li>
+                        <li class="flex-ingredient-item">Pepper</li>
+                    </ul>
+                </div>
+                <br />
+                <p class="meal_editor_form_header">Recipe:</p>
+                <br />
+                <textarea class="recipe_text_area" rows="15"></textarea>
+            </div>
         </div>
     </div>
 </body>
-
 </html>
