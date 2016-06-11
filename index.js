@@ -51,7 +51,44 @@ $(document).ready(function () {
         var date = new Date();
         date = a_date;
         return months[date.getMonth()] + ' ' + date.getFullYear();
-    }  
+    }
+
+
+
+
+    // Drag & Drop
+
+    /**********************************
+    * Drag
+    * 
+    **********************************/
+    document.drag = function(ev) {
+        ev.dataTransfer.setData("text", ev.target.id);
+        //a_event.dataTransfer.effectAllowed = "copy";
+    }
+
+    /**********************************
+    * Allow_drop
+    * 
+    **********************************/
+    document.allow_drop = function (ev)
+    {
+        ev.preventDefault();
+    }
+
+
+    /**********************************
+   * Drop
+   * 
+   **********************************/
+    document.drop = function(ev)
+    {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("text");
+        var nodeCopy = document.getElementById(data).cloneNode(true);
+        nodeCopy.id = data + "_new"; /* We cannot use the same ID */
+        ev.target.appendChild(nodeCopy);
+    }
 
 });
 
