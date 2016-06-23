@@ -1,0 +1,18 @@
+{
+  "meal": [
+  {
+    "id": "1",
+    "name": "Chicken Noodle Soup",
+    "image_url":  "images\soup.png",
+    "ingredients": [
+      {
+        "ingredient_1": "chicken",
+        "ingredient_2": "noodles",
+        "ingredient_3": "broth",
+        "ingredient_4": "carrots",
+        "ingredient_5": "celary"
+      }],
+    "recipe" :  "These are the instructions..."
+    }
+  ]
+}
