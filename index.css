@@ -134,6 +134,18 @@ div.calendar_button:active {
     opacity: 0.8;
 }
 
+.flex_calendar_body_item_half_day {
+    margin: 1px;
+    padding:0;
+    background-color: white;
+    font-weight: bold;
+    font-size: 1.5em;
+    width: 13.8%;
+    height: 77px;
+    opacity: 0.8;
+    border: 2px solid rgba(0,0,0,0.2);
+}
+
 .calendar {
     margin: 0;
     padding: 0;
@@ -212,7 +224,6 @@ li.flex-meal-item:active {
 ******************************************************************************************/
 .meal_editor {
     background-color: white;
-    padding: 10px;
 }
 
 .meal_editor_and_list_title {
@@ -220,6 +231,11 @@ li.flex-meal-item:active {
     background-color: gray;
     color: white;
     font-size: 2em;
+    margin: 5px;
+}
+
+.meal_editor_body {
+    padding: 10px;
 }
 
 .ingredient_list {
