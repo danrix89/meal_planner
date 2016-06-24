@@ -13,7 +13,8 @@ $(document).ready(function () {
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var previous_meal = {};
     var current_meal = {};
-    var is_edit_mode = true;
+    var is_edit_mode = false;
+    var is_adding_new_meal = false;
 
     // Set the month title with todays date
     $("#month_title").text(formatted_date(calendar_date));
@@ -153,6 +154,7 @@ $(document).ready(function () {
             meal_list_item += '<li class="flex-meal-item" id="meal_list_item_' + id + '"><img id="drag_' + id + '" src="' + meals[i].image_url + '" draggable="true" ondragstart="drag(event)" data-meal-id="' + id + '"><div class="meal_name">' + meals[i].name + '</div></li>';
             document.getElementById('meal_unordered_list').innerHTML = meal_list_item;
         }
+        setup_add_meal_onclick_function();
     }
 
     function setup_meal_onclick_function() {
@@ -172,26 +174,47 @@ $(document).ready(function () {
     {
         // Set the current_meal to the first meal in the meals array
         previous_meal = current_meal;
-        for (var i = 0; i < meals.length; i++)
+        for (var i = 0; i < meals.length; i++) 
         {
             if (meals[i].id == meal_id)
                 current_meal = meals[i];
         }
 
-        // Set the meal name input field
-        document.getElementById('meal_name_input').value = current_meal.name;
+        // Set the meal name input field and instructions text area
+        var meal_instructions_text_area = document.getElementById('recipe_text_area');
+        meal_instructions_text_area.value = current_meal.recipe;
+        var meal_name_iput = document.getElementById('meal_name_input');
+        meal_name_iput.value = current_meal.name;
+
+        // Handle Edit Mode
+        if (is_edit_mode)
+        {
+            meal_name_iput.readOnly = false;
+            meal_instructions_text_area.readOnly = false;
+            document.getElementById('edit_button').src = "images\\controls\\check.png";
+        }
+        else
+        {
+            meal_name_iput.readOnly = true;
+            meal_instructions_text_area.readOnly = true;
+            document.getElementById('edit_button').src = "images\\controls\\pen.png";
+        }
+
+
         // Set the meal ingredients list
         var ingredients = '';
         for (var i = 0; i < current_meal.ingredients.length; i++)
         {
-            ingredients += '<li class="flex-ingredient-item"><div class="ingredient" id="ingredient_' + i + '">' + current_meal.ingredients[i] + '</div><div class="remove_ingredient_button" id="button_' + i + '">x</div></li>';
-            document.getElementById('ingredients_unordered_list').innerHTML = ingredients;
+            var x = ''
+            if (is_edit_mode)
+                x = 'x';
+            ingredients += '<li class="flex-ingredient-item"><div class="ingredient" id="ingredient_' + i + '">' + current_meal.ingredients[i] + '</div><div class="remove_ingredient_button" id="button_' + i + '">' + x + '</div></li>';
         }
-        // Set the meal instructions text area
-        document.getElementById('recipe_text_area').value = current_meal.recipe;
+        document.getElementById('ingredients_unordered_list').innerHTML = ingredients;
 
-        // Setup the onclick functionality of each ingredient element
+        // Setup the onclick functionality
         setup_ingredient_onclick_function();
+        setup_edit_button_onclick_function();
     }
 
     function highlight_current_meal(meal_id) {
@@ -206,7 +229,30 @@ $(document).ready(function () {
         meal_list_element.style.border = "3px solid #33afff";
     }
 
-    function setup_ingredient_onclick_function() {
+    function setup_add_meal_onclick_function()
+    {
+        document.getElementById('add_button').onclick = (function (meal_id) { return function () { on_add_meal_buton_click(meal_id); } })(current_meal.id);
+    }
+
+    function on_add_meal_buton_click(meal_id)
+    {
+        if (!is_edit_mode && !is_adding_new_meal)
+        {
+            is_adding_new_meal = true;
+            is_edit_mode = true;
+            var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
+            var new_meal = { "id": "", "name": "", "image_url": "images' + '\\' + 'default_image.jpg", "ingredients": [], "recipe": "" };
+            new_meal.id = latest_meal_id.toString();
+            
+            current_meal = new_meal;
+            meals.push(current_meal);
+            set_meal_editor_data(new_meal.id);
+            document.getElementById('meal_name_input').focus();
+        }
+    }
+
+    function setup_ingredient_onclick_function()
+    {
         for (var i = 0; i < current_meal.ingredients.length; i++) {
             document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
         }
@@ -217,10 +263,32 @@ $(document).ready(function () {
         if (is_edit_mode)
         {
             current_meal.ingredients.splice(ingredient_index, 1);
-            set_meal_editor_data(current_meal.id - 1);
+            set_meal_editor_data(current_meal.id);
         }
-        else
-            ;
+    }
+
+    function setup_edit_button_onclick_function()
+    {
+        document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
+    }
+
+    function edit_button_onclick(meal_id)
+    {
+        if (is_edit_mode)
+        {
+           // Save changes to meal name and instructions
+            current_meal.name = document.getElementById('meal_name_input').value;
+            current_meal.recipe = document.getElementById('recipe_text_area').value;
+
+            if (is_adding_new_meal)
+            {
+                is_adding_new_meal = false;
+                populate_meal_list();
+            }
+        }
+
+        is_edit_mode = !is_edit_mode;
+        set_meal_editor_data(meal_id);
     }
 
     function populate_calendar_days()
@@ -260,62 +328,18 @@ $(document).ready(function () {
         return new Date(year, month + 1, 0).getDate();
     }
 
-    /**********************************************************************
-     * Computes and returns the offset for the first day of a given month year.
-    ***********************************************************************/
-    function computeOffset(month, year)
-    {
-        var numDays = 0;
-        for (var yearCount = 1753; yearCount <= year; yearCount++)
-        {
-            if (yearCount == year)
-            {
-                for (var i = 1; i < month; i++)
-                {
-                    numDays = numDays + computeNumDays(i, year);
-                }
-            }
-            else
-                // If not at the end, add another years worth of days
-            {
-                if (isLeapYear(yearCount))
-                    numDays = numDays + 366;
-                else
-                    numDays = numDays + 365;
-            }
-        }
-        var offset = numDays % 7;
-        return offset;
-    }
 
-    /**********************************************************************
-     * Is a given year a technical leap year?
-     * For more information on what qualifies as a leap year visit:
-     * www.timeanddate.com/date/leapyear.html
-    ***********************************************************************/
-    function isLeapYear(year)
-    {
-       var result = false;
-        // If it's divisible by 4 it might be a leap year
-        if ((year % 4) == 0)
-        {
-            // If it's divisible by 100 it might NOT be a leap year...
-            if ((year % 100) == 0)
-            {
-                // ...unless it's also divisible by 400
-                if ((year % 400) == 0)
-                {
-                    result = true;
-                }
-            }
-                // If it's divisible by 4 and not divisible by 100
-            else
-            {
-                result = true;
-            }
-        }
-        return result;
-    }
+
+
+
+
+
+
+
+
+
+
+
 
     /************************************************************************************************************************************************************************************
     *************************************************************************************************************************************************************************************
@@ -537,29 +561,43 @@ $(document).ready(function () {
           },
           {
               "id": "31",
-              "name": "Dine-Out",
-              "image_url": "images\\dine_out.jpg", // http://www.keyword-suggestions.com/ZGluZXI/
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
               "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
               "recipe": "These are the instructions..."
           },
           {
               "id": "32",
-              "name": "Dine-Out",
-              "image_url": "images\\dine_out.jpg", // http://www.keyword-suggestions.com/ZGluZXI/
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
               "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
               "recipe": "These are the instructions..."
           },
           {
               "id": "33",
-              "name": "Dine-Out",
-              "image_url": "images\\dine_out.jpg", // http://www.keyword-suggestions.com/ZGluZXI/
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
               "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
               "recipe": "These are the instructions..."
           },
           {
               "id": "34",
-              "name": "Dine-Out",
-              "image_url": "images\\dine_out.jpg", // http://www.keyword-suggestions.com/ZGluZXI/
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
+              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
+              "recipe": "These are the instructions..."
+          },
+          {
+              "id": "35",
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
+              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
+              "recipe": "These are the instructions..."
+          },
+          {
+              "id": "36",
+              "name": "Some Meal",
+              "image_url": "images\\default.png",
               "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
               "recipe": "These are the instructions..."
           },

@@ -51,7 +51,8 @@
                     <ul class="flex-meal-container" id="meal_unordered_list">
                         <!-- Populated by Json Meal Data -->
                     </ul>
-                    <div class="meal_list_floating_button" ondrop="drop_to_garbage(event)" ondragover="    allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                    <div class="meal_list_floating_button" ondrop="drop_to_garbage(event)" ondragover="allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                    <div class="meal_list_floating_add_button" ondrop="drop_to_garbage(event)" ondragover="allow_drop(event)"><img id="add_button" class="calendar_button_image" src="images\controls\add.png" /></div>
                 </div>
            </div>
         </div>
@@ -66,9 +67,10 @@
                         <ul class="flex-ingredient-container" id="ingredients_unordered_list">
                             <!-- Populated by Json Meal Data-->
                         </ul>
+                        <div class="meal_list_floating_button"><img id="edit_button" class="calendar_button_image" src="images\controls\pen.png" /></div>
                     </div>
                     <p class="meal_editor_form_header">Instructions:</p>
-                    <textarea class="recipe_text_area" id="recipe_text_area" rows="15"></textarea>
+                    <textarea class="recipe_text_area" id="recipe_text_area" rows="5"></textarea>
                 </div>
             </div>
         </div>
