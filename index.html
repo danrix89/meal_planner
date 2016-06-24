@@ -16,7 +16,7 @@
                     <div class="calendar_button" id="previous_month"><img class="calendar_button_image" src="images\controls\left-arrow.png" /></div>
                 </li>
                 <li class="flex_calendar_title_item" id="month_title">
-                    try again...
+                    Error: Contact Dan Rix
                 </li>
                 <li class="flex_calendar_title_item">
                     <div class="calendar_button" id="next_month"><img class="calendar_button_image" src="images\controls\right-arrow.png" /></div>
@@ -39,7 +39,7 @@
                 <ul class="flex_calendar_body_container" id="calendar">
                     <!-- Populated by JavaScript function -->
                 </ul>
-
+                <div class="floating_button" ondrop="drop(event)" ondragover="allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
             </div>
         </div>
     </div>
@@ -51,8 +51,9 @@
                     <ul class="flex-meal-container" id="meal_unordered_list">
                         <!-- Populated by Json Meal Data -->
                     </ul>
+                    <div class="meal_list_floating_button" ondrop="drop_to_garbage(event)" ondragover="    allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
                 </div>
-            </div>
+           </div>
         </div>
         <div class="side_panel_container" id="meal_editor_container">
             <div class="meal_editor">
