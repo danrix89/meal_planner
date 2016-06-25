@@ -71,6 +71,17 @@ html, body {
     left: 75%;   
 }
 
+.meal_list_floating_cancel_button{
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: #FF4500;
+    border-radius: 200px;
+    position: absolute;
+    bottom: 5%;
+    left: 76%;   
+}
+
 div.floating_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
@@ -100,6 +111,17 @@ div.meal_list_floating_add_button:hover {
 }
 
 div.meal_list_floating_add_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+div.meal_list_floating_cancel_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;    
+}
+
+div.meal_list_floating_cancel_button:active {
     transform: scale(.95, .95);
     transition-duration: -1s;    
 }
@@ -366,7 +388,7 @@ li.flex-meal-item:active {
     transform: scale(.9, .9);    
 }
 
-.meal_name_input {
+.meal_data_input {
     color: #ff6500;
     width: 50%;
     font-size: 16px;
@@ -381,4 +403,33 @@ li.flex-meal-item:active {
     width: 100%;
     color: #ff6500;
     font-size: 16px;
+}
+
+.ingredient_add_button_image {
+    height: 15px;
+    width: 15px;
+    margin: 5px;
+}
+
+.ingredient_edit_mode_fields{
+    //display: inline-block;
+}
+
+.ingredient_add_field_and_button{
+    display: inline-block;
+    height: 25px;
+    width: 25px;
+    background-color: #33afff;
+    border-radius: 200px;
+}
+
+div.ingredient_add_field_and_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;    
+}
+
+div.ingredient_add_field_and_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
 }

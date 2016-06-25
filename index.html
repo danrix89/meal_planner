@@ -61,17 +61,23 @@
                 <div class="meal_editor_and_list_title">Recipe</div>
                 <div class="meal_editor_body">
                     <p class="meal_editor_form_header">Meal Name:</p>
-                    <input class="meal_name_input" id="meal_name_input" type="text">
+                    <input class="meal_data_input" id="meal_name_input" type="text">
                     <p class="meal_editor_form_header">Ingredients:</p>
                     <div class="ingredient_list">
                         <ul class="flex-ingredient-container" id="ingredients_unordered_list">
                             <!-- Populated by Json Meal Data-->
                         </ul>
-                        <div class="meal_list_floating_button"><img id="edit_button" class="calendar_button_image" src="images\controls\pen.png" /></div>
+                        <br />
+                        <div class="ingredient_edit_mode_fields">
+                            <input class="meal_data_input" id="meal_ingredient_input" type="text">
+                            <div class="ingredient_add_field_and_button"><img id="ingredient_add_button" class="ingredient_add_button_image" src="images\controls\check.png" /></div>
+                        </div>
                     </div>
                     <p class="meal_editor_form_header">Instructions:</p>
                     <textarea class="recipe_text_area" id="recipe_text_area" rows="5"></textarea>
                 </div>
+                <div class="meal_list_floating_cancel_button"><img id="cancel_button" class="calendar_button_image" src="images\controls\cancel.png" /></div>
+                <div class="meal_list_floating_button"><img id="edit_button" class="calendar_button_image" src="images\controls\pen.png" /></div>
             </div>
         </div>
     </div>

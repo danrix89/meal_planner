@@ -13,8 +13,10 @@ $(document).ready(function () {
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var previous_meal = {};
     var current_meal = {};
+    var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
     var is_edit_mode = false;
     var is_adding_new_meal = false;
+    var is_need_to_auto_save = false;
 
     // Set the month title with todays date
     $("#month_title").text(formatted_date(calendar_date));
@@ -126,8 +128,15 @@ $(document).ready(function () {
         var data = ev.dataTransfer.getData("text");
         var element = document.getElementById(data);
         var meal_id = element.getAttribute("data-meal-id");
-        if (window.confirm("Are you sure you want to delete this meal?")) {
-            meals.splice(meal_id - 1, 1);
+        if (window.confirm("Are you sure you want to delete this meal?"))
+        {
+            for (var i = 0; i < meals.length; i++)
+            {
+                if (meals[i].id == meal_id)
+                {
+                    meals.splice(i, 1);
+                }
+            }
             populate_meal_list();
             setup_meal_onclick_function();
         }
@@ -142,7 +151,6 @@ $(document).ready(function () {
         populate_meal_list();
         populate_calendar_days();
         set_meal_editor_data(1);
-        setup_meal_onclick_function();
     };
 
     function populate_meal_list()
@@ -154,6 +162,9 @@ $(document).ready(function () {
             meal_list_item += '<li class="flex-meal-item" id="meal_list_item_' + id + '"><img id="drag_' + id + '" src="' + meals[i].image_url + '" draggable="true" ondragstart="drag(event)" data-meal-id="' + id + '"><div class="meal_name">' + meals[i].name + '</div></li>';
             document.getElementById('meal_unordered_list').innerHTML = meal_list_item;
         }
+
+        // Setup onclick functions
+        setup_meal_onclick_function();
         setup_add_meal_onclick_function();
     }
 
@@ -166,8 +177,11 @@ $(document).ready(function () {
 
     function onclick_meal(meal_id)
     {
-        set_meal_editor_data(meal_id);
-        highlight_current_meal(meal_id);
+        if (!is_edit_mode)
+        {
+            set_meal_editor_data(meal_id);
+            highlight_current_meal(meal_id);
+        }
     }
 
     function set_meal_editor_data(meal_id)
@@ -191,13 +205,36 @@ $(document).ready(function () {
         {
             meal_name_iput.readOnly = false;
             meal_instructions_text_area.readOnly = false;
+            document.getElementById('meal_ingredient_input').value = '';
+
             document.getElementById('edit_button').src = "images\\controls\\check.png";
+            document.getElementById('edit_button').parentElement.style.backgroundColor = "#00e364";
+            document.getElementById('cancel_button').parentElement.style.visibility = "visible";
+            document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
+            document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
+
+            if (is_need_to_auto_save)
+            {
+                // Auto save the meal data in the auto_Saved_meal
+                is_need_to_auto_save = false;
+                auto_saved_meal.name = current_meal.name;
+                auto_saved_meal.recipe = current_meal.recipe;
+                // Clear the auto save ingredients just in case, then set them to the current meal's ingredients
+                auto_saved_meal.ingredients.length = 0;
+                for (var i = 0; i < current_meal.ingredients.length; i++) {
+                    auto_saved_meal.ingredients.push(current_meal.ingredients[i]);
+                }
+            }
         }
         else
         {
             meal_name_iput.readOnly = true;
             meal_instructions_text_area.readOnly = true;
             document.getElementById('edit_button').src = "images\\controls\\pen.png";
+            document.getElementById('edit_button').parentElement.style.backgroundColor = "#33afff";
+            document.getElementById('cancel_button').parentElement.style.visibility = "hidden";
+            document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
+            document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
         }
 
 
@@ -215,6 +252,8 @@ $(document).ready(function () {
         // Setup the onclick functionality
         setup_ingredient_onclick_function();
         setup_edit_button_onclick_function();
+        setup_cancel_button_onclick_function();
+        setup_add_ingredient_button_onclick_function();
     }
 
     function highlight_current_meal(meal_id) {
@@ -241,9 +280,10 @@ $(document).ready(function () {
             is_adding_new_meal = true;
             is_edit_mode = true;
             var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
-            var new_meal = { "id": "", "name": "", "image_url": "images' + '\\' + 'default_image.jpg", "ingredients": [], "recipe": "" };
+            var new_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
             new_meal.id = latest_meal_id.toString();
-            
+            new_meal.image_url = "images\\default_image.jpg"
+
             current_meal = new_meal;
             meals.push(current_meal);
             set_meal_editor_data(new_meal.id);
@@ -267,6 +307,22 @@ $(document).ready(function () {
         }
     }
 
+    function setup_add_ingredient_button_onclick_function()
+    {
+        document.getElementById('ingredient_add_button').onclick = (function (current_i) { return function () { add_ingredient_button_onclick(current_i); } })(1);
+    }
+
+    function add_ingredient_button_onclick(ingredient_index)
+    {
+        if (is_edit_mode) {
+            var ingredient = document.getElementById('meal_ingredient_input').value;
+            current_meal.ingredients.push(ingredient);
+            document.getElementById('meal_ingredient_input').value = '';
+            set_meal_editor_data(current_meal.id);
+        }
+    }
+
+
     function setup_edit_button_onclick_function()
     {
         document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
@@ -286,10 +342,59 @@ $(document).ready(function () {
                 populate_meal_list();
             }
         }
+        else
+        {
+            is_need_to_auto_save = true;
+        }
 
         is_edit_mode = !is_edit_mode;
         set_meal_editor_data(meal_id);
     }
+
+    function setup_cancel_button_onclick_function() {
+        document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
+    }
+
+    function cancel_button_onclick(meal_id)
+    {
+        if (is_edit_mode)
+        {
+            // Take everything out of edit mode / adding mode
+            is_adding_new_meal = false;
+            is_edit_mode = false;
+
+            // Check if adding...
+            if (is_adding_new_meal)
+            {
+                // Remove current meal from meals
+                for (var i = 0; i < meals.length; i++)
+                {
+                    if (meals[i].id == meal_id)
+                    {
+                        meals.splice(i, 1);
+                    }
+                }
+
+                // set current meal back to previous meal
+                current_meal = previous_meal;
+            }
+            else
+            {
+                // Replace the values of the current meal
+                current_meal.name = auto_saved_meal.name;
+                current_meal.recipe = auto_saved_meal.recipe;
+                // Clear out current meal recipes then add them back from  auto save
+                current_meal.ingredients.length = 0;
+                for (var i = 0; i < auto_saved_meal.ingredients.length; i++)
+                {
+                    current_meal.ingredients.push(auto_saved_meal.ingredients[i]);
+                }
+            }
+
+            set_meal_editor_data(current_meal.id);
+        }
+    }
+
 
     function populate_calendar_days()
     {
@@ -450,7 +555,7 @@ $(document).ready(function () {
           {
               "id": "15",
               "name": "Hawaiian Haystacks",
-              "image_url": "images\\haystacks.jpg", // http://www.chrislovesjulia.com/2012/10/halloween-haystacks-and-egging.html
+              "image_url": "images\\haystacks.jpg", // http://www.yummyhealthyeasy.com/2013/03/hawaiian-haystacks-aka-chicken-sundaes-2.html
               "ingredients": ["Rice", "Pineapple", "Chicken", "Chow mein noodles", "coconut shavings", "Cream of chicken soup"],
               "recipe": "Cook Rice. Place cooked rice on a plate and add the rest of the ingredients on top and enjoy."
           },
