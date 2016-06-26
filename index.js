@@ -13,6 +13,7 @@ $(document).ready(function () {
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var previous_meal = {};
     var current_meal = {};
+    var monthly_meal_data = {};
     var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
     var is_edit_mode = false;
     var is_adding_new_meal = false;
@@ -147,8 +148,10 @@ $(document).ready(function () {
    * This function will run all the functions necessary to run when the page is initially loaded.
    **********************************/
     window.onload = function ()
-    {
+    {        
         populate_meal_list();
+        previous_meal = meals[0];
+        set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
         populate_calendar_days();
         set_meal_editor_data(1);
     };
@@ -179,21 +182,24 @@ $(document).ready(function () {
     {
         if (!is_edit_mode)
         {
+            set_current_meal(meal_id);
             set_meal_editor_data(meal_id);
             highlight_current_meal(meal_id);
         }
     }
 
-    function set_meal_editor_data(meal_id)
+    function set_current_meal(meal_id)
     {
-        // Set the current_meal to the first meal in the meals array
         previous_meal = current_meal;
-        for (var i = 0; i < meals.length; i++) 
-        {
+
+        for (var i = 0; i < meals.length; i++) {
             if (meals[i].id == meal_id)
                 current_meal = meals[i];
         }
+    }
 
+    function set_meal_editor_data(meal_id)
+    {
         // Set the meal name input field and instructions text area
         var meal_instructions_text_area = document.getElementById('recipe_text_area');
         meal_instructions_text_area.value = current_meal.recipe;
@@ -279,6 +285,7 @@ $(document).ready(function () {
         {
             is_adding_new_meal = true;
             is_edit_mode = true;
+            set_current_meal(meal_id);
             var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
             var new_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
             new_meal.id = latest_meal_id.toString();
@@ -288,6 +295,8 @@ $(document).ready(function () {
             meals.push(current_meal);
             set_meal_editor_data(new_meal.id);
             document.getElementById('meal_name_input').focus();
+
+            setup_input_onkeypress_function();
         }
     }
 
@@ -314,7 +323,8 @@ $(document).ready(function () {
 
     function add_ingredient_button_onclick(ingredient_index)
     {
-        if (is_edit_mode) {
+        if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '') 
+        {
             var ingredient = document.getElementById('meal_ingredient_input').value;
             current_meal.ingredients.push(ingredient);
             document.getElementById('meal_ingredient_input').value = '';
@@ -322,6 +332,20 @@ $(document).ready(function () {
         }
     }
 
+    function setup_input_onkeypress_function()
+    {
+        document.getElementById('meal_name_input').onkeypress = (function (nothing) { return function () { on_meal_name_input_key_press(nothing); } })(0);
+        document.getElementById('recipe_text_area').onkeypress = (function (nothing) { return function () { on_meal_intstructions_input_key_press(nothing); } })(0);
+    }
+
+    function on_meal_name_input_key_press(nothing)
+    {
+        current_meal.name = document.getElementById('meal_name_input').value;
+    }
+
+    function on_meal_intstructions_input_key_press(nothing) {
+        current_meal.recipe = document.getElementById('recipe_text_area').value;
+    }
 
     function setup_edit_button_onclick_function()
     {
@@ -344,6 +368,7 @@ $(document).ready(function () {
         }
         else
         {
+            set_current_meal(meal_id);
             is_need_to_auto_save = true;
         }
 
@@ -360,12 +385,12 @@ $(document).ready(function () {
         if (is_edit_mode)
         {
             // Take everything out of edit mode / adding mode
-            is_adding_new_meal = false;
             is_edit_mode = false;
 
             // Check if adding...
             if (is_adding_new_meal)
             {
+                is_adding_new_meal = false;
                 // Remove current meal from meals
                 for (var i = 0; i < meals.length; i++)
                 {
@@ -458,7 +483,7 @@ $(document).ready(function () {
               "id": "1",
               "name": "Soup",
               "image_url": "images\\soup.jpg", // https://sites.psu.edu/siowfa15/2015/10/06/does-chicken-soup-actually-help-colds/
-              "ingredients": [ "Chicken", "Broth", "Carrots", "Celary", "Noodles" ],
+              "ingredients": [ "Chicken", "Broth", "Carrots", "Celery", "Noodles" ],
               "recipe": "Throw ingredients into large pot and let cook for 3 hours until veggies are semi soft."
           },
           {
