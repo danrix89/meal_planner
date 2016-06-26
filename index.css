@@ -278,6 +278,7 @@ div.calendar_button:active {
 .meal_name {
     color: white;
     font-weight: bold;
+    font-size: 10px;
 }
 
 li.flex-meal-item:hover {
@@ -300,7 +301,7 @@ li.flex-meal-item:active {
     height: 75%;
 }
 
-[id*="_new"] {
+[id*="_calendar"] {
     margin: 0;
     padding: 0;
     width: 100%;

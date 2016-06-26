@@ -13,7 +13,8 @@ $(document).ready(function () {
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var previous_meal = {};
     var current_meal = {};
-    var monthly_meal_data = {};
+    var monthly_meal_plan_data = [];
+    var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
     var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
     var is_edit_mode = false;
     var is_adding_new_meal = false;
@@ -51,7 +52,28 @@ $(document).ready(function () {
     function advance_month(a_value)
     {
         calendar_date.setMonth(calendar_date.getMonth() + a_value)
-        $("#month_title").text(formatted_date(calendar_date));
+        var current_calendar_date = formatted_date(calendar_date);
+        $("#month_title").text(current_calendar_date);
+
+        // If a meal plan for this month already exists, set the current_calendar_month_meal_plan to that
+        var already_has_meal_plan = false;
+        for (var i = 0; i < monthly_meal_plan_data.length; i++)
+        {
+            if (monthly_meal_plan_data[i].formatted_date == current_calendar_date)
+            {
+                current_calendar_month_meal_plan = monthly_meal_plan_data[i];
+                already_has_meal_plan = true;
+            }
+        }
+        // Else creat a new one and push it to the monthly_meal_plan_data
+        if (!already_has_meal_plan)
+        {
+            var new_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
+            new_month_meal_plan.formatted_date = current_calendar_date;
+            new_month_meal_plan.meal_plan = [];
+            monthly_meal_plan_data.push(new_month_meal_plan);
+            current_calendar_month_meal_plan = new_month_meal_plan;
+        }
         populate_calendar_days()
     }
 
@@ -103,7 +125,7 @@ $(document).ready(function () {
         if (parent_element.className.includes("flex-meal-item"))
         {
             var node_copy = document.getElementById(data).cloneNode(true);
-            var new_id = data + "_new";
+            var new_id = data + "_calendar";
             var element_count = $('[id^=' + new_id + ']').length;
             new_id += (element_count + 1).toString();
             node_copy.id = new_id;
@@ -115,7 +137,49 @@ $(document).ready(function () {
             ev.target.appendChild(element);
 
         }
+        // '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></li>';
 
+        // Get the meal id from the image element
+        var meal_id = document.getElementById(data).getAttribute("data-meal-id");
+        
+        // Copy the meal info matching meal_id into local variables
+        var id = '';
+        var name = '';
+        var image_url = '';
+        var ingredients = [];
+        var recipe = '';
+        for (var i = 0; i < meals.length; i++)
+        {
+            if (meals[i].id == meal_id)
+            {
+                id = meals[i].id;
+                name = meals[i].name;
+                image_url = meals[i].image_url;
+                for (var j = 0; j < meals[i].ingredients.length; j++)
+                {
+                    ingredients.push(meals[i].ingredients[j]);
+                }
+                recipe = meals[i].recipe;
+            }
+        }
+        
+        // Get the day of the week of the calendar div
+        var day = ev.target.getAttribute("data-day");
+
+        // Make a new day meal with that data
+        var new_meal = {
+                        "day": day,
+                        "meal": {
+                                "id": id,
+                                "name": name,
+                                "image_url": image_url,
+                                "ingredients": ingredients,
+                                "recipe": recipe
+                                }
+                       };
+
+        // Add the meal to the current meal plan
+        current_calendar_month_meal_plan.meal_plan.push(new_meal);
     }
 
    /**********************************
@@ -148,7 +212,9 @@ $(document).ready(function () {
    * This function will run all the functions necessary to run when the page is initially loaded.
    **********************************/
     window.onload = function ()
-    {        
+    {
+        current_calendar_month_meal_plan = this_months_meal_plan;
+        monthly_meal_plan_data.push(this_months_meal_plan);
         populate_meal_list();
         previous_meal = meals[0];
         set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
@@ -423,7 +489,6 @@ $(document).ready(function () {
 
     function populate_calendar_days()
     {
-        //                     <li class="flex_calendar_body_item"><div id="calendar_day_div_1" ondrop="drop(event)" ondragover="allow_drop(event)"></div></li>
         var calendar_day_squares = '';
         var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
         var day = 1;
@@ -433,19 +498,20 @@ $(document).ready(function () {
             if (i >= first_day && day <= number_of_days)
             {
                 if ((first_day == 5 || first_day == 6) && (number_of_days == 31) && (day == 24))
-                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></li>';
+                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></li>';
                 else if ((first_day == 6) && (number_of_days >= 30) && (day == 23))
-                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">' + day + ' </div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">30</div></li>';
+                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + ' </div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">30</div></li>';
                 else
-                calendar_day_squares += '<li class="flex_calendar_body_item"><div id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">' + day + '</div></li>';
+                calendar_day_squares += '<li class="flex_calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></li>';
 
                 // Increment the day
                 day++;
             }
             else
-                calendar_day_squares += '<li class="flex_calendar_body_item"><div id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)"></div></li>';
+                calendar_day_squares += '<li class="flex_calendar_body_item"></li>';
         }
         document.getElementById('calendar').innerHTML = calendar_day_squares;
+        populate_calendar_with_meal_plan();
     }
 
     function first_day_of_month(year, month)
@@ -458,8 +524,26 @@ $(document).ready(function () {
         return new Date(year, month + 1, 0).getDate();
     }
 
+    function populate_calendar_with_meal_plan()
+    {
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
+        {
+            var id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
+            var day = current_calendar_month_meal_plan.meal_plan[i].day;
+            var image_url = current_calendar_month_meal_plan.meal_plan[i].meal.image_url;
 
+            var calendar_day_element = document.getElementById('calendar_day_div_' + day);
 
+            var image_element = document.createElement("img");
+            image_element.setAttribute('id', 'drag_' + id + '_' + i + '_' + '_calendar');
+            image_element.setAttribute('src', image_url);
+            image_element.setAttribute('draggable', 'true');
+            image_element.setAttribute('ondragstart', 'drag(event)');
+            image_element.setAttribute('data-meal-id', id);
+                
+            calendar_day_element.appendChild(image_element);
+        }
+    }
 
 
 
@@ -476,6 +560,86 @@ $(document).ready(function () {
     * Global Constants
     *************************************************************************************************************************************************************************************
     ************************************************************************************************************************************************************************************/
+
+    // Hard coded current month meals
+    var this_months_meal_plan = {
+            "formatted_date": "June 2016",
+            "meal_plan": [
+                            {
+                                "day": "1",
+                                "meal": {
+                                    "id": "1",
+                                    "name": "Soup",
+                                    "image_url": "images\\soup.jpg", // https://sites.psu.edu/siowfa15/2015/10/06/does-chicken-soup-actually-help-colds/
+                                    "ingredients": ["Chicken", "Broth", "Carrots", "Celery", "Noodles"],
+                                    "recipe": "Throw ingredients into large pot and let cook for 3 hours until veggies are semi soft."
+                                }
+                            },
+                            {
+                                "day": "15",
+                                "meal": {
+                                    "id": "6",
+                                    "name": "Taco Salad",
+                                    "image_url": "images\\taco_salad.jpg", // https://www.babble.com/best-recipes/perfectly-baked-tortilla-bowl/
+                                    "ingredients": ["Black Beans", "Corn", "Mexican Rice", "Bell pepper", "Onion", "Lettuce", "Salsa", "Sour Cream", "Cheese", "Tortillas"],
+                                    "recipe": "Drain black beans and corn. Cook rice. chop up veggies. Bake tortillas at 400f for 10 minutes. Place all ingredients in tortilla bowl and enjoy."
+                                }
+                            },
+                            {
+                                "day": "4",
+                                "meal": {
+                                    "id": "4",
+                                    "name": "BBQ Sandwiches",
+                                    "image_url": "images\\bbq_pork_sandwich.jpg", // http://www.foodnetwork.com/recipes/paula-deen/bbq-pork-sandwich-recipe.html
+                                    "ingredients": ["Pork Butt", "Can of Root Beer", "BBQ Sauce"],
+                                    "recipe": "Place Pork Butt in crockpot. Pour Root Beer over the pork. Cook on low for 8 hours. Drain the juice. Pull Pork apart add BBQ sauce and serve."
+                                }
+                            },
+                            {
+                                "day": "29",
+                                "meal": {
+                                    "id": "10",
+                                    "name": "Teriyaki Chicken",
+                                    "image_url": "images\\teriyaki_chicken.jpg", // http://www.soberjulie.com/2016/03/chicken-teriyaki-bowl-recipe/
+                                    "ingredients": ["Chicken", "Teriyaki sauce", "Chicken Broth", "Brown rice", "Broccoli"],
+                                    "recipe": "Cube Chicken and place in a hot pan. Add teriyaki sauce and chicken broth. Let cook for 15 minutes on simmer. Cook rice. Wash and chop Broccoli. Scoop rice, chicken and broccoli and add to your bowl. enjoy."
+                                }
+                            },
+                            {
+                                "day": "6",
+                                "meal": {
+                                    "id": "14",
+                                    "name": "Wraps",
+                                    "image_url": "images\\wraps.jpg", // http://www.foodnetwork.com/recipes/jeff-mauro/grilled-chicken-caesar-wrap-recipe.html
+                                    "ingredients": ["Chicken", "Lettuce", "Tortillas", "Tomatoes"],
+                                    "recipe": "Cook and cube chicken. Chop lettuce and tomatoes. Place all ingredients in a tortilla, roll it up and enojoy."
+                                }
+                            },
+                            {
+                                "day": "20",
+                                "meal": {
+                                    "id": "22",
+                                    "name": "Spaghetti",
+                                    "image_url": "images\\spaghetti.jpg", // http://tiger.towson.edu/~awiggi4/recipe.html
+                                    "ingredients": ["Spaghetti noodles", "Ground beef", "Pasta sauce"],
+                                    "recipe": "Cook beef on skillet until browned. Drain the fat. Cook noodles. Combine noodles, meat, and sauce in a bowl. Mix and serve."
+                                }
+                            },
+                            {
+                                "day": "21",
+                                "meal": {
+                                    "id": "7",
+                                    "name": "Left-Overs",
+                                    "image_url": "images\\leftovers.jpg", // http://www.bonappetit.com/test-kitchen/primers/article/thanksgiving-leftovers-guide
+                                    "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
+                                    "recipe": "Pull it out and microwave it"
+                                }
+                            },
+
+                         ]
+        };
+
+
 
     // Hard coded meals
     var meals = [
@@ -502,7 +666,7 @@ $(document).ready(function () {
           },
           {
               "id": "4",
-              "name": "BBQ Pork Sandwiches",
+              "name": "BBQ Sandwiches",
               "image_url": "images\\bbq_pork_sandwich.jpg", // http://www.foodnetwork.com/recipes/paula-deen/bbq-pork-sandwich-recipe.html
               "ingredients": ["Pork Butt", "Can of Root Beer", "BBQ Sauce"],
               "recipe": "Place Pork Butt in crockpot. Pour Root Beer over the pork. Cook on low for 8 hours. Drain the juice. Pull Pork apart add BBQ sauce and serve."
@@ -628,7 +792,7 @@ $(document).ready(function () {
           },
           {
               "id": "22",
-              "name": "spaghetti",
+              "name": "Spaghetti",
               "image_url": "images\\spaghetti.jpg", // http://tiger.towson.edu/~awiggi4/recipe.html
               "ingredients": ["Spaghetti noodles", "Ground beef", "Pasta sauce"],
               "recipe": "Cook beef on skillet until browned. Drain the fat. Cook noodles. Combine noodles, meat, and sauce in a bowl. Mix and serve."
@@ -689,49 +853,6 @@ $(document).ready(function () {
               "ingredients": ["Wallet"],
               "recipe": "Grab your wallet and enjoy the evening not having to cook tonight."
           },
-          {
-              "id": "31",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-          {
-              "id": "32",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-          {
-              "id": "33",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-          {
-              "id": "34",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-          {
-              "id": "35",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-          {
-              "id": "36",
-              "name": "Some Meal",
-              "image_url": "images\\default.png",
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
-              "recipe": "These are the instructions..."
-          },
-
     ];
 
 
