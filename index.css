@@ -6,10 +6,20 @@ html, body {
     margin: 0;
     height: 100%;
     font-family: Arial;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
-.main_panel {
-    background-color: blue;
+.main_box{
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
+}
+
+.calendar_panel {
+    background-color: white;
     height: 100%;
     width: 65%;
     float: left;
@@ -184,7 +194,7 @@ div.calendar_button:active {
     transition-duration: -1s;    
 }
 
-/* CALENDAR BODY */
+/***************** CALENDAR BODY *****************/
 
 .flex_calendar_days_of_week_container {
     padding: 0;
@@ -203,42 +213,40 @@ div.calendar_button:active {
     font-size: 1.5em;
 }
 
-.flex_calendar_body_container {
+.calendar_body_container {
     padding: 0;
     margin: 0;
     list-style: none;
-    display: flex;
-    flex-flow: row wrap;
     justify-content: space-around;
+    overflow: scroll;
+    table-layout: fixed;
+    width: 100%;
 }
 
-.flex_calendar_body_item {
+.calendar_body_item {
     margin: 1px;
     padding:0;
     border: 2px solid rgba(0,0,0,0.2);
     background-color: white;
     font-weight: bold;
     font-size: 1.5em;
+    max-width: 13.8%;
+    min-width: 13.8%;
     width: 13.8%;
     height: 155px;
     opacity: 0.8;
 }
 
-.flex_calendar_body_item_half_day {
-    margin: 1px;
-    padding:0;
-    //border: 2px solid rgba(0,0,0,0.0);
-    background-color: white;
-    font-weight: bold;
-    font-size: 1.5em;
-    width: 13.8%;
-    height: 75.5px;
-    opacity: 0.8;
-}
-
 .half_day {
-    margin: 1px;
-    border: 2px solid rgba(0,0,0,0.2);
+    margin: inherit;
+    padding: 1px;
+    border: inherit;
+    background-color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    width: inherit;
+    max-height: 75.5px;
+
 }
 
 .calendar {
@@ -291,9 +299,8 @@ li.flex-meal-item:active {
     transform: scale(.9, .9);    
 }
 
-/*
-    Meal Images (both in the meal list and the calendar)
-*/
+/****************** Meal Images (both in the meal list and the calendar) ******************/
+
 [id^="drag_"], [id*="drag_"] {
     margin: 0;
     padding: 0;
@@ -305,7 +312,8 @@ li.flex-meal-item:active {
     margin: 0;
     padding: 0;
     width: 100%;
-    height: 75%;
+    height: auto;
+    max-height: 75%;
 }
 
 [id^="calendar_day_div_"], [id*="calendar_day_div_"] {
@@ -410,10 +418,6 @@ li.flex-meal-item:active {
     height: 15px;
     width: 15px;
     margin: 5px;
-}
-
-.ingredient_edit_mode_fields{
-    //display: inline-block;
 }
 
 .ingredient_add_field_and_button{

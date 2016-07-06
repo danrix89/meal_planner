@@ -401,6 +401,7 @@ $(document).ready(function () {
     function setup_input_onkeypress_function()
     {
         document.getElementById('meal_name_input').onkeypress = (function (nothing) { return function () { on_meal_name_input_key_press(nothing); } })(0);
+        //document.getElementById('meal_name_input').onkeydown = (function (ev) { return function () { on_meal_name_input_key_press(nothing); } })(0);
         document.getElementById('recipe_text_area').onkeypress = (function (nothing) { return function () { on_meal_intstructions_input_key_press(nothing); } })(0);
     }
 
@@ -489,7 +490,7 @@ $(document).ready(function () {
 
     function populate_calendar_days()
     {
-        var calendar_day_squares = '';
+        var calendar_day_squares = '<tr class="calendar_body_container">';
         var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
         var day = 1;
         var first_day = first_day_of_month(calendar_date.getFullYear(), calendar_date.getMonth()).getDay();
@@ -498,17 +499,26 @@ $(document).ready(function () {
             if (i >= first_day && day <= number_of_days)
             {
                 if ((first_day == 5 || first_day == 6) && (number_of_days == 31) && (day == 24))
-                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></li>';
+                    calendar_day_squares += '<td class="calendar_body_item"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></td>';
                 else if ((first_day == 6) && (number_of_days >= 30) && (day == 23))
-                    calendar_day_squares += '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + ' </div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">30</div></li>';
+                    calendar_day_squares += '<td class="calendar_body_item"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + ' </div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">30</div></td>';
                 else
-                calendar_day_squares += '<li class="flex_calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></li>';
+                calendar_day_squares += '<td class="calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></td>';
 
                 // Increment the day
                 day++;
             }
             else
-                calendar_day_squares += '<li class="flex_calendar_body_item"></li>';
+                calendar_day_squares += '<td class="calendar_body_item"></td>';
+
+            // Check if its at the end of the row - star a new row if it is
+            if (((i + 1) % 7) == 0)
+            {
+                if (i == 34)
+                    calendar_day_squares += '</tr>';
+                else
+                    calendar_day_squares += '</tr><tr class="calendar_body_container">';
+            }
         }
         document.getElementById('calendar').innerHTML = calendar_day_squares;
         populate_calendar_with_meal_plan();
@@ -563,7 +573,7 @@ $(document).ready(function () {
 
     // Hard coded current month meals
     var this_months_meal_plan = {
-            "formatted_date": "June 2016",
+            "formatted_date": "July 2016",
             "meal_plan": [
                             {
                                 "day": "1",
