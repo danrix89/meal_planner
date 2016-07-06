@@ -754,7 +754,7 @@ $(document).ready(function () {
           {
               "id": "15",
               "name": "Hawaiian Haystacks",
-              "image_url": "images\\haystacks.jpg", // http://www.yummyhealthyeasy.com/2013/03/hawaiian-haystacks-aka-chicken-sundaes-2.html
+              "image_url": "images\\hawaiian_haystacks.jpg", // http://www.yummyhealthyeasy.com/2013/03/hawaiian-haystacks-aka-chicken-sundaes-2.html
               "ingredients": ["Rice", "Pineapple", "Chicken", "Chow mein noodles", "coconut shavings", "Cream of chicken soup"],
               "recipe": "Cook Rice. Place cooked rice on a plate and add the rest of the ingredients on top and enjoy."
           },
