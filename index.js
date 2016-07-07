@@ -430,8 +430,8 @@ $(document).ready(function () {
             if (is_adding_new_meal)
             {
                 is_adding_new_meal = false;
-                populate_meal_list();
             }
+            populate_meal_list();
         }
         else
         {
