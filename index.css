@@ -11,6 +11,19 @@ html, body {
     overflow: hidden;
 }
 
+.app_title {
+    background-color: #ff8333;
+    height: 75px;
+    width: 100%;
+    margin-left: 3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 75px;
+    font-size: 2em;
+    color: white;
+    font-weight: bold;    
+}
+
 .main_box{
     width: 100%;
     height: 100%;
@@ -90,16 +103,16 @@ html, body {
     border-radius: 200px;
     position: absolute;
     bottom: 5%;
-    left: 76%;   
+    left: 75%;   
 }
 
-div.floating_button:hover {
+div.calendar_floating_remove_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;    
 }
 
-div.floating_button:active {
+div.calendar_floating_remove_button:active {
     transform: scale(.95, .95);
     transition-duration: -1s;    
 }
@@ -148,6 +161,7 @@ div.meal_list_floating_cancel_button:active {
     background-color: gray;
     min-height: 50px;
     width: 100%;
+    margin: 3px;
 }
 
 .flex_calendar_title_container {
@@ -172,7 +186,7 @@ div.meal_list_floating_cancel_button:active {
     border-radius: 200px;
     width: 50px;
     height: 50px;
-    background-color: #ff8333;
+    background-color: #33afff;
     opacity: 0.9;
     transition-duration: .5s;
 }

@@ -10,6 +10,7 @@
 </head>
 <body onload="populate_meals()">
     <div class="main_box">
+        <div class="app_title">Meal Planner</div>
         <div class="calendar_panel">
             <div class="calendar_title_pane">
                 <ul class="flex_calendar_title_container">
@@ -38,7 +39,7 @@
                 </div>
                 <div class="calendar_body">
                     <table class="calendar_body_container" id="calendar"></table>
-                    <div class="calendar_floating_remove_button" ondrop="drop(event)" ondragover="allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                    <div class="calendar_floating_remove_button" ondrop="drop_to_calendar_garbage(event)" ondragover="    allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
                 </div>
             </div>
         </div>

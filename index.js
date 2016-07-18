@@ -1,11 +1,11 @@
 
 $(document).ready(function () {
 
-    /************************************************************************************************************************************************************************************
-    *************************************************************************************************************************************************************************************
-    * Initial Page Setup
-    *************************************************************************************************************************************************************************************
-    ************************************************************************************************************************************************************************************/
+/************************************************************************************************************************************************************************************
+*************************************************************************************************************************************************************************************
+* Initial Page Setup
+*************************************************************************************************************************************************************************************
+************************************************************************************************************************************************************************************/
 
     // Global Variables
     var todays_date = new Date();
@@ -29,26 +29,33 @@ $(document).ready(function () {
 
 
 
-    /************************************************************************************************************************************************************************************
-    *************************************************************************************************************************************************************************************
-    * Functions
-    *************************************************************************************************************************************************************************************
-    ************************************************************************************************************************************************************************************/
 
+
+
+
+
+
+/************************************************************************************************************************************************************************************
+*************************************************************************************************************************************************************************************
+* Functions
+*************************************************************************************************************************************************************************************
+************************************************************************************************************************************************************************************/
+
+    /************************************************************************************************************************************************************************************/
+    /* Calendar Functions ***************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
     // JQuery function for when a previous month nav button is clicked
-    $("#previous_month").click(function () {
+    $("#previous_month").click(function ()
+    {
         advance_month(-1);
     });
 
     // JQuery function for when a next month nav button is clicked
-    $("#next_month").click(function () {
+    $("#next_month").click(function ()
+    {
         advance_month(1);
     });
 
-   /**********************************
-   * Advance_month
-   * Advances and sets month displayed on the calendar using a_value.
-   **********************************/
     function advance_month(a_value)
     {
         calendar_date.setMonth(calendar_date.getMonth() + a_value)
@@ -77,10 +84,6 @@ $(document).ready(function () {
         populate_calendar_days()
     }
 
-    /**********************************
-    * Formatted_date
-    * Returns a formatted string version of a_date.
-    **********************************/
     function formatted_date(a_date)
     {
         var date = new Date();
@@ -88,33 +91,120 @@ $(document).ready(function () {
         return months[date.getMonth()] + ' ' + date.getFullYear();
     }
 
+    function populate_calendar_days() {
+        var calendar_day_squares = '<tr class="calendar_body_container">';
+        var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
+        var day = 1;
+        var first_day = first_day_of_month(calendar_date.getFullYear(), calendar_date.getMonth()).getDay();
+        var number_of_squares_in_calendar = 35;
+        if (((first_day == 5 || first_day == 6) && (number_of_days == 31)) || ((first_day == 6) && (number_of_days >= 30)))
+            number_of_squares_in_calendar = 42;
+        for (var i = 0; i < number_of_squares_in_calendar; i++) {
+            if (i >= first_day && day <= number_of_days) {
+                calendar_day_squares += '<td class="calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></td>';
 
+                // Increment the day
+                day++;
+            }
+            else
+                calendar_day_squares += '<td class="calendar_body_item"></td>';
 
+            // Check if its at the end of the row - star a new row if it is
+            if (((i + 1) % 7) == 0) {
+                if (i == 34)
+                    calendar_day_squares += '</tr>';
+                else
+                    calendar_day_squares += '</tr><tr class="calendar_body_container">';
+            }
+        }
+        document.getElementById('calendar').innerHTML = calendar_day_squares;
+        populate_calendar_with_meal_plan();
+    }
 
-    // Drag & Drop
+    function first_day_of_month(year, month) {
+        return new Date(year, month, 1);
+    }
 
-    /**********************************
-    * Drag
-    * 
-    **********************************/
-    document.drag = function(ev) {
+    function daysInMonth(month, year) {
+        return new Date(year, month + 1, 0).getDate();
+    }
+
+    function populate_calendar_with_meal_plan() {
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
+            var meal_id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
+            var day = current_calendar_month_meal_plan.meal_plan[i].day;
+            var image_url = current_calendar_month_meal_plan.meal_plan[i].meal.image_url;
+
+            var calendar_day_element = document.getElementById('calendar_day_div_' + day);
+
+            var image_element = document.createElement("img");
+            image_element.setAttribute('id', 'drag_' + meal_id + '_' + i + '_' + '_calendar');
+            image_element.setAttribute('src', image_url);
+            image_element.setAttribute('draggable', 'true');
+            image_element.setAttribute('ondragstart', 'drag(event)');
+            image_element.setAttribute('data-meal-id', meal_id);
+            image_element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+
+            calendar_day_element.appendChild(image_element);
+        }
+    }
+
+    function add_new_meal_to_current_month_meal_plan(day, meal_id)
+    {
+        var new_meal = {
+            "day": day,
+            "meal": {
+                "id": '',
+                "name": '',
+                "image_url": '',
+                "ingredients": [],
+                "recipe": ''
+            }
+        };
+
+        // Copy the meal info from meals_from_file into the new_meal
+        for (var i = 0; i < meals_from_file.length; i++) {
+            if (meals_from_file[i].id == meal_id)
+            {
+                var latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
+                new_meal.meal.id = (latest_meal_id + 1).toString();
+                new_meal.meal.name = meals_from_file[i].name;
+                new_meal.meal.image_url = meals_from_file[i].image_url;
+                for (var j = 0; j < meals_from_file[i].ingredients.length; j++) {
+                    new_meal.meal.ingredients.push(meals_from_file[i].ingredients[j]);
+                }
+                new_meal.meal.recipe = meals_from_file[i].recipe;
+            }
+        }
+
+        // Add the new_meal to the current_calendar_month_meal_plan
+        current_calendar_month_meal_plan.meal_plan.push(new_meal);
+    }
+
+    function update_day(target_day, meal_id)
+    {
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
+        {
+            if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
+            {
+                current_calendar_month_meal_plan.meal_plan[i].day = target_day;
+            }
+        }
+    }
+
+    /************************************************************************************************************************************************************************************/
+    /* Drag & Drop Functions ************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
+    document.drag = function (ev)
+    {
         ev.dataTransfer.setData("text", ev.target.id);
     }
 
-    /**********************************
-    * Allow_drop
-    * 
-    **********************************/
     document.allow_drop = function (ev)
     {
         ev.preventDefault();
     }
 
-
-    /**********************************
-   * Drop
-   * 
-   **********************************/
     document.drop = function(ev)
     {
         ev.preventDefault();
@@ -130,62 +220,60 @@ $(document).ready(function () {
             new_id += (element_count + 1).toString();
             node_copy.id = new_id;
             ev.target.appendChild(node_copy);
+
+            // Create a new meal with the meal info from meals_from_file matching meal_id to add to the meal plan
+            var day = ev.target.getAttribute("data-day");
+            var meal_id = document.getElementById(data).getAttribute("data-meal-id");
+            add_new_meal_to_current_month_meal_plan(day, meal_id);
+            meal_id = current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id;
+            var element = document.getElementById(new_id);
+            element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+            element.setAttribute("data-meal-id", meal_id);
         }
         else // ... Else, the data should be transfered/moved
         {
+            // Copy the image over with onclick functionality
             var element = document.getElementById(data);
-            ev.target.appendChild(element);
+            var target_parent = ev.target.parentElement;
+            var target_day = target_parent.getAttribute("data-day");
+            var image_url = element.getAttribute("src");
+            var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
 
-        }
-        // '<li class="flex_calendar_body_item_half_day"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></li>';
-
-        // Get the meal id from the image element
-        var meal_id = document.getElementById(data).getAttribute("data-meal-id");
-        
-        // Copy the meal info matching meal_id into local variables
-        var id = '';
-        var name = '';
-        var image_url = '';
-        var ingredients = [];
-        var recipe = '';
-        for (var i = 0; i < meals.length; i++)
-        {
-            if (meals[i].id == meal_id)
+            // Check if the user is overwriting a day by copying over...
+            var is_day_already_filled = false;
+            var index_of_meal_to_replace;
+            for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
             {
-                id = meals[i].id;
-                name = meals[i].name;
-                image_url = meals[i].image_url;
-                for (var j = 0; j < meals[i].ingredients.length; j++)
+                if (current_calendar_month_meal_plan.meal_plan[i].day == target_day)
                 {
-                    ingredients.push(meals[i].ingredients[j]);
+                    is_day_already_filled = true;
+                    index_of_meal_to_replace = i;
                 }
-                recipe = meals[i].recipe;
+            }
+
+            if (is_day_already_filled)
+            {
+                if (window.confirm("Are you sure you want to replace this meal?"))
+                {
+                    ev.target.appendChild(element);
+                    var meal_id = element.getAttribute("data-meal-id");
+                    ev.target.setAttribute("src", image_url);
+                    element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+                    current_calendar_month_meal_plan.meal_plan.splice(index_of_meal_to_replace, 1);
+                    update_day(target_day, meal_id);
+                }
+            }
+            else
+            {
+                ev.target.appendChild(element);
+                var meal_id = element.getAttribute("data-meal-id");
+                element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+                target_day = document.getElementById(data).parentElement.getAttribute("data-day");
+                update_day(target_day, meal_id);
             }
         }
-        
-        // Get the day of the week of the calendar div
-        var day = ev.target.getAttribute("data-day");
-
-        // Make a new day meal with that data
-        var new_meal = {
-                        "day": day,
-                        "meal": {
-                                "id": id,
-                                "name": name,
-                                "image_url": image_url,
-                                "ingredients": ingredients,
-                                "recipe": recipe
-                                }
-                       };
-
-        // Add the meal to the current meal plan
-        current_calendar_month_meal_plan.meal_plan.push(new_meal);
     }
 
-   /**********************************
-   * Drop to garbage
-   * 
-   **********************************/
     document.drop_to_garbage = function(ev)
     {
         ev.preventDefault();
@@ -193,7 +281,11 @@ $(document).ready(function () {
         var data = ev.dataTransfer.getData("text");
         var element = document.getElementById(data);
         var meal_id = element.getAttribute("data-meal-id");
-        if (window.confirm("Are you sure you want to delete this meal?"))
+
+        // Set up where you get the meals from
+        var meals = meals_from_file;
+
+        if (window.confirm("Are you sure you want to delete this meal forever?"))
         {
             for (var i = 0; i < meals.length; i++)
             {
@@ -206,29 +298,54 @@ $(document).ready(function () {
             setup_meal_onclick_function();
         }
     }
+    
+    document.drop_to_calendar_garbage = function(ev)
+    {
+        ev.preventDefault();
 
-    /**********************************
-   * ON LOAD
-   * This function will run all the functions necessary to run when the page is initially loaded.
-   **********************************/
+        var data = ev.dataTransfer.getData("text");
+        var element = document.getElementById(data);
+        var meal_id = element.getAttribute("data-meal-id");
+
+        var meals = meals_from_file;
+
+        if (window.confirm("Are you sure you want to delete this meal from your meal plan?")) 
+        {
+            for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) 
+            {
+                if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id) 
+                {
+                    current_calendar_month_meal_plan.meal_plan.splice(i, 1);
+                }
+            }
+            populate_calendar_days();
+        }
+    }
+
+    /************************************************************************************************************************************************************************************/
+    /* On Load Functions ****************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
     window.onload = function ()
     {
         current_calendar_month_meal_plan = this_months_meal_plan;
         monthly_meal_plan_data.push(this_months_meal_plan);
         populate_meal_list();
-        previous_meal = meals[0];
-        set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+        previous_meal = meals_from_file[0];
+        set_current_meal(meals_from_file[0].id); // Set the initial current/previous meals to the first meal when loading the page.
         populate_calendar_days();
-        set_meal_editor_data(1);
+        set_meal_editor_data();
     };
 
+    /************************************************************************************************************************************************************************************/
+    /* Meal List Functions ***********************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
     function populate_meal_list()
     {
         var meal_list_item = '';
-        for (var i = 0; i < meals.length; i++)
+        for (var i = 0; i < meals_from_file.length; i++)
         {
-            var id = meals[i].id;
-            meal_list_item += '<li class="flex-meal-item" id="meal_list_item_' + id + '"><img id="drag_' + id + '" src="' + meals[i].image_url + '" draggable="true" ondragstart="drag(event)" data-meal-id="' + id + '"><div class="meal_name">' + meals[i].name + '</div></li>';
+            var id = meals_from_file[i].id;
+            meal_list_item += '<li class="flex-meal-item" id="meal_list_item_' + id + '"><img id="drag_' + id + '" src="' + meals_from_file[i].image_url + '" draggable="true" ondragstart="drag(event)" data-meal-id="' + id + '"><div class="meal_name">' + meals_from_file[i].name + '</div></li>';
             document.getElementById('meal_unordered_list').innerHTML = meal_list_item;
         }
 
@@ -237,46 +354,201 @@ $(document).ready(function () {
         setup_add_meal_onclick_function();
     }
 
+    /************************************************************************************************************************************************************************************/
+    /* OnClick Setup Functions **********************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
     function setup_meal_onclick_function()
     {
-        for (var i = 0; i < meals.length; i++)
+        for (var i = 0; i < meals_from_file.length; i++)
         {
-            document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals[i].id);
+            document.getElementById('drag_' + meals_from_file[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals_from_file[i].id);
         }
     }
 
-    function setup_calendar_meal_onclick_function()
+    function setup_add_meal_onclick_function()
     {
-        // Loop across all calendar day divs
-        for (var i = 0; i < meals.length; i++)
+        document.getElementById('add_button').onclick = (function (meal_id) { return function () { on_add_meal_buton_click(meal_id); } })(current_meal.id);
+    }
+
+    function setup_ingredient_onclick_function()
+    {
+        for (var i = 0; i < current_meal.ingredients.length; i++)
         {
-            // Check if the div has meal data
-            // If so, get the meal_id then call onclick_meal(meal_id)
-            document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals[i].id);
+            document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
         }
     }
+
+    function setup_add_ingredient_button_onclick_function()
+    {
+        document.getElementById('ingredient_add_button').onclick = (function (current_i) { return function () { add_ingredient_button_onclick(current_i); } })(1);
+    }
+
+    function setup_input_onkeypress_function()
+    {
+        document.getElementById('meal_name_input').onkeypress = (function (nothing) { return function () { on_meal_name_input_key_press(nothing); } })(0);
+        //document.getElementById('meal_name_input').onkeydown = (function (ev) { return function () { on_meal_name_input_key_press(nothing); } })(0);
+        document.getElementById('recipe_text_area').onkeypress = (function (nothing) { return function () { on_meal_intstructions_input_key_press(nothing); } })(0);
+    }
+
+    function setup_edit_button_onclick_function()
+    {
+        document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
+    }
+
+    function setup_cancel_button_onclick_function()
+    {
+        document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
+    }
+
+    /************************************************************************************************************************************************************************************/
+    /* OnClick Funcions *****************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
 
     function onclick_meal(meal_id)
     {
         if (!is_edit_mode)
         {
             set_current_meal(meal_id);
-            set_meal_editor_data(meal_id);
+            set_meal_editor_data();
             highlight_current_meal(meal_id);
         }
     }
 
-    function set_current_meal(meal_id)
-    {
-        previous_meal = current_meal;
-
-        for (var i = 0; i < meals.length; i++) {
-            if (meals[i].id == meal_id)
-                current_meal = meals[i];
+    function onclick_calendar_meal(meal_id) {
+        if (!is_edit_mode)
+        {
+            set_current_meal_with_calendar_meal(meal_id);
+            set_meal_editor_data();
         }
     }
 
-    function set_meal_editor_data(meal_id)
+    function on_meal_name_input_key_press(nothing)
+    {
+        current_meal.name = document.getElementById('meal_name_input').value;
+    }
+
+    function on_meal_intstructions_input_key_press(nothing)
+    {
+        current_meal.recipe = document.getElementById('recipe_text_area').value;
+    }
+
+    function on_add_meal_buton_click(meal_id)
+    {
+        if (!is_edit_mode && !is_adding_new_meal)
+        {
+            is_adding_new_meal = true;
+            is_edit_mode = true;
+            set_current_meal(meal_id);
+            var latest_meal_id = (parseInt(meals_from_file[meals_from_file.length - 1].id) + 1);
+            var new_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
+            new_meal.id = latest_meal_id.toString();
+            new_meal.image_url = "images\\default_image.jpg"
+
+            current_meal = new_meal;
+            meals_from_file.push(current_meal);
+            set_meal_editor_data();
+            document.getElementById('meal_name_input').focus();
+
+            setup_input_onkeypress_function();
+        }
+    }
+
+    function add_ingredient_button_onclick(ingredient_index)
+    {
+        if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
+        {
+            var ingredient = document.getElementById('meal_ingredient_input').value;
+            current_meal.ingredients.push(ingredient);
+            document.getElementById('meal_ingredient_input').value = '';
+            set_meal_editor_data();
+        }
+    }
+
+    function edit_button_onclick(meal_id)
+    {
+        if (is_edit_mode)
+        {
+            // Save changes to meal name and instructions
+            current_meal.name = document.getElementById('meal_name_input').value;
+            current_meal.recipe = document.getElementById('recipe_text_area').value;
+
+            if (is_adding_new_meal)
+            {
+                is_adding_new_meal = false;
+            }
+            populate_meal_list();
+        }
+        else
+        {
+            is_need_to_auto_save = true;
+        }
+
+        is_edit_mode = !is_edit_mode;
+        set_meal_editor_data();
+    }
+
+    function cancel_button_onclick(meal_id)
+    {
+        if (is_edit_mode) {
+            // Take everything out of edit mode / adding mode
+            is_edit_mode = false;
+
+            // Check if adding...
+            if (is_adding_new_meal)
+            {
+                is_adding_new_meal = false;
+                // Remove current meal from meals
+                for (var i = 0; i < meals_from_file.length; i++)
+                {
+                    if (meals_from_file[i].id == meal_id) {
+                        meals_from_file.splice(i, 1);
+                    }
+                }
+
+                // set current meal back to previous meal
+                current_meal = previous_meal;
+            }
+            else {
+                // Replace the values of the current meal
+                current_meal.name = auto_saved_meal.name;
+                current_meal.recipe = auto_saved_meal.recipe;
+                // Clear out current meal recipes then add them back from  auto save
+                current_meal.ingredients.length = 0;
+                for (var i = 0; i < auto_saved_meal.ingredients.length; i++)
+                {
+                    current_meal.ingredients.push(auto_saved_meal.ingredients[i]);
+                }
+            }
+
+            set_meal_editor_data();
+        }
+    }
+
+    /************************************************************************************************************************************************************************************/
+    /* Setter Functions *****************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
+
+    function set_current_meal(meal_id)
+    {
+        previous_meal = current_meal;
+        for (var i = 0; i < meals_from_file.length; i++)
+        {
+            if (meals_from_file[i].id == meal_id)
+                current_meal = meals_from_file[i];
+        }
+    }
+
+    function set_current_meal_with_calendar_meal(meal_id)
+    {
+        previous_meal = current_meal;
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
+        {
+            if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
+                current_meal = current_calendar_month_meal_plan.meal_plan[i].meal;
+        }
+    }
+
+    function set_meal_editor_data()
     {
         // Set the meal name input field and instructions text area
         var meal_instructions_text_area = document.getElementById('recipe_text_area');
@@ -291,7 +563,7 @@ $(document).ready(function () {
             meal_instructions_text_area.readOnly = false;
             document.getElementById('meal_ingredient_input').value = '';
 
-            document.getElementById('edit_button').src = "images\\controls\\check.jpg";
+            document.getElementById('edit_button').src = "images\\controls\\check.png";
             document.getElementById('edit_button').parentElement.style.backgroundColor = "#00e364";
             document.getElementById('cancel_button').parentElement.style.visibility = "visible";
             document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
@@ -305,7 +577,8 @@ $(document).ready(function () {
                 auto_saved_meal.recipe = current_meal.recipe;
                 // Clear the auto save ingredients just in case, then set them to the current meal's ingredients
                 auto_saved_meal.ingredients.length = 0;
-                for (var i = 0; i < current_meal.ingredients.length; i++) {
+                for (var i = 0; i < current_meal.ingredients.length; i++)
+                {
                     auto_saved_meal.ingredients.push(current_meal.ingredients[i]);
                 }
             }
@@ -340,7 +613,12 @@ $(document).ready(function () {
         setup_add_ingredient_button_onclick_function();
     }
 
-    function highlight_current_meal(meal_id) {
+    /************************************************************************************************************************************************************************************/
+    /* Other Functions ******************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
+
+    function highlight_current_meal(meal_id)
+    {
         // Remove the highlight on the last selected meal
         var element_id = "meal_list_item_" + (previous_meal.id);
         var meal_list_element = document.getElementById(element_id);
@@ -352,219 +630,15 @@ $(document).ready(function () {
         meal_list_element.style.border = "3px solid #33afff";
     }
 
-    function setup_add_meal_onclick_function()
-    {
-        document.getElementById('add_button').onclick = (function (meal_id) { return function () { on_add_meal_buton_click(meal_id); } })(current_meal.id);
-    }
-
-    function on_add_meal_buton_click(meal_id)
-    {
-        if (!is_edit_mode && !is_adding_new_meal)
-        {
-            is_adding_new_meal = true;
-            is_edit_mode = true;
-            set_current_meal(meal_id);
-            var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
-            var new_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
-            new_meal.id = latest_meal_id.toString();
-            new_meal.image_url = "images\\default_image.jpg"
-
-            current_meal = new_meal;
-            meals.push(current_meal);
-            set_meal_editor_data(new_meal.id);
-            document.getElementById('meal_name_input').focus();
-
-            setup_input_onkeypress_function();
-        }
-    }
-
-    function setup_ingredient_onclick_function()
-    {
-        for (var i = 0; i < current_meal.ingredients.length; i++) {
-            document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
-        }
-    }
-
     function remove_ingredient(ingredient_index)
     {
         if (is_edit_mode)
         {
             current_meal.ingredients.splice(ingredient_index, 1);
-            set_meal_editor_data(current_meal.id);
+            set_meal_editor_data();
         }
     }
 
-    function setup_add_ingredient_button_onclick_function()
-    {
-        document.getElementById('ingredient_add_button').onclick = (function (current_i) { return function () { add_ingredient_button_onclick(current_i); } })(1);
-    }
-
-    function add_ingredient_button_onclick(ingredient_index)
-    {
-        if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '') 
-        {
-            var ingredient = document.getElementById('meal_ingredient_input').value;
-            current_meal.ingredients.push(ingredient);
-            document.getElementById('meal_ingredient_input').value = '';
-            set_meal_editor_data(current_meal.id);
-        }
-    }
-
-    function setup_input_onkeypress_function()
-    {
-        document.getElementById('meal_name_input').onkeypress = (function (nothing) { return function () { on_meal_name_input_key_press(nothing); } })(0);
-        //document.getElementById('meal_name_input').onkeydown = (function (ev) { return function () { on_meal_name_input_key_press(nothing); } })(0);
-        document.getElementById('recipe_text_area').onkeypress = (function (nothing) { return function () { on_meal_intstructions_input_key_press(nothing); } })(0);
-    }
-
-    function on_meal_name_input_key_press(nothing)
-    {
-        current_meal.name = document.getElementById('meal_name_input').value;
-    }
-
-    function on_meal_intstructions_input_key_press(nothing) {
-        current_meal.recipe = document.getElementById('recipe_text_area').value;
-    }
-
-    function setup_edit_button_onclick_function()
-    {
-        document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
-    }
-
-    function edit_button_onclick(meal_id)
-    {
-        if (is_edit_mode)
-        {
-           // Save changes to meal name and instructions
-            current_meal.name = document.getElementById('meal_name_input').value;
-            current_meal.recipe = document.getElementById('recipe_text_area').value;
-
-            if (is_adding_new_meal)
-            {
-                is_adding_new_meal = false;
-            }
-            populate_meal_list();
-        }
-        else
-        {
-            set_current_meal(meal_id);
-            is_need_to_auto_save = true;
-        }
-
-        is_edit_mode = !is_edit_mode;
-        set_meal_editor_data(meal_id);
-    }
-
-    function setup_cancel_button_onclick_function() {
-        document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
-    }
-
-    function cancel_button_onclick(meal_id)
-    {
-        if (is_edit_mode)
-        {
-            // Take everything out of edit mode / adding mode
-            is_edit_mode = false;
-
-            // Check if adding...
-            if (is_adding_new_meal)
-            {
-                is_adding_new_meal = false;
-                // Remove current meal from meals
-                for (var i = 0; i < meals.length; i++)
-                {
-                    if (meals[i].id == meal_id)
-                    {
-                        meals.splice(i, 1);
-                    }
-                }
-
-                // set current meal back to previous meal
-                current_meal = previous_meal;
-            }
-            else
-            {
-                // Replace the values of the current meal
-                current_meal.name = auto_saved_meal.name;
-                current_meal.recipe = auto_saved_meal.recipe;
-                // Clear out current meal recipes then add them back from  auto save
-                current_meal.ingredients.length = 0;
-                for (var i = 0; i < auto_saved_meal.ingredients.length; i++)
-                {
-                    current_meal.ingredients.push(auto_saved_meal.ingredients[i]);
-                }
-            }
-
-            set_meal_editor_data(current_meal.id);
-        }
-    }
-
-
-    function populate_calendar_days()
-    {
-        var calendar_day_squares = '<tr class="calendar_body_container">';
-        var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
-        var day = 1;
-        var first_day = first_day_of_month(calendar_date.getFullYear(), calendar_date.getMonth()).getDay();
-        var number_of_squares_in_calendar = 35;
-        if (((first_day == 5 || first_day == 6) && (number_of_days == 31)) || ((first_day == 6) && (number_of_days >= 30)))
-            number_of_squares_in_calendar = 42;
-        for (var i = 0; i < number_of_squares_in_calendar; i++) 
-        {
-            if (i >= first_day && day <= number_of_days)
-            {
-                calendar_day_squares += '<td class="calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></td>';
-
-                // Increment the day
-                day++;
-            }
-            else
-                calendar_day_squares += '<td class="calendar_body_item"></td>';
-
-            // Check if its at the end of the row - star a new row if it is
-            if (((i + 1) % 7) == 0)
-            {
-                if (i == 34)
-                    calendar_day_squares += '</tr>';
-                else
-                    calendar_day_squares += '</tr><tr class="calendar_body_container">';
-            }
-        }
-        document.getElementById('calendar').innerHTML = calendar_day_squares;
-        populate_calendar_with_meal_plan();
-        setup_calendar_meal_onclick_function();
-    }
-
-    function first_day_of_month(year, month)
-    {
-        return new Date(year, month, 1);
-    }
-
-    function daysInMonth(month,year) 
-    {
-        return new Date(year, month + 1, 0).getDate();
-    }
-
-    function populate_calendar_with_meal_plan()
-    {
-        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
-        {
-            var id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
-            var day = current_calendar_month_meal_plan.meal_plan[i].day;
-            var image_url = current_calendar_month_meal_plan.meal_plan[i].meal.image_url;
-
-            var calendar_day_element = document.getElementById('calendar_day_div_' + day);
-
-            var image_element = document.createElement("img");
-            image_element.setAttribute('id', 'drag_' + id + '_' + i + '_' + '_calendar');
-            image_element.setAttribute('src', image_url);
-            image_element.setAttribute('draggable', 'true');
-            image_element.setAttribute('ondragstart', 'drag(event)');
-            image_element.setAttribute('data-meal-id', id);
-                
-            calendar_day_element.appendChild(image_element);
-        }
-    }
 
 
 
@@ -599,7 +673,7 @@ $(document).ready(function () {
                             {
                                 "day": "15",
                                 "meal": {
-                                    "id": "6",
+                                    "id": "2",
                                     "name": "Taco Salad",
                                     "image_url": "images\\taco_salad.jpg", // https://www.babble.com/best-recipes/perfectly-baked-tortilla-bowl/
                                     "ingredients": ["Black Beans", "Corn", "Mexican Rice", "Bell pepper", "Onion", "Lettuce", "Salsa", "Sour Cream", "Cheese", "Tortillas"],
@@ -609,7 +683,7 @@ $(document).ready(function () {
                             {
                                 "day": "4",
                                 "meal": {
-                                    "id": "4",
+                                    "id": "3",
                                     "name": "BBQ Sandwiches",
                                     "image_url": "images\\bbq_pork_sandwich.jpg", // http://www.foodnetwork.com/recipes/paula-deen/bbq-pork-sandwich-recipe.html
                                     "ingredients": ["Pork Butt", "Can of Root Beer", "BBQ Sauce"],
@@ -619,7 +693,7 @@ $(document).ready(function () {
                             {
                                 "day": "29",
                                 "meal": {
-                                    "id": "10",
+                                    "id": "4",
                                     "name": "Teriyaki Chicken",
                                     "image_url": "images\\teriyaki_chicken.jpg", // http://www.soberjulie.com/2016/03/chicken-teriyaki-bowl-recipe/
                                     "ingredients": ["Chicken", "Teriyaki sauce", "Chicken Broth", "Brown rice", "Broccoli"],
@@ -629,7 +703,7 @@ $(document).ready(function () {
                             {
                                 "day": "6",
                                 "meal": {
-                                    "id": "14",
+                                    "id": "5",
                                     "name": "Wraps",
                                     "image_url": "images\\wraps.jpg", // http://www.foodnetwork.com/recipes/jeff-mauro/grilled-chicken-caesar-wrap-recipe.html
                                     "ingredients": ["Chicken", "Lettuce", "Tortillas", "Tomatoes"],
@@ -639,7 +713,7 @@ $(document).ready(function () {
                             {
                                 "day": "20",
                                 "meal": {
-                                    "id": "22",
+                                    "id": "6",
                                     "name": "Spaghetti",
                                     "image_url": "images\\spaghetti.jpg", // http://tiger.towson.edu/~awiggi4/recipe.html
                                     "ingredients": ["Spaghetti noodles", "Ground beef", "Pasta sauce"],
@@ -656,6 +730,16 @@ $(document).ready(function () {
                                     "recipe": "Pull it out and microwave it"
                                 }
                             },
+                            {
+                                "day": "25",
+                                "meal": {
+                                    "id": "8",
+                                    "name": "Wraps",
+                                    "image_url": "images\\wraps.jpg", // http://www.foodnetwork.com/recipes/jeff-mauro/grilled-chicken-caesar-wrap-recipe.html
+                                    "ingredients": ["Chicken", "Lettuce", "Tortillas", "Tomatoes"],
+                                    "recipe": "Cook and cube chicken. Chop lettuce and tomatoes. Place all ingredients in a tortilla, roll it up and enojoy."
+                                }
+                            },
 
                          ]
         };
@@ -663,7 +747,7 @@ $(document).ready(function () {
 
 
     // Hard coded meals
-    var meals = [
+    var meals_from_file = [
           {
               "id": "1",
               "name": "Soup",
