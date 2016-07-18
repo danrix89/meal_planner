@@ -279,7 +279,7 @@ $(document).ready(function () {
             meal_instructions_text_area.readOnly = false;
             document.getElementById('meal_ingredient_input').value = '';
 
-            document.getElementById('edit_button').src = "images\\controls\\check.png";
+            document.getElementById('edit_button').src = "images\\controls\\check.jpg";
             document.getElementById('edit_button').parentElement.style.backgroundColor = "#00e364";
             document.getElementById('cancel_button').parentElement.style.visibility = "visible";
             document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
@@ -302,7 +302,7 @@ $(document).ready(function () {
         {
             meal_name_iput.readOnly = true;
             meal_instructions_text_area.readOnly = true;
-            document.getElementById('edit_button').src = "images\\controls\\pen.png";
+            document.getElementById('edit_button').src = "images\\controls\\pen.jpg";
             document.getElementById('edit_button').parentElement.style.backgroundColor = "#33afff";
             document.getElementById('cancel_button').parentElement.style.visibility = "hidden";
             document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
