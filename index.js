@@ -237,9 +237,21 @@ $(document).ready(function () {
         setup_add_meal_onclick_function();
     }
 
-    function setup_meal_onclick_function() {
+    function setup_meal_onclick_function()
+    {
         for (var i = 0; i < meals.length; i++)
         {
+            document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals[i].id);
+        }
+    }
+
+    function setup_calendar_meal_onclick_function()
+    {
+        // Loop across all calendar day divs
+        for (var i = 0; i < meals.length; i++)
+        {
+            // Check if the div has meal data
+            // If so, get the meal_id then call onclick_meal(meal_id)
             document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals[i].id);
         }
     }
@@ -494,15 +506,13 @@ $(document).ready(function () {
         var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
         var day = 1;
         var first_day = first_day_of_month(calendar_date.getFullYear(), calendar_date.getMonth()).getDay();
-        for (var i = 0; i < 35; i++) 
+        var number_of_squares_in_calendar = 35;
+        if (((first_day == 5 || first_day == 6) && (number_of_days == 31)) || ((first_day == 6) && (number_of_days >= 30)))
+            number_of_squares_in_calendar = 42;
+        for (var i = 0; i < number_of_squares_in_calendar; i++) 
         {
             if (i >= first_day && day <= number_of_days)
             {
-                if ((first_day == 5 || first_day == 6) && (number_of_days == 31) && (day == 24))
-                    calendar_day_squares += '<td class="calendar_body_item"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">31</div></td>';
-                else if ((first_day == 6) && (number_of_days >= 30) && (day == 23))
-                    calendar_day_squares += '<td class="calendar_body_item"><div class="half_day" id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + ' </div><div class="half_day" id="calendar_day_div_' + i + '" ondrop="drop(event)" ondragover="allow_drop(event)">30</div></td>';
-                else
                 calendar_day_squares += '<td class="calendar_body_item"><div id="calendar_day_div_' + day + '" ondrop="drop(event)" ondragover="allow_drop(event)" data-day="' + day + '">' + day + '</div></td>';
 
                 // Increment the day
@@ -522,6 +532,7 @@ $(document).ready(function () {
         }
         document.getElementById('calendar').innerHTML = calendar_day_squares;
         populate_calendar_with_meal_plan();
+        setup_calendar_meal_onclick_function();
     }
 
     function first_day_of_month(year, month)
