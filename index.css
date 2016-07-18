@@ -49,14 +49,15 @@ html, body {
     height:40%;
 }
 
-.floating_button {
+.calendar_floating_remove_button {
     display: inline-block;
     height: 50px;
     width: 50px;
     background-color: #33afff;
     border-radius: 200px;
-    position: absolute;
-    left: 95%;   
+    position: fixed;
+    left: 60%;
+    bottom: 20px;   
 }
 
 .meal_list_floating_button {
