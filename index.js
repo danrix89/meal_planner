@@ -47,22 +47,17 @@ $(document).ready(function () {
     // Get the modal
     var modal = document.getElementById('welcome_modal');
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementsByClassName("welcome_modal_close_button")[0];
-
     // When the user clicks the button, open the modal
-    function display_modal() {
+    function display_modal()
+    {
         modal.style.display = "block";
     }
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function () {
-        modal.style.display = "none";
-    }
-
     // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function (event) {
-        if (event.target == modal) {
+    window.onclick = function (event)
+    {
+        if (event.target == modal)
+        {
             modal.style.display = "none";
         }
     }
@@ -421,6 +416,7 @@ $(document).ready(function () {
         set_current_meal(meals_from_file[0].id); // Set the initial current/previous meals to the first meal when loading the page.
         populate_calendar_days();
         set_meal_editor_data();
+        setup_calendar_help_button_onclick_function();
     };
 
     /************************************************************************************************************************************************************************************/
@@ -485,6 +481,10 @@ $(document).ready(function () {
     function setup_cancel_button_onclick_function()
     {
         document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
+    }
+
+    function setup_calendar_help_button_onclick_function() {
+        document.getElementById('help_button').onclick = (function (a_nothing) { return function () { calendar_help_button_onclick(a_nothing); } })(false);
     }
 
     /************************************************************************************************************************************************************************************/
@@ -610,6 +610,13 @@ $(document).ready(function () {
             set_meal_editor_data();
         }
     }
+
+    function calendar_help_button_onclick(a_nothing)
+    {
+        document.getElementById("welcome_modal_title").innerHTML = "Help";
+        display_modal();
+    }
+
 
     /************************************************************************************************************************************************************************************/
     /* Setter Functions *****************************************************************************************************************************************************************/
@@ -817,7 +824,7 @@ $(document).ready(function () {
                                     "id": "7",
                                     "name": "Left-Overs",
                                     "image_url": "images\\leftovers.jpg", // http://www.bonappetit.com/test-kitchen/primers/article/thanksgiving-leftovers-guide
-                                    "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
+                                    "ingredients": [],
                                     "recipe": "Pull it out and microwave it"
                                 }
                             },
@@ -890,7 +897,7 @@ $(document).ready(function () {
           },
           {
               "id": "8",
-              "name": "Fettuccine Alfredo",
+              "name": "Chicken Alfredo",
               "image_url": "images\\fettuccine_alfredo.jpg", //http://www.daringgourmet.com/2015/12/01/fettuccine-alfredo/
               "ingredients": ["Chicken", "Fettuccine Noodles", "Alfredo sauce"],
               "recipe": "Place chicken in crock pot pour sauce over. Cook for 4 hours on low. Cook Noodles. Combine chicken, sauce, and noodles together and serve."
@@ -918,7 +925,7 @@ $(document).ready(function () {
           },
           {
               "id": "12",
-              "name": "Pigs in a Blanket",
+              "name": "Pigs in Blankets",
               "image_url": "images\\pigs_in_a_blanket.jpg", // http://lovinfromtheoven.blogspot.com/2010/10/pigs-in-blanket.html
               "ingredients": ["Hot dogs", "Dough"],
               "recipe": "Place hot dogs in strips of dough. Place on greased baking sheet. Bake for 8 minutes at 400F."
@@ -1009,7 +1016,7 @@ $(document).ready(function () {
           },
           {
               "id": "25",
-              "name": "lasagna",
+              "name": "Lasagna",
               "image_url": "images\\lasagna.jpg", // http://www.huffingtonpost.com/2014/10/07/lasagna-recipes-easy-chicken_n_1249660.html
               "ingredients": ["Lasagna noodles", "Ground beef", "Speghetti sauce", "cottage cheese", "Ricotta cheese", "Parmesan cheese", "Mozzarella cheese"],
               "recipe": "Cook noodles. Cook ground beef until brown. Add speghetti sauce. In a bowl combine all cheeses. Layer noodles in baking dish. Spread layer of meat sauce and then a layer of cheese. Continue until all ingredients are used. bake for 45 minutes at 350F."
