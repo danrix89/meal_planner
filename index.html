@@ -10,22 +10,35 @@
 </head>
 <body onload="populate_meals()">
     <div class="main_box">
-        <!--  
-        <div class="app_title">Meal Planner</div>
-        -->
+
+        <div class="app_title">
+            <div class="calendar_help_button" id="help_button"><img class="calendar_button_image" src="images\controls\question-mark.png" /></div>
+            MyMealPlanner
+        </div>
+ 
         <!-- The Modal Welcome Dialog -->
         <div id="welcome_modal" class="welcome_modal">
             <!-- Modal content -->
             <div class="welcome_modal_content">
                 <div class="welcome_modal_header">
-                    <span class="welcome_modal_close_button">×</span>
-                    <h1 class="welcome_modal_title">Welcome to MyMealPlanner!</h1>
+                    <h1 id="welcome_modal_title" class="welcome_modal_title">Welcome to MyMealPlanner!</h1>
                 </div>
                 <div class="welcome_modal_body">
-                    
+                    <p>
+                        The MyMealPlanner web app is designed to make monthly meal planning quick and easy!<br /><br />
+
+                        Need to plan your meal calendar?<br />
+                        Simply drag meals from the right hand side and drop them on a day.<br /><br />
+
+                        Creating new meals?<br />
+                        Click the "+" button in the meal list and edit the contents.<br /><br />
+
+                        Editing meals?<br />
+                        Click on either a meal in the calendar or meal list to edit its contents.<br /><br />
+                    </p>
                 </div>
                 <div class="welcome_modal_footer">
-                    <div id="got_it_button" class="got_it_button">Got it</div>
+                    <div id="got_it_button" class="got_it_button">OK</div>
                 </div>
             </div>
         </div>
