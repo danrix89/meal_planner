@@ -410,7 +410,10 @@ $(document).ready(function () {
     {
         checkCookie();
         setup_got_it_button_onclick_function();
-        display_modal();
+        if (is_to_welcome)
+        {
+            display_modal();
+        }
         current_calendar_month_meal_plan = this_months_meal_plan;
         monthly_meal_plan_data.push(this_months_meal_plan);
         populate_meal_list();
