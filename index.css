@@ -13,12 +13,12 @@ html, body {
 
 .app_title {
     background-color: #ff8333;
-    height: 75px;
+    height: 50px;
     width: 100%;
     margin-left: 3px;
     text-align: center;
     vertical-align: middle;
-    line-height: 75px;
+    line-height: 50px;
     font-size: 2em;
     color: white;
     font-weight: bold;    
@@ -109,7 +109,8 @@ html, body {
 div.calendar_floating_remove_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s; 
+    cursor: pointer;   
 }
 
 div.calendar_floating_remove_button:active {
@@ -120,7 +121,8 @@ div.calendar_floating_remove_button:active {
 div.meal_list_floating_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s; 
+    cursor: pointer;   
 }
 
 div.meal_list_floating_button:active {
@@ -131,7 +133,8 @@ div.meal_list_floating_button:active {
 div.meal_list_floating_add_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s;   
+    cursor: pointer; 
 }
 
 div.meal_list_floating_add_button:active {
@@ -142,7 +145,8 @@ div.meal_list_floating_add_button:active {
 div.meal_list_floating_cancel_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s;
+    cursor: pointer;    
 }
 
 div.meal_list_floating_cancel_button:active {
@@ -201,7 +205,8 @@ div.meal_list_floating_cancel_button:active {
 div.calendar_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s;
+    cursor: pointer;    
 }
 
 div.calendar_button:active {
@@ -223,7 +228,7 @@ div.calendar_button:active {
 
 .flex_calendar_days_of_week_item {
     padding: 5px;
-    color: #ff6500;
+    color: #ff8333;
     font-weight: bold;
     font-size: 1.5em;
 }
@@ -290,7 +295,7 @@ div.calendar_button:active {
 }
 
 .flex-meal-item {
-    background-color: #ff6500;
+    background-color: #ff8333;
     width: 100px;
     height: 80px;
     margin-top: 20px;
@@ -301,13 +306,14 @@ div.calendar_button:active {
 .meal_name {
     color: white;
     font-weight: bold;
-    font-size: 10px;
+    font-size: 11px;
 }
 
 li.flex-meal-item:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 15px 0px rgba(100,100,100,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s; 
+    cursor: pointer;   
 }
 
 li.flex-meal-item:active {
@@ -331,7 +337,8 @@ li.flex-meal-item:active {
     max-height: 75%;
 }
 
-[id^="calendar_day_div_"], [id*="calendar_day_div_"] {
+[id^="calendar_day_div_"], 
+[id*="calendar_day_div_"] {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -350,7 +357,7 @@ li.flex-meal-item:active {
     background-color: gray;
     color: white;
     font-size: 2em;
-    margin: 5px;
+    margin: 3px;
 }
 
 .meal_editor_body {
@@ -394,7 +401,7 @@ li.flex-meal-item:active {
     margin: 3px;
     padding: 0;
     background-color: white;
-    color: #ff6500;
+    color: #ff8333;
     font-size: 1em;
     text-align:center;
     border-radius: 200px;
@@ -405,7 +412,8 @@ li.flex-meal-item:active {
 .remove_ingredient_button:hover {
     transform: scale(1.09, 1.09);
     box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s;
+    cursor: pointer;    
 }
 
 .remove_ingredient_button:active {
@@ -413,19 +421,19 @@ li.flex-meal-item:active {
 }
 
 .meal_data_input {
-    color: #ff6500;
+    color: #ff8333;
     width: 50%;
     font-size: 16px;
 }
 
 .meal_editor_form_header {
-    color: #ff6500;
+    color: #ff8333;
     font-weight: bold;
 }
 
 .recipe_text_area {
     width: 100%;
-    color: #ff6500;
+    color: #ff8333;
     font-size: 16px;
 }
 
@@ -446,10 +454,121 @@ li.flex-meal-item:active {
 div.ingredient_add_field_and_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;    
+    transition-duration: .2s;
+    cursor: pointer;    
 }
 
 div.ingredient_add_field_and_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+
+/******************************************************************************************
+* MODAL WELCOME DIALOG
+******************************************************************************************/
+/* The Modal (background) */
+.welcome_modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.welcome_modal_content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    width: 70%;
+    height: 50%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.welcome_modal_close_button {
+    color: white;
+    float: right;
+    font-size: 2em;
+    font-weight: bold;
+    padding-top: 5px;
+    padding-right: 10px;
+}
+
+.welcome_modal_close_button:hover,
+.welcome_modal_close_button:focus {
+    color: #33afff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.welcome_modal_header {
+    height: 15%;
+    background-color: #ff8333;
+    color: white;
+}
+
+.welcome_modal_body {
+    padding: 2px 16px;
+    height: 70%;
+}
+
+.welcome_modal_footer {
+    padding: 2px 16px;
+    background-color: #ff8333;
+    color: white;
+    height: 15%;
+    
+}
+
+.welcome_modal_title {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 1%;
+}
+
+.got_it_button {
+    height: 50px;
+    width: 125px;
+    margin: 5px;
+    background-color: #33afff;
+    float: right;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    font-size: 1.5em;
+    color: white;
+    font-weight: bold;
+}
+
+.got_it_button:hover { 
+    cursor: pointer;   
+}
+
+div.got_it_button:active {
     transform: scale(.95, .95);
     transition-duration: -1s;    
 }

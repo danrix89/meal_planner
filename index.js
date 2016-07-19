@@ -19,10 +19,10 @@ $(document).ready(function () {
     var is_edit_mode = false;
     var is_adding_new_meal = false;
     var is_need_to_auto_save = false;
-
-    // Set the month title with todays date
-    $("#month_title").text(formatted_date(calendar_date));
-
+    
+    // Cookie Variables
+    var are_cookies_enabled = false;
+    var is_to_welcome = true;
 
 
 
@@ -42,8 +42,81 @@ $(document).ready(function () {
 ************************************************************************************************************************************************************************************/
 
     /************************************************************************************************************************************************************************************/
+    /* Modal & Cookie Functions *********************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
+    // Get the modal
+    var modal = document.getElementById('welcome_modal');
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName("welcome_modal_close_button")[0];
+
+    // When the user clicks the button, open the modal
+    function display_modal() {
+        modal.style.display = "block";
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function () {
+        modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function (event) {
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+
+    function setup_got_it_button_onclick_function()
+    {
+        document.getElementById('got_it_button').onclick = (function (a_nothing) { return function () { got_it_button_onclick(a_nothing); } })(false);
+    }
+
+    function got_it_button_onclick(a_nothing)
+    {
+        modal.style.display = "none";
+    }
+
+    function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires=" + d.toGMTString();
+        document.cookie = cname + "=" + cvalue + "; " + expires;
+    }
+
+    function getCookie(cname) {
+        var name = cname + "=";
+        var ca = document.cookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    function checkCookie() {
+        var user = getCookie("username");
+        if (user != "") {
+            alert("Welcome again " + user);
+        } else {
+            user = prompt("Please enter your name:", "");
+            if (user != "" && user != null) {
+                setCookie("username", user, 30);
+            }
+        }
+    }
+
+    /************************************************************************************************************************************************************************************/
     /* Calendar Functions ***************************************************************************************************************************************************************/
     /************************************************************************************************************************************************************************************/
+    // Set the month title with todays date
+    $("#month_title").text(formatted_date(calendar_date));
+
     // JQuery function for when a previous month nav button is clicked
     $("#previous_month").click(function ()
     {
@@ -327,6 +400,9 @@ $(document).ready(function () {
     /************************************************************************************************************************************************************************************/
     window.onload = function ()
     {
+        checkCookie();
+        setup_got_it_button_onclick_function();
+        display_modal();
         current_calendar_month_meal_plan = this_months_meal_plan;
         monthly_meal_plan_data.push(this_months_meal_plan);
         populate_meal_list();
@@ -650,6 +726,10 @@ $(document).ready(function () {
 
 
 
+
+
+
+
     /************************************************************************************************************************************************************************************
     *************************************************************************************************************************************************************************************
     * Global Constants
@@ -794,7 +874,7 @@ $(document).ready(function () {
               "id": "7",
               "name": "Left-Overs",
               "image_url": "images\\leftovers.jpg", // http://www.bonappetit.com/test-kitchen/primers/article/thanksgiving-leftovers-guide
-              "ingredients": ["INGREDIENT_1", "INGREDIENT_2", "INGREDIENT_3"],
+              "ingredients": [],
               "recipe": "Pull it out and microwave it"
           },
           {
@@ -848,7 +928,7 @@ $(document).ready(function () {
           },
           {
               "id": "15",
-              "name": "Hawaiian Haystacks",
+              "name": "Haystacks",
               "image_url": "images\\hawaiian_haystacks.jpg", // http://www.yummyhealthyeasy.com/2013/03/hawaiian-haystacks-aka-chicken-sundaes-2.html
               "ingredients": ["Rice", "Pineapple", "Chicken", "Chow mein noodles", "coconut shavings", "Cream of chicken soup"],
               "recipe": "Cook Rice. Place cooked rice on a plate and add the rest of the ingredients on top and enjoy."
@@ -904,14 +984,14 @@ $(document).ready(function () {
           },
           {
               "id": "23",
-              "name": "Biscuits and Gravy",
+              "name": "Biscuits n' Gravy",
               "image_url": "images\\biscuits_and_gravy.jpg", // http://www.recipeshubs.com/biscuits-and-gravy/37591
               "ingredients": ["Biscuit dough", "Milk", "Ground sausage", "Chicken Bouillon"],
               "recipe": "Bake biscuits. Cook sausage with bouillon in skillet until brown. Take sausage out leaving only the fat. Add milk to the fat and wisk until thick. Add sausage back in. Serve over hot biscuits."
           },
           {
               "id": "24",
-              "name": "Beans and Rice",
+              "name": "Beans & Rice",
               "image_url": "images\\beans_and_rice.jpg", // http://www.thebittenword.com/thebittenword/2010/02/cajun-red-beans-and-rice.html
               "ingredients": ["Rice", "Ham hock", "Beans", "Onion", "bell pepper", "chili powder", "Salt"],
               "recipe": "Place all ingredients but the rice in a crock pot. Let it cook for 6-8 hours. Cook rice. Place rice and beans in a bowl or on a plate and serve."
@@ -925,7 +1005,7 @@ $(document).ready(function () {
           },
           {
               "id": "26",
-              "name": "Stuffed Bell Peppers",
+              "name": "Stuffed Peppers",
               "image_url": "images\\stuffed_bell_peppers.jpg", // http://sweetpeaskitchen.com/2010/08/stuffed-bell-peppers/
               "ingredients": ["Mexican rice", "Bell peppers", "Corn", "Black beans", "Cheese", "Sour cream"],
               "recipe": "Cook rice. Cut tops of bell peppers off. Boil bell peppers until softened. In a bowl combine cooked rice, beans and corn. Scoop into bell peppers. Sprinkle cheese on top and bake for 15 minutes at 350F"
@@ -955,7 +1035,7 @@ $(document).ready(function () {
               "id": "30",
               "name": "Dine-Out",
               "image_url": "images\\dine_out.jpg", // http://www.keyword-suggestions.com/ZGluZXI/
-              "ingredients": ["Wallet"],
+              "ingredients": [],
               "recipe": "Grab your wallet and enjoy the evening not having to cook tonight."
           },
     ];
