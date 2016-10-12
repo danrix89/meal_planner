@@ -828,6 +828,11 @@ $(document).ready(function () {
         {
             alert("We are unable to save your meal plan. We apologize for any inconvenience.")
         }
+
+        if (localStorage.getItem(localStorage_meal_plan_key) != null)
+        {
+            alert("Your meal plan has been saved.")
+        }
     }
 
 
