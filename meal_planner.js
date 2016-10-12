@@ -87,6 +87,7 @@ $(document).ready(function () {
         set_meal_editor_data();
         setup_calendar_help_button_onclick_function();
         setup_calendar_print_button_onclick_function();
+        setup_calendar_grocery_list_button_onclick_function();
         setup_calendar_save_button_onclick_function();
     };
 
@@ -551,15 +552,23 @@ $(document).ready(function () {
         document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
     }
 
-    function setup_calendar_help_button_onclick_function() {
+    function setup_calendar_help_button_onclick_function()
+    {
         document.getElementById('help_button').onclick = (function (a_nothing) { return function () { calendar_help_button_onclick(a_nothing); } })(false);
     }
 
-    function setup_calendar_print_button_onclick_function() {
+    function setup_calendar_print_button_onclick_function()
+    {
         document.getElementById('print_button').onclick = (function (a_nothing) { return function () { calendar_print_button_onclick(a_nothing); } })(false);
     }
 
-    function setup_calendar_save_button_onclick_function() {
+    function setup_calendar_grocery_list_button_onclick_function()
+    {
+        document.getElementById('grocery_list_button').onclick = (function (a_nothing) { return function () { calendar_grocery_list_button_onclick(a_nothing); } })(false);
+    }
+
+    function setup_calendar_save_button_onclick_function()
+    {
         document.getElementById('save_button').onclick = (function (a_nothing) { return function () { calendar_save_button_onclick(a_nothing); } })(false);
     }
     /************************************************************************************************************************************************************************************/
@@ -695,6 +704,11 @@ $(document).ready(function () {
     function calendar_print_button_onclick(a_nothing)
     {
         alert("Printing coming soon.")
+    }
+
+    function calendar_grocery_list_button_onclick(a_nothing)
+    {
+        alert("Grocery lsit coming soon.")
     }
 
     function calendar_save_button_onclick(a_nothing)
