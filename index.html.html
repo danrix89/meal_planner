@@ -3,15 +3,18 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title></title>
-    <link rel="stylesheet" type="text/css" href="index.css">
+    <title>MyMealPlanner</title>
+    <link rel="shortcut icon" href="images/default_image.jpg" />
+    <link rel="stylesheet" type="text/css" href="meal_planner.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script src="index.js"></script>
+    <script src="meal_planner.js"></script>
 </head>
 <body onload="populate_meals()">
     <div class="main_box">
 
         <div class="app_title">
+            <div class="calendar_help_button" id="save_button"><img class="calendar_button_image" src="images\controls\save.png" /></div>
+            <div class="calendar_help_button" id="print_button"><img class="calendar_button_image" src="images\controls\print.png" /></div>
             <div class="calendar_help_button" id="help_button"><img class="calendar_button_image" src="images\controls\question-mark.png" /></div>
             MyMealPlanner
         </div>

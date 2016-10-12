@@ -7,18 +7,22 @@ $(document).ready(function () {
 *************************************************************************************************************************************************************************************
 ************************************************************************************************************************************************************************************/
 
-    // Global Variables
+    // Useful Variables
     var todays_date = new Date();
-    var calendar_date = todays_date;
-    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var previous_meal = {};
-    var current_meal = {};
-    var monthly_meal_plan_data = [];
+    var calendar_date = todays_date;    // The current (or most recently chosen) date on the calendar
+    var months = ["January", "February", "March", "April", "May", "June", "July",
+                  "August", "September", "October", "November", "December"];
+    var previous_meal = {};     // Used for recovering from cancelled saves
+    var current_meal = {};      // The currently selected and updated meal
+    var monthly_meal_plan_data = { "meal_plans" : []};    // The array of every months meal plan
     var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
     var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
     var is_edit_mode = false;
     var is_adding_new_meal = false;
     var is_need_to_auto_save = false;
+
+    //
+    var localStorage_meal_plan_key = "user_meal_plan_data";
     
     // Cookie Variables
     var are_cookies_enabled = false;
@@ -42,12 +46,72 @@ $(document).ready(function () {
 ************************************************************************************************************************************************************************************/
 
     /************************************************************************************************************************************************************************************/
+    /* On Load Functions ****************************************************************************************************************************************************************/
+    /************************************************************************************************************************************************************************************/
+    window.onload = function ()
+    {
+        checkCookie();
+        setup_got_it_button_onclick_function();
+        if (is_to_welcome)
+        {
+            display_modal();
+        }
+
+        // Check for previously saved meal plans
+        var previously_saved_meal_plan_data = localStorage.getItem(localStorage_meal_plan_key);
+        if (previously_saved_meal_plan_data != null)
+        {
+            var meal_data_object = JSON.parse(previously_saved_meal_plan_data)
+            monthly_meal_plan_data = meal_data_object;
+
+            for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++) {
+                if (monthly_meal_plan_data.meal_plans[i].formatted_date == formatted_date(calendar_date))
+                {
+                    current_calendar_month_meal_plan = monthly_meal_plan_data.meal_plans[i];
+                }
+            }
+
+        }
+        else
+        {
+            // Possibly give the user an example meal plan initially by default???
+            //example_meal_plan.formatted_date = formatted_date(calendar_date);
+            //current_calendar_month_meal_plan = example_meal_plan;
+            //monthly_meal_plan_data.meal_plans.push(example_meal_plan);
+        }
+
+        populate_meal_list();
+        previous_meal = meals_from_file[0];
+        set_current_meal(meals_from_file[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+        populate_calendar_days();
+        set_meal_editor_data();
+        setup_calendar_help_button_onclick_function();
+        setup_calendar_print_button_onclick_function();
+        setup_calendar_save_button_onclick_function();
+    };
+
+    window.onbeforeunload = function (evt)
+    {
+        var message = 'Did you remember to save your meal plan?';
+        if (typeof evt == 'undefined')
+        {
+            evt = window.event;
+        }
+        if (evt)
+        {
+            evt.returnValue = message;
+        }
+
+        return message;
+    }
+
+    /************************************************************************************************************************************************************************************/
     /* Modal & Cookie Functions *********************************************************************************************************************************************************/
     /************************************************************************************************************************************************************************************/
-    // Get the modal
+    // Assign the modal element
     var modal = document.getElementById('welcome_modal');
 
-    // When the user clicks the button, open the modal
+    // Display the modal dialog
     function display_modal()
     {
         modal.style.display = "block";
@@ -62,16 +126,19 @@ $(document).ready(function () {
         }
     }
 
+    // Setup for the "Got it" (or OK) button in the modal dialog
     function setup_got_it_button_onclick_function()
     {
         document.getElementById('got_it_button').onclick = (function (a_nothing) { return function () { got_it_button_onclick(a_nothing); } })(false);
     }
 
+    // Onclick action for the "Got it" (or OK) button in the modal dialog
     function got_it_button_onclick(a_nothing)
     {
         modal.style.display = "none";
     }
 
+    // Creates a cookie with a name, value, and expiration date
     function setCookie(cname, cvalue, exdays)
     {
         var d = new Date();
@@ -80,6 +147,7 @@ $(document).ready(function () {
         document.cookie = cname + "=" + cvalue + "; " + expires;
     }
 
+    // Returns the value of a cookie argument that matches a particular name
     function getCookie(cname)
     {
         var name = cname + "=";
@@ -99,6 +167,7 @@ $(document).ready(function () {
         return "";
     }
 
+    // Returns true if...
     function checkCookie()
     {
         var is_already_welcomed = getCookie("is_already_welcomed");
@@ -109,7 +178,7 @@ $(document).ready(function () {
         else
         {
             is_already_welcomed = "true";
-            setCookie("is_already_welcomed", is_already_welcomed, 30);
+            setCookie("is_already_welcomed", is_already_welcomed, 90);
             is_to_welcome = true;
         }
     }
@@ -132,34 +201,38 @@ $(document).ready(function () {
         advance_month(1);
     });
 
+    // Advances the calendar to a different month based on a_value
     function advance_month(a_value)
     {
         calendar_date.setMonth(calendar_date.getMonth() + a_value)
         var current_calendar_date = formatted_date(calendar_date);
         $("#month_title").text(current_calendar_date);
 
-        // If a meal plan for this month already exists, set the current_calendar_month_meal_plan to that
+        // Check if a meal plan for this month already exists and set the current_calendar_month_meal_plan to that
         var already_has_meal_plan = false;
-        for (var i = 0; i < monthly_meal_plan_data.length; i++)
+        for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++)
         {
-            if (monthly_meal_plan_data[i].formatted_date == current_calendar_date)
+            if (monthly_meal_plan_data.meal_plans[i].formatted_date == current_calendar_date)
             {
-                current_calendar_month_meal_plan = monthly_meal_plan_data[i];
+                current_calendar_month_meal_plan = monthly_meal_plan_data.meal_plans[i];
                 already_has_meal_plan = true;
             }
         }
-        // Else creat a new one and push it to the monthly_meal_plan_data
+        // If no meal plan exists create a new one and push it to the monthly_meal_plan_data
         if (!already_has_meal_plan)
         {
             var new_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
             new_month_meal_plan.formatted_date = current_calendar_date;
             new_month_meal_plan.meal_plan = [];
-            monthly_meal_plan_data.push(new_month_meal_plan);
+            monthly_meal_plan_data.meal_plans.push(new_month_meal_plan);
             current_calendar_month_meal_plan = new_month_meal_plan;
         }
+
+        // Populate the calander
         populate_calendar_days()
     }
 
+    // Returns a formatted date (e.g. "September 2016")
     function formatted_date(a_date)
     {
         var date = new Date();
@@ -167,6 +240,7 @@ $(document).ready(function () {
         return months[date.getMonth()] + ' ' + date.getFullYear();
     }
 
+    // Populates the calendar with days and meal plan data
     function populate_calendar_days() {
         var calendar_day_squares = '<tr class="calendar_body_container">';
         var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
@@ -193,18 +267,24 @@ $(document).ready(function () {
                     calendar_day_squares += '</tr><tr class="calendar_body_container">';
             }
         }
+        // Set the calendar with the newly calculated calendar squares
         document.getElementById('calendar').innerHTML = calendar_day_squares;
+
+        // Now populate the month with any meal data
         populate_calendar_with_meal_plan();
     }
 
+    // Return the first day of a month (e.g. Monday = August 1, 2016)
     function first_day_of_month(year, month) {
         return new Date(year, month, 1);
     }
 
+    // Return the number of days in a month (e.g. October = 31)
     function daysInMonth(month, year) {
         return new Date(year, month + 1, 0).getDate();
     }
 
+    // Populate the current month with the meals
     function populate_calendar_with_meal_plan() {
         for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
             var meal_id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
@@ -225,6 +305,7 @@ $(document).ready(function () {
         }
     }
 
+    // Add a new meal to the meal plan for the current month
     function add_new_meal_to_current_month_meal_plan(day, meal_id)
     {
         var new_meal = {
@@ -242,7 +323,14 @@ $(document).ready(function () {
         for (var i = 0; i < meals_from_file.length; i++) {
             if (meals_from_file[i].id == meal_id)
             {
-                var latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
+                // Find out the latest_meal_id in the current_calendar_month_meal_plan's meal_plan
+                var latest_meal_id;
+                if (current_calendar_month_meal_plan.meal_plan.length == 0)
+                    latest_meal_id = 0;
+                else
+                    latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
+
+                // Set the data for the new_meal you'll be adding
                 new_meal.meal.id = (latest_meal_id + 1).toString();
                 new_meal.meal.name = meals_from_file[i].name;
                 new_meal.meal.image_url = meals_from_file[i].image_url;
@@ -257,6 +345,7 @@ $(document).ready(function () {
         current_calendar_month_meal_plan.meal_plan.push(new_meal);
     }
 
+    // Update the calendar day for a meal in the meal plan (If the user moved a meal from one day to another)
     function update_day(target_day, meal_id)
     {
         for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
@@ -399,27 +488,6 @@ $(document).ready(function () {
     }
 
     /************************************************************************************************************************************************************************************/
-    /* On Load Functions ****************************************************************************************************************************************************************/
-    /************************************************************************************************************************************************************************************/
-    window.onload = function ()
-    {
-        checkCookie();
-        setup_got_it_button_onclick_function();
-        if (is_to_welcome)
-        {
-            display_modal();
-        }
-        current_calendar_month_meal_plan = this_months_meal_plan;
-        monthly_meal_plan_data.push(this_months_meal_plan);
-        populate_meal_list();
-        previous_meal = meals_from_file[0];
-        set_current_meal(meals_from_file[0].id); // Set the initial current/previous meals to the first meal when loading the page.
-        populate_calendar_days();
-        set_meal_editor_data();
-        setup_calendar_help_button_onclick_function();
-    };
-
-    /************************************************************************************************************************************************************************************/
     /* Meal List Functions ***********************************************************************************************************************************************/
     /************************************************************************************************************************************************************************************/
     function populate_meal_list()
@@ -487,6 +555,13 @@ $(document).ready(function () {
         document.getElementById('help_button').onclick = (function (a_nothing) { return function () { calendar_help_button_onclick(a_nothing); } })(false);
     }
 
+    function setup_calendar_print_button_onclick_function() {
+        document.getElementById('print_button').onclick = (function (a_nothing) { return function () { calendar_print_button_onclick(a_nothing); } })(false);
+    }
+
+    function setup_calendar_save_button_onclick_function() {
+        document.getElementById('save_button').onclick = (function (a_nothing) { return function () { calendar_save_button_onclick(a_nothing); } })(false);
+    }
     /************************************************************************************************************************************************************************************/
     /* OnClick Funcions *****************************************************************************************************************************************************************/
     /************************************************************************************************************************************************************************************/
@@ -617,6 +692,16 @@ $(document).ready(function () {
         display_modal();
     }
 
+    function calendar_print_button_onclick(a_nothing)
+    {
+        alert("Printing coming soon.")
+    }
+
+    function calendar_save_button_onclick(a_nothing)
+    {
+        save_meal_plan();
+    }
+
 
     /************************************************************************************************************************************************************************************/
     /* Setter Functions *****************************************************************************************************************************************************************/
@@ -733,6 +818,18 @@ $(document).ready(function () {
         }
     }
 
+    function save_meal_plan()
+    {
+        try
+        {
+            localStorage.setItem(localStorage_meal_plan_key, JSON.stringify(monthly_meal_plan_data));
+        }
+        catch (exception)
+        {
+            alert("We are unable to save your meal plan. We apologize for any inconvenience.")
+        }
+    }
+
 
 
 
@@ -754,9 +851,10 @@ $(document).ready(function () {
     *************************************************************************************************************************************************************************************
     ************************************************************************************************************************************************************************************/
 
+
     // Hard coded current month meals
-    var this_months_meal_plan = {
-            "formatted_date": "July 2016",
+    var example_meal_plan = {
+            "formatted_date": "",
             "meal_plan": [
                             {
                                 "day": "1",
