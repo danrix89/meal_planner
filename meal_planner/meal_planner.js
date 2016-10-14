@@ -344,6 +344,17 @@ $(document).ready(function () {
 
         // Add the new_meal to the current_calendar_month_meal_plan
         current_calendar_month_meal_plan.meal_plan.push(new_meal);
+        update_meal_plan_data();
+    }
+
+    function update_meal_plan_data()
+    {
+        // Update the meal plan data with the update current month meal plan
+        for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++) {
+            if (monthly_meal_plan_data.meal_plans[i].formatted_date == current_calendar_month_meal_plan.formatted_date) {
+                monthly_meal_plan_data.meal_plans[i] = current_calendar_month_meal_plan;
+            }
+        }
     }
 
     // Update the calendar day for a meal in the meal plan (If the user moved a meal from one day to another)
@@ -485,6 +496,7 @@ $(document).ready(function () {
                 }
             }
             populate_calendar_days();
+            update_meal_plan_data();
         }
     }
 
