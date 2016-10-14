@@ -1,0 +1,603 @@
+﻿/*
+    Sources:
+    All button images are attributed to: http://www.flaticon.com/authors/freepik
+*/
+
+
+/******************************************************************************************
+* MAIN LAYOUT
+******************************************************************************************/
+
+html, body {
+    margin: 0;
+    height: 100%;
+    font-family: Arial;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+.app_title {
+    background-color: #ff8333;
+    height: 56px;
+    margin-left: 3px;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    font-size: 2em;
+    color: white;
+    font-weight: bold;    
+}
+
+.main_box{
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
+}
+
+.calendar_panel {
+    background-color: white;
+    height: 100%;
+    width: 65%;
+    float: left;
+    position: relative;
+}
+
+.side_panel {
+    background-color: red;
+    width: 35%;
+    height: 100%;
+    float: left;
+}
+
+.side_panel_container {
+    background-color: white;
+    width: 100%;
+    float: left;
+    overflow-y: auto;
+    position: relative;
+}
+
+#meal_list_container {
+    height:60%;
+}
+
+#meal_editor_container {
+    height:40%;
+}
+
+.calendar_floating_remove_button {
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: #33afff;
+    border-radius: 200px;
+    position: fixed;
+    left: 60%;
+    bottom: 20px;   
+}
+
+.meal_list_floating_button {
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: #33afff;
+    border-radius: 200px;
+    position: absolute;
+    bottom: 5%;
+    left: 85%;   
+}
+
+.meal_list_floating_add_button {
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: #33afff;
+    border-radius: 200px;
+    position: absolute;
+    bottom: 5%;
+    left: 75%;   
+}
+
+.meal_list_floating_cancel_button{
+    display: inline-block;
+    height: 50px;
+    width: 50px;
+    background-color: #FF4500;
+    border-radius: 200px;
+    position: absolute;
+    bottom: 5%;
+    left: 75%;   
+}
+
+div.calendar_floating_remove_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s; 
+    cursor: pointer;   
+}
+
+div.calendar_floating_remove_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+div.meal_list_floating_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s; 
+    cursor: pointer;   
+}
+
+div.meal_list_floating_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+div.meal_list_floating_add_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;   
+    cursor: pointer; 
+}
+
+div.meal_list_floating_add_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+div.meal_list_floating_cancel_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;    
+}
+
+div.meal_list_floating_cancel_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+
+/******************************************************************************************
+* CALENDAR
+******************************************************************************************/
+
+/* MONTH TITLE */
+
+.calendar_title_pane {
+    background-color: gray;
+    min-height: 50px;
+    width: 100%;
+    margin: 3px;
+}
+
+.flex_calendar_title_container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.flex_calendar_title_item {
+    background-color: gray;
+    padding: 5px;
+    height: 50px;
+    color: white;
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.calendar_button {
+    border-radius: 200px;
+    width: 50px;
+    height: 50px;
+    background-color: #33afff;
+    transition-duration: .5s;
+}
+
+.calendar_help_button {
+    border-radius: 200px;
+    width: 50px;
+    height: 50px;
+    background-color: #33afff;
+    transition-duration: .5s;
+    float: right;
+    margin-right: 10px;
+    margin-top: 2px;
+}
+
+.calendar_button_image {
+    height: 30px;
+    width: 30px;
+    color: orange;
+    margin: 10px;
+}
+
+div.calendar_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;    
+}
+
+div.calendar_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+div.calendar_help_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;    
+}
+
+div.calendar_help_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+
+/***************** CALENDAR BODY *****************/
+
+.flex_calendar_days_of_week_container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    background-color: white;
+}
+
+.flex_calendar_days_of_week_item {
+    padding: 5px;
+    color: #ff8333;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.calendar_body_container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    justify-content: space-around;
+    overflow: scroll;
+    table-layout: fixed;
+    width: 100%;
+}
+
+.calendar_body_item {
+    margin: 1px;
+    padding:0;
+    border: 2px solid rgba(0,0,0,0.2);
+    background-color: white;
+    font-weight: bold;
+    font-size: 1.5em;
+    max-width: 13.8%;
+    min-width: 13.8%;
+    width: 13.8%;
+    height: 125px;
+    opacity: 0.8;
+}
+
+.half_day {
+    margin: inherit;
+    padding: 1px;
+    border: inherit;
+    background-color: inherit;
+    font-weight: inherit;
+    font-size: inherit;
+    width: inherit;
+    max-height: 75.5px;
+
+}
+
+.calendar {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 93.7%;
+    background-color: white;
+}
+
+
+/******************************************************************************************
+* MEAL LIST
+******************************************************************************************/
+.meal_list {
+    background-color: white;
+}
+
+.flex-meal-container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.flex-meal-item {
+    background-color: #ff8333;
+    width: 100px;
+    height: 80px;
+    margin-top: 20px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.meal_name {
+    color: black;
+    font-size: 11px;
+}
+
+li.flex-meal-item:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 15px 0px rgba(100,100,100,.8);
+    transition-duration: .2s; 
+    cursor: pointer;   
+}
+
+li.flex-meal-item:active {
+    transform: scale(.9, .9);    
+}
+
+/****************** Meal Images (both in the meal list and the calendar) ******************/
+
+[id^="drag_"], [id*="drag_"] {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 75%;
+}
+
+[id*="_calendar"] {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: auto;
+    max-height: 75%;
+}
+
+[id^="calendar_day_div_"], 
+[id*="calendar_day_div_"] {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/******************************************************************************************
+* MEAL EDITOR
+******************************************************************************************/
+.meal_editor {
+    background-color: white;
+}
+
+.meal_editor_and_list_title {
+    text-align: center;
+    background-color: gray;
+    color: white;
+    font-size: 2em;
+    margin: 3px;
+}
+
+.meal_editor_body {
+    padding: 10px;
+}
+
+.ingredient_list {
+    background-color: white;
+    min-height: 100px;
+    overflow-y: auto;
+}
+
+.flex-ingredient-container {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.flex-ingredient-item {
+    margin: 0;
+    padding: 0;
+    background: #ff8333;
+    width: 175px;
+    height: 25px;
+    margin: 5px;
+}
+
+.ingredient {
+    margin: 3px;
+    padding: 0;
+    padding-right: 3px;
+    color: white;
+    font-size: 16px;
+    text-align: left;
+    float: left;
+}
+
+.remove_ingredient_button {
+    margin: 3px;
+    padding: 0;
+    background-color: white;
+    color: #ff8333;
+    font-size: 1em;
+    text-align:center;
+    border-radius: 200px;
+    width: 20px;
+    float: right;
+}
+
+.remove_ingredient_button:hover {
+    transform: scale(1.09, 1.09);
+    box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
+    transition-duration: .2s;
+    cursor: pointer;    
+}
+
+.remove_ingredient_button:active {
+    transform: scale(.9, .9);    
+}
+
+.meal_data_input {
+    color: #ff8333;
+    width: 50%;
+    font-size: 16px;
+}
+
+.meal_editor_form_header {
+    color: #ff8333;
+    font-weight: bold;
+}
+
+.recipe_text_area {
+    width: 100%;
+    color: #ff8333;
+    font-size: 16px;
+}
+
+.ingredient_add_button_image {
+    height: 15px;
+    width: 15px;
+    margin: 5px;
+}
+
+.ingredient_add_field_and_button{
+    display: inline-block;
+    height: 25px;
+    width: 25px;
+    background-color: #33afff;
+    border-radius: 200px;
+}
+
+div.ingredient_add_field_and_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;    
+}
+
+div.ingredient_add_field_and_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
+
+
+/******************************************************************************************
+* MODAL WELCOME DIALOG
+******************************************************************************************/
+/* The Modal (background) */
+.welcome_modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content */
+.welcome_modal_content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    width: 60%;
+    height: 50%;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    -webkit-animation-name: animatetop;
+    -webkit-animation-duration: 0.4s;
+    animation-name: animatetop;
+    animation-duration: 0.4s
+}
+
+/* Add Animation */
+@-webkit-keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+@keyframes animatetop {
+    from {top:-300px; opacity:0}
+    to {top:0; opacity:1}
+}
+
+/* The Close Button */
+.welcome_modal_close_button {
+    color: white;
+    float: right;
+    font-size: 2em;
+    font-weight: bold;
+    padding-top: 5px;
+    padding-right: 10px;
+}
+
+.welcome_modal_close_button:hover,
+.welcome_modal_close_button:focus {
+    color: #33afff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.welcome_modal_header {
+    height: 15%;
+    background-color: #ff8333;
+    color: white;
+}
+
+.welcome_modal_body {
+    padding: 2px 16px;
+    height: 70%;
+    font-size: 1.25em;
+    text-align: center;
+}
+
+.welcome_modal_footer {
+    padding: 2px 16px;
+    background-color: #ff8333;
+    color: white;
+    height: 15%;
+    
+}
+
+.welcome_modal_title {
+    text-align: center;
+    vertical-align: middle;
+    padding-top: 1%;
+}
+
+.got_it_button {
+    height: 50px;
+    width: 125px;
+    margin: 5px;
+    background-color: #33afff;
+    float: right;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    font-size: 1.5em;
+    color: white;
+    font-weight: bold;
+}
+
+.got_it_button:hover { 
+    cursor: pointer;   
+}
+
+div.got_it_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;    
+}
