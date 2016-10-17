@@ -720,7 +720,7 @@ $(document).ready(function () {
 
     function calendar_grocery_list_button_onclick(a_nothing)
     {
-        alert("Grocery lsit coming soon.")
+        alert("Grocery list coming soon.")
     }
 
     function calendar_save_button_onclick(a_nothing)
