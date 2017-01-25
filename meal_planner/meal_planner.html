@@ -6,10 +6,12 @@
     <title>MyMealPlanner</title>
     <link rel="shortcut icon" href="images/default_image.jpg" />
     <link rel="stylesheet" type="text/css" href="meal_planner.css">
+    <script src="https://www.gstatic.com/firebasejs/3.6.6/firebase.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
     <script src="meal_planner.js"></script>
 </head>
-<body onload="populate_meals()">
+<body onload="on_page_load(event)">
+    <!-- <h1 id="test"></h1> -->
     <div class="main_box">
 
         <div class="app_title">
@@ -119,5 +121,21 @@
             </div>
         </div>
     </div>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
+            authDomain: "my-mealplanner.firebaseapp.com",
+            databaseURL: "https://my-mealplanner.firebaseio.com",
+            storageBucket: "my-mealplanner.appspot.com",
+            messagingSenderId: "470333058555"
+        };
+        firebase.initializeApp(config);
+
+        //var test = document.getElementById("test");
+        var dbRef = firebase.database().ref().child('test');
+
+        //dbRef.on('value', snap => test.innerText = snap.val());
+    </script>
 </body>
 </html>
