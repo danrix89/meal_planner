@@ -78,7 +78,7 @@ function on_page_load(event) {
     window.addEventListener("click", close_modal);
 
     // Set the meals from user's meals in storage
-    meals = get_user_meals();
+    get_user_meals();
 
     // Setup the calendar title and nav buttons
     setup_calendar_title_and_nav_buttons();
@@ -98,21 +98,32 @@ function on_page_load(event) {
 * Get the user's meals from storage (not the meal plans but their list of meals)
 */
 function get_user_meals() {
-    // Request the user's meal data  
-    var request = new XMLHttpRequest();
-    request.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            // Once retrieved, set the meals variable and populate the interface
-            meals = JSON.parse(request.responseText);
-            populate_meal_list();
-            previous_meal = meals[0];
-            set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
-            populate_calendar_days();
-            set_meal_editor_data();
-        }
-    };
-    request.open("GET", default_meals_json_api, true);
-    request.send();
+    if (localStorage.user_meal_list != undefined && localStorage.user_meal_list != "undefined") {
+        meals = JSON.parse(localStorage.user_meal_list);
+        populate_meal_list();
+        previous_meal = meals[0];
+        set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+        populate_calendar_days();
+        set_meal_editor_data();
+    }
+        // Else load the default meals
+    else {
+        // Request the user's meal data  
+        var request = new XMLHttpRequest();
+        request.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                // Once retrieved, set the meals variable and populate the interface
+                meals = JSON.parse(request.responseText);
+                populate_meal_list();
+                previous_meal = meals[0];
+                set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+                populate_calendar_days();
+                set_meal_editor_data();
+            }
+        };
+        request.open("GET", default_meals_json_api, true);
+        request.send();
+    }
 }
 
 
@@ -221,12 +232,11 @@ function setup_got_it_button_onclick_function() {
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* GOT_IT_BUTTON_ONCLICK
+* Onclick action for the "Got it" (or OK) button in the modal dialog
+*
+* @param a_nothing (ignore this)
 */
-// Onclick action for the "Got it" (or OK) button in the modal dialog
 function got_it_button_onclick(a_nothing) {
     document.getElementById('welcome_modal').style.display = "none";
 }
@@ -241,14 +251,18 @@ function has_visited() {
 
 /**
 * FUNCTION_NAME
-* Description
-* @param
-* @return
+* Advances the calendar to a different month based on a_value and then repopulates the calendar
+* @param a_value is used to either increment or decrement the months
 */
-// Advances the calendar to a different month based on a_value
+// 
 function advance_month(a_value) {
+    // Increment/Decrement the month
     calendar_date.setMonth(calendar_date.getMonth() + a_value)
+
+    // Format the new date to only have the month name and year (e.g. January 2017)
     var current_calendar_date = formatted_date(calendar_date);
+
+    // Display the formatted date on the calendar title
     document.getElementById("month_title").innerHTML = current_calendar_date;
 
     // Check if a meal plan for this month already exists and set the current_calendar_month_meal_plan to that
@@ -260,6 +274,7 @@ function advance_month(a_value) {
             break;
         }
     }
+
     // If no meal plan exists create a new one and push it to the monthly_meal_plan_data
     if (!already_has_meal_plan) {
         var new_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
@@ -269,17 +284,16 @@ function advance_month(a_value) {
         current_calendar_month_meal_plan = new_month_meal_plan;
     }
 
-    // Populate the calander
+    // Repopulate the calander
     populate_calendar_days();
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* FORMATTED_DATE
+* Returns a formatted date (e.g. "September 2016")
+* @param a_date is the date to be formated
+* @return the formated date
 */
-// Returns a formatted date (e.g. "September 2016")
 function formatted_date(a_date) {
     var date = new Date();
     date = a_date;
@@ -287,12 +301,9 @@ function formatted_date(a_date) {
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* populate_calendar_days
+* Populates the calendar with squares (days) and the populates with meal plan data
 */
-// Populates the calendar with days and meal plan data
 function populate_calendar_days() {
     // Clear the calendar (if not empty)
     var calendar_element = document.getElementById('calendar');
@@ -313,7 +324,7 @@ function populate_calendar_days() {
     // The calendar square index (which square is it currently on?)
     var calendar_square_index = 0;
 
-    // Dynamically build the squares
+    // Dynamically build the squares/days
     for (var i = 0; i < row_count; i++) {
         // Create a new week (container) element
         var calendar_week_element = document.createElement("tr");
@@ -358,12 +369,11 @@ function populate_calendar_days() {
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
+* FIRST_DAY_OF_MONTH
+* Return the first day of the week for a given month (e.g. Monday = August 1, 2016).
+* @param year of the month (critical to know which day of the week)
 * @return
 */
-// Return the first day of a month (e.g. Monday = August 1, 2016)
 function first_day_of_month(year, month) {
     return new Date(year, month, 1);
 }
@@ -604,9 +614,6 @@ document.drop_to_garbage = function (ev)
     var element = document.getElementById(data);
     var meal_id = element.getAttribute("data-meal-id");
 
-    // Set up where you get the meals from
-    var meals = meals;
-
     if (window.confirm("Are you sure you want to delete this meal forever?"))
     {
         for (var i = 0; i < meals.length; i++)
@@ -635,8 +642,6 @@ document.drop_to_calendar_garbage = function (ev)
     var element = document.getElementById(data);
     var meal_id = element.getAttribute("data-meal-id");
 
-    var meals = meals;
-
     if (window.confirm("Are you sure you want to delete this meal from your meal plan?")) 
     {
         for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) 
@@ -659,6 +664,10 @@ document.drop_to_calendar_garbage = function (ev)
 */
 function populate_meal_list()
 {
+    // Get the meal list (container) and clear it of any items
+    var meal_list_element = document.getElementById('meal_unordered_list');
+    meal_list_element.innerHTML = "";
+
     for (var i = 0; i < meals.length; i++)
     {
         var id = meals[i].id;
@@ -1034,6 +1043,15 @@ function calendar_grocery_list_button_onclick(a_nothing)
 function calendar_save_button_onclick(a_nothing)
 {
     save_meal_plan();
+    save_meal_list();
+
+    if (localStorage.user_meal_plan_data != null) {
+        alert("Your meal plan has been saved.")
+    }
+
+    if (localStorage.user_meal_list != null) {
+        alert("Your meal plan has been saved.")
+    }
 }
 
 /**
@@ -1190,8 +1208,19 @@ function save_meal_plan()
         alert("We are unable to save your meal plan. We apologize for any inconvenience.")
     }
 
-    if (localStorage.user_meal_plan_data != null)
-    {
-        alert("Your meal plan has been saved.")
+}
+
+/**
+* FUNCTION_NAME
+* Description
+* @param
+* @return
+*/
+function save_meal_list() {
+    try {
+        localStorage.user_meal_list = JSON.stringify(meals);
+    }
+    catch (exception) {
+        alert("We are unable to save your meal plan. We apologize for any inconvenience.")
     }
 }
