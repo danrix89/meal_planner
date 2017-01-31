@@ -78,7 +78,7 @@
                 </div>
                 <div class="calendar_body">
                     <table class="calendar_body_container" id="calendar"></table>
-                    <div class="calendar_floating_remove_button" ondrop="drop_to_calendar_garbage(event)" ondragover="    allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                    <div class="calendar_floating_remove_button" ondrop="drop_to_calendar_garbage(event)" ondragover="allow_meal_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
                 </div>
             </div>
         </div>
@@ -90,8 +90,8 @@
                         <ul class="flex-meal-container" id="meal_unordered_list">
                             <!-- Populated by Json Meal Data -->
                         </ul>
-                        <div class="meal_list_floating_button" ondrop="drop_to_garbage(event)" ondragover="allow_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
-                        <div class="meal_list_floating_add_button" ondrop="drop_to_garbage(event)" ondragover="allow_drop(event)"><img id="add_button" class="calendar_button_image" src="images\controls\add.png" /></div>
+                        <div class="meal_list_floating_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                        <div class="meal_list_floating_add_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img id="add_button" class="calendar_button_image" src="images\controls\add.png" /></div>
                     </div>
                 </div>
             </div>

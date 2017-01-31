@@ -31,7 +31,7 @@ var current_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "
 var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
 
 // The array of every months meal plan
-var monthly_meal_plan_data = { "meal_plans": [] };
+var meal_plans = { "meal_plans": [] };
 
 // The meal plan for the month the users is currently viewing
 var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
@@ -84,13 +84,14 @@ function on_page_load(event) {
     setup_calendar_title_and_nav_buttons();
 
     // Setup the current session's meal plans with user data
-    setup_initial_monthly_meal_plan_data();
+    setup_initial_meal_plans();
 
     // Setup button on click event functions
     setup_calendar_help_button_onclick_function();
     setup_calendar_print_button_onclick_function();
     setup_calendar_grocery_list_button_onclick_function();
     setup_calendar_save_button_onclick_function();
+
 };
 
 /**
@@ -104,7 +105,7 @@ function get_user_meals() {
         previous_meal = meals[0];
         set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
         populate_calendar_days();
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
     }
         // Else load the default meals
     else {
@@ -118,7 +119,7 @@ function get_user_meals() {
                 previous_meal = meals[0];
                 set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
                 populate_calendar_days();
-                set_meal_editor_data();
+                populate_meal_editor(current_meal);
             }
         };
         request.open("GET", default_meals_json_api, true);
@@ -172,14 +173,14 @@ function on_before_unload(event) {
 * Does the initial set up of what the user's meal plans are
 * to later be displayed.
 */
-function setup_initial_monthly_meal_plan_data() {
+function setup_initial_meal_plans() {
     // Get all the user's saved meal plans from storage
     var previously_saved_meal_plan_data = localStorage.user_meal_plan_data;
 
     // If the user has meal plan data
     if (previously_saved_meal_plan_data != null) {
         // Set the meal plan data object
-        monthly_meal_plan_data = JSON.parse(previously_saved_meal_plan_data);
+        meal_plans = JSON.parse(previously_saved_meal_plan_data);
 
         // set the meal plan for the currently view calendar month
         set_initial_calendar_month_meal_plan();
@@ -193,9 +194,9 @@ function setup_initial_monthly_meal_plan_data() {
 * plans for that month (if any).
 */
 function set_initial_calendar_month_meal_plan() {
-    for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++) {
-        if (monthly_meal_plan_data.meal_plans[i].formatted_date == formatted_date(calendar_date)) {
-            current_calendar_month_meal_plan = monthly_meal_plan_data.meal_plans[i];
+    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
+        if (meal_plans.meal_plans[i].formatted_date == formatted_date(calendar_date)) {
+            current_calendar_month_meal_plan = meal_plans.meal_plans[i];
             return;
         }
     }
@@ -250,7 +251,7 @@ function has_visited() {
 }
 
 /**
-* FUNCTION_NAME
+* ADVANCE_MONTH
 * Advances the calendar to a different month based on a_value and then repopulates the calendar
 * @param a_value is used to either increment or decrement the months
 */
@@ -267,20 +268,20 @@ function advance_month(a_value) {
 
     // Check if a meal plan for this month already exists and set the current_calendar_month_meal_plan to that
     var already_has_meal_plan = false;
-    for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++) {
-        if (monthly_meal_plan_data.meal_plans[i].formatted_date == current_calendar_date) {
-            current_calendar_month_meal_plan = monthly_meal_plan_data.meal_plans[i];
+    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
+        if (meal_plans.meal_plans[i].formatted_date == current_calendar_date) {
+            current_calendar_month_meal_plan = meal_plans.meal_plans[i];
             already_has_meal_plan = true;
             break;
         }
     }
 
-    // If no meal plan exists create a new one and push it to the monthly_meal_plan_data
+    // If no meal plan exists create a new one and push it to the meal_plans
     if (!already_has_meal_plan) {
         var new_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
         new_month_meal_plan.formatted_date = current_calendar_date;
         new_month_meal_plan.meal_plan = [];
-        monthly_meal_plan_data.meal_plans.push(new_month_meal_plan);
+        meal_plans.meal_plans.push(new_month_meal_plan);
         current_calendar_month_meal_plan = new_month_meal_plan;
     }
 
@@ -301,8 +302,8 @@ function formatted_date(a_date) {
 }
 
 /**
-* populate_calendar_days
-* Populates the calendar with squares (days) and the populates with meal plan data
+* POPULATE_CALENDAR_DAYS
+* Populates the calendar with squares (days) and the populates it with meal plan data
 */
 function populate_calendar_days() {
     // Clear the calendar (if not empty)
@@ -310,7 +311,7 @@ function populate_calendar_days() {
     calendar_element.innerHTML = "";
 
     // Setup number of days, day index, calendar square count, etc.
-    var number_of_days = daysInMonth(calendar_date.getMonth(), calendar_date.getFullYear());
+    var number_of_days = days_in_month(calendar_date.getMonth(), calendar_date.getFullYear());
 
     // Used for keeping track of the days in the month
     var day = 1;
@@ -341,8 +342,8 @@ function populate_calendar_days() {
                 // Create and setup the data div that will hold meal data for that day
                 var calendar_day_data_div_element = document.createElement("div");
                 calendar_day_data_div_element.id = "calendar_day_div_" + day;
-                calendar_day_data_div_element.setAttribute("ondrop", "drop(event)");
-                calendar_day_data_div_element.setAttribute("ondragover", "allow_drop(event)")
+                calendar_day_data_div_element.setAttribute("ondrop", "drop_meal(event)");
+                calendar_day_data_div_element.setAttribute("ondragover", "allow_meal_drop(event)")
                 calendar_day_data_div_element.setAttribute("data-day", day);
                 calendar_day_data_div_element.innerHTML = day;
 
@@ -379,23 +380,20 @@ function first_day_of_month(year, month) {
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* DAYS_IN_MONTH
+* Returns the number of days in a given month for a particular year.
+* @param month you want the number of days for
+* @param year that the month is in (so you can account for leap years)
+* @return the number of days in the month (e.g. Feb 2016 = 29 days OR Feb 2017 = 28 days)
 */
-// Return the number of days in a month (e.g. October = 31)
-function daysInMonth(month, year) {
+function days_in_month(month, year) {
     return new Date(year, month + 1, 0).getDate();
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* POPULATE_CALENDAR_WITH_MEAL_PLAN
+* Populate the current month with the meals the that month's meal plans (if any)
 */
-// Populate the current month with the meals
 function populate_calendar_with_meal_plan() {
     for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
         var meal_id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
@@ -408,7 +406,7 @@ function populate_calendar_with_meal_plan() {
         image_element.setAttribute('id', 'drag_' + meal_id + '_' + i + '_' + '_calendar');
         image_element.setAttribute('src', image_url);
         image_element.setAttribute('draggable', 'true');
-        image_element.setAttribute('ondragstart', 'drag(event)');
+        image_element.setAttribute('ondragstart', 'drag_meal(event)');
         image_element.setAttribute('data-meal-id', meal_id);
         image_element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
 
@@ -417,138 +415,164 @@ function populate_calendar_with_meal_plan() {
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* ADD_NEW_MEAL_TO_CURRENT_MONTH_MEAL_PLAN
+* Add a new meal to the meal plan for the current month
+* @param day on the calendar that the meal is being planned for
+* @param meal_id from the meal in the users meal list
 */
-// Add a new meal to the meal plan for the current month
 function add_new_meal_to_current_month_meal_plan(day, meal_id)
 {
-    var new_meal = {
-        "day": day,
-        "meal": {
-            "id": '',
-            "name": '',
-            "image_url": '',
-            "ingredients": [],
-            "recipe": ''
-        }
-    };
+    // A variable to store the meal from the user's 
+    // meal list that matches the meal_id parameter
+    var matched_meal;
 
-    // Copy the meal info from meals into the new_meal
+    // A flag to know if a matching meal was found
+    var is_meal_found = false;
+
+    // Find the meal from the users meal list using the meal_id parameter
     for (var i = 0; i < meals.length; i++) {
+        // Copy the meal info from meals into the new_meal object
         if (meals[i].id == meal_id)
         {
-            // Find out the latest_meal_id in the current_calendar_month_meal_plan's meal_plan
-            var latest_meal_id;
-            if (current_calendar_month_meal_plan.meal_plan.length == 0)
-                latest_meal_id = 0;
-            else
-                latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
-
-            // Set the data for the new_meal you'll be adding
-            new_meal.meal.id = (latest_meal_id + 1).toString();
-            new_meal.meal.name = meals[i].name;
-            new_meal.meal.image_url = meals[i].image_url;
-            for (var j = 0; j < meals[i].ingredients.length; j++) {
-                new_meal.meal.ingredients.push(meals[i].ingredients[j]);
-            }
-            new_meal.meal.recipe = meals[i].recipe;
+            matched_meal = meals[i];
+            is_meal_found = true;
             break;
         }
     }
 
-    // Add the new_meal to the current_calendar_month_meal_plan
-    current_calendar_month_meal_plan.meal_plan.push(new_meal);
-    update_meal_plan_data();
+    // Check if the meal was found and then
+    // copy the data from the matched_meal to the new_meal
+    if (is_meal_found)
+    {
+        // Variable the represents the new meal object to be added to the calendar
+        var new_meal = {
+            "day": day,
+            "meal": {
+                "id": '',
+                "name": '',
+                "image_url": '',
+                "ingredients": [],
+                "recipe": ''
+            }
+        };
+
+        // Find out the latest_meal_id in the current_calendar_month_meal_plan's meal_plan (default to zero)
+        // then set the ID of the new_meal
+        var latest_meal_id = 0;
+        if (current_calendar_month_meal_plan.meal_plan.length > 0)
+            latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
+        new_meal.meal.id = (latest_meal_id + 1).toString();
+        
+        // Copy over the name
+        new_meal.meal.name = matched_meal.name;
+
+        // Copy of the image url
+        new_meal.meal.image_url = matched_meal.image_url;
+
+        // Copy over all the ingredients
+        for (var j = 0; j < matched_meal.ingredients.length; j++) {
+            new_meal.meal.ingredients.push(matched_meal.ingredients[j]);
+        }
+
+        // Copy of the recipe instructions
+        new_meal.meal.recipe = matched_meal.recipe;
+
+        // Add the new_meal to the current_calendar_month_meal_plan
+        current_calendar_month_meal_plan.meal_plan.push(new_meal);
+
+        // Update the meal plan
+        update_meal_plan(current_calendar_month_meal_plan);
+    }
 }
 
 /**
-* FUNCTION_NAME
+* UPDATE_MEAL_PLAN
 * Update the user's meal plan's with the updated current month's meal plan
-* @param
-* @return
 */
-function update_meal_plan_data()
+function update_meal_plan(meal_plan)
 {
-    // Loop through the existing plans
-    for (var i = 0; i < monthly_meal_plan_data.meal_plans.length; i++) {
-        if (monthly_meal_plan_data.meal_plans[i].formatted_date == current_calendar_month_meal_plan.formatted_date) {
-            monthly_meal_plan_data.meal_plans[i] = current_calendar_month_meal_plan;
+    // Check if the meal_plan already exists in the list of meal_plans
+    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
+        // If so, overwrite that meal plan with the new meal_plan (parameter)
+        if (meal_plans.meal_plans[i].formatted_date == meal_plan.formatted_date) {
+            meal_plans.meal_plans[i] = meal_plan;
             return;
         }
     }
 
     // If we've made it this far, then an existing meal plan was not found so add it as a new plan at the back
-    var back_index = monthly_meal_plan_data.meal_plans.length;
-    monthly_meal_plan_data.meal_plans.push(current_calendar_month_meal_plan);
+    var back_index = meal_plans.meal_plans.length;
+    meal_plans.meal_plans.push(meal_plan);
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* update_day
+* Update a meal's day in a meal plan (e.g. If the user moved a meal from one day to another)
+* @param meal_plan that is being updated
+* @param target_day is the new day that the meal will be moving to
+* @param meal_id used to know if the meal exists in the meal plan
 */
-// Update the calendar day for a meal in the meal plan (If the user moved a meal from one day to another)
-function update_day(target_day, meal_id)
+function update_day(meal_plan, target_day, meal_id)
 {
-    for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
+    // Find the meal in the meal plan using the meal_id and meal_plan parameters
+    for (var i = 0; i < meal_plan.meal_plan.length; i++)
     {
-        if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
+        // If found update the day to the target day parameter
+        if (meal_plan.meal_plan[i].meal.id == meal_id)
         {
-            current_calendar_month_meal_plan.meal_plan[i].day = target_day;
+            meal_plan.meal_plan[i].day = target_day;
         }
     }
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* DRAG_MEAL
+* Begin dragging a meal. 
+* @param event of the meal image being dragged
 */
-document.drag = function (ev)
-{
-    ev.dataTransfer.setData("text", ev.target.id);
+function drag_meal(event) {
+    event.dataTransfer.setData("text", event.target.id);
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* ALLOW_MEAL_DROP
+* Allows the meal image to be dropped over other HTML elements
+* @param event of the meal image being dropped
 */
-document.allow_drop = function (ev)
-{
-    ev.preventDefault();
+function allow_meal_drop(event) {
+    // By default, data/elements cannot be dropped in other elements. 
+    // To allow a drop, we must prevent the default handling of the element. 
+    // This is done by calling the event.preventDefault() method for the ondragover event
+    event.preventDefault();
 }
 
 /**
-* FUNCTION_NAME
+* DROP_MEAL
 * Description
 * @param
 * @return
 */
-document.drop = function (ev)
-{
-    ev.preventDefault();
-    var data = ev.dataTransfer.getData("text"); 
+function drop_meal(event) {
+    // Prevent default behavior
+    event.preventDefault();
+
+    // Get the data from the dropped meal
+    var data = event.dataTransfer.getData("text");
+
+    // Find the parent element of the dropped meal (where did we drag it from?)
     var parent_element = document.getElementById(data).parentElement;
-        
+
     // If the parent element is a meal list item, copy the data over...
-    if (parent_element.className.includes("flex-meal-item"))
-    {
+    if (parent_element.className.includes("flex-meal-item")) {
         var node_copy = document.getElementById(data).cloneNode(true);
         var new_id = data + "_calendar";
         var element_count = $('[id^=' + new_id + ']').length;
         new_id += (element_count + 1).toString();
         node_copy.id = new_id;
-        ev.target.appendChild(node_copy);
+        event.target.appendChild(node_copy);
 
         // Create a new meal with the meal info from meals matching meal_id to add to the meal plan
-        var day = ev.target.getAttribute("data-day");
+        var day = event.target.getAttribute("data-day");
         var meal_id = document.getElementById(data).getAttribute("data-meal-id");
         add_new_meal_to_current_month_meal_plan(day, meal_id);
         meal_id = current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id;
@@ -560,7 +584,7 @@ document.drop = function (ev)
     {
         // Copy the image over with onclick functionality
         var element = document.getElementById(data);
-        var target_parent = ev.target.parentElement;
+        var target_parent = event.target.parentElement;
         var target_day = target_parent.getAttribute("data-day");
         var image_url = element.getAttribute("src");
         var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
@@ -568,49 +592,47 @@ document.drop = function (ev)
         // Check if the user is overwriting a day by copying over...
         var is_day_already_filled = false;
         var index_of_meal_to_replace;
-        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
-        {
-            if (current_calendar_month_meal_plan.meal_plan[i].day == target_day)
-            {
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
+            if (current_calendar_month_meal_plan.meal_plan[i].day == target_day) {
                 is_day_already_filled = true;
                 index_of_meal_to_replace = i;
             }
         }
 
-        if (is_day_already_filled)
-        {
-            if (window.confirm("Are you sure you want to replace this meal?"))
-            {
+        // Handle copying the data over into the new day square on the calendar (even if it's already filled)
+        if (is_day_already_filled) {
+            if (window.confirm("Are you sure you want to replace this meal?")) {
                 ev.target.appendChild(element);
                 var meal_id = element.getAttribute("data-meal-id");
                 ev.target.setAttribute("src", image_url);
                 element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
                 current_calendar_month_meal_plan.meal_plan.splice(index_of_meal_to_replace, 1);
-                update_day(target_day, meal_id);
+                update_day(current_calendar_month_meal_plan, target_day, meal_id);
             }
         }
-        else
-        {
+        else {
             ev.target.appendChild(element);
             var meal_id = element.getAttribute("data-meal-id");
             element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
             target_day = document.getElementById(data).parentElement.getAttribute("data-day");
-            update_day(target_day, meal_id);
+            update_day(current_calendar_month_meal_plan, target_day, meal_id);
         }
     }
 }
 
+
+
 /**
-* FUNCTION_NAME
+* DROP_TO_MEAL_LIST_GARBAGE
 * Description
 * @param
 * @return
 */
-document.drop_to_garbage = function (ev)
+function drop_to_meal_list_garbage(event)
 {
-    ev.preventDefault();
+    event.preventDefault();
 
-    var data = ev.dataTransfer.getData("text");
+    var data = event.dataTransfer.getData("text");
     var element = document.getElementById(data);
     var meal_id = element.getAttribute("data-meal-id");
 
@@ -623,22 +645,24 @@ document.drop_to_garbage = function (ev)
                 meals.splice(i, 1);
             }
         }
+        
+        // Repopulate the meal list
         populate_meal_list();
         setup_meal_onclick_function();
     }
 }
     
 /**
-* FUNCTION_NAME
+* DROP_TO_CALENDAR_GARBAGE
 * Description
 * @param
 * @return
 */
-document.drop_to_calendar_garbage = function (ev)
+function drop_to_calendar_garbage(event)
 {
-    ev.preventDefault();
+    event.preventDefault();
 
-    var data = ev.dataTransfer.getData("text");
+    var data = event.dataTransfer.getData("text");
     var element = document.getElementById(data);
     var meal_id = element.getAttribute("data-meal-id");
 
@@ -651,16 +675,18 @@ document.drop_to_calendar_garbage = function (ev)
                 current_calendar_month_meal_plan.meal_plan.splice(i, 1);
             }
         }
+
+        // Repopulate the calendar
         populate_calendar_days();
-        update_meal_plan_data();
+
+        // Update the meal plan for that month to reflect the change
+        update_meal_plan(current_calendar_month_meal_plan);
     }
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* POPULATE_MEAL_LIST
+* Populates the meal list on the right hand side of the interface
 */
 function populate_meal_list()
 {
@@ -680,7 +706,7 @@ function populate_meal_list()
         image_element.id = "drag_" + id;
         image_element.src = image_url;
         image_element.draggable = true;
-        image_element.setAttribute('ondragstart', 'drag(event)');
+        image_element.setAttribute('ondragstart', 'drag_meal(event)');
         image_element.setAttribute("data-meal-id", id);
 
         // Set up the meal name div element
@@ -704,10 +730,8 @@ function populate_meal_list()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for meals in either the meal list
 */
 function setup_meal_onclick_function()
 {
@@ -718,10 +742,8 @@ function setup_meal_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_ADD_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when the add meal button is clicked (the "+" icon in the meal list)
 */
 function setup_add_meal_onclick_function()
 {
@@ -729,10 +751,9 @@ function setup_add_meal_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_INGREDIENT_ONCLICK_FUNCTION
+* Sets up the onclick function for each of the ingredient buttons for the currently selected meal
+* (e.g. If "Spaghetti" is selected meal the ingredients buttons: "Noodles" and "Sauce" will have the same onclick functionality)
 */
 function setup_ingredient_onclick_function()
 {
@@ -743,10 +764,8 @@ function setup_ingredient_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_ADD_INGREDIENT_BUTTON_ONCLICK_FUNCTION
+* Sets up the onclick function of the add ingredient button (next to the ingredient text field when in edit mode)
 */
 function setup_add_ingredient_button_onclick_function()
 {
@@ -754,10 +773,8 @@ function setup_add_ingredient_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_input_onkeypress_function()
 {
@@ -767,10 +784,8 @@ function setup_input_onkeypress_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_edit_button_onclick_function()
 {
@@ -778,10 +793,8 @@ function setup_edit_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_cancel_button_onclick_function()
 {
@@ -789,10 +802,8 @@ function setup_cancel_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_calendar_help_button_onclick_function()
 {
@@ -800,10 +811,8 @@ function setup_calendar_help_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_calendar_print_button_onclick_function()
 {
@@ -811,10 +820,8 @@ function setup_calendar_print_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_calendar_grocery_list_button_onclick_function()
 {
@@ -822,10 +829,8 @@ function setup_calendar_grocery_list_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
 function setup_calendar_save_button_onclick_function()
 {
@@ -843,7 +848,7 @@ function onclick_meal(meal_id)
     if (!is_edit_mode)
     {
         set_current_meal(meal_id);
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
         highlight_current_meal(meal_id);
     }
 }
@@ -858,7 +863,7 @@ function onclick_calendar_meal(meal_id) {
     if (!is_edit_mode)
     {
         set_current_meal_with_calendar_meal(meal_id);
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
     }
 }
 
@@ -904,7 +909,7 @@ function on_add_meal_buton_click(meal_id)
 
         current_meal = new_meal;
         meals.push(current_meal);
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
         document.getElementById('meal_name_input').focus();
 
         setup_input_onkeypress_function();
@@ -924,7 +929,7 @@ function add_ingredient_button_onclick(ingredient_index)
         var ingredient = document.getElementById('meal_ingredient_input').value;
         current_meal.ingredients.push(ingredient);
         document.getElementById('meal_ingredient_input').value = '';
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
     }
 }
 
@@ -954,7 +959,7 @@ function edit_button_onclick(meal_id)
     }
 
     is_edit_mode = !is_edit_mode;
-    set_meal_editor_data();
+    populate_meal_editor(current_meal);
 }
 
 /**
@@ -996,7 +1001,7 @@ function cancel_button_onclick(meal_id)
             }
         }
 
-        set_meal_editor_data();
+        populate_meal_editor(current_meal);
     }
 }
 
@@ -1087,26 +1092,27 @@ function set_current_meal_with_calendar_meal(meal_id)
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* POPULATE_MEAL_EDITOR
+* Populates the meal editor (the box/window at the bottom right hand side of the interface)
+* @param meal used to populate the editor with it's data
 */
-function set_meal_editor_data()
+function populate_meal_editor(meal)
 {
     // Set the meal name input field and instructions text area
     var meal_instructions_text_area = document.getElementById('recipe_text_area');
-    meal_instructions_text_area.value = current_meal.recipe;
+    meal_instructions_text_area.value = meal.recipe;
     var meal_name_iput = document.getElementById('meal_name_input');
-    meal_name_iput.value = current_meal.name;
+    meal_name_iput.value = meal.name;
 
     // Handle Edit Mode
     if (is_edit_mode)
     {
+        // Set the text fields to read/write
         meal_name_iput.readOnly = false;
         meal_instructions_text_area.readOnly = false;
         document.getElementById('meal_ingredient_input').value = '';
 
+        // Show the edit controls/buttons
         document.getElementById('edit_button').src = "images\\controls\\check.png";
         document.getElementById('edit_button').parentElement.style.backgroundColor = "#00e364";
         document.getElementById('cancel_button').parentElement.style.visibility = "visible";
@@ -1115,15 +1121,15 @@ function set_meal_editor_data()
 
         if (is_need_to_auto_save)
         {
-            // Auto save the meal data in the auto_Saved_meal
+            // Auto save the meal data in the auto_saved_meal
             is_need_to_auto_save = false;
-            auto_saved_meal.name = current_meal.name;
-            auto_saved_meal.recipe = current_meal.recipe;
+            auto_saved_meal.name = meal.name;
+            auto_saved_meal.recipe = meal.recipe;
             // Clear the auto save ingredients just in case, then set them to the current meal's ingredients
             auto_saved_meal.ingredients.length = 0;
-            for (var i = 0; i < current_meal.ingredients.length; i++)
+            for (var i = 0; i < meal.ingredients.length; i++)
             {
-                auto_saved_meal.ingredients.push(current_meal.ingredients[i]);
+                auto_saved_meal.ingredients.push(meal.ingredients[i]);
             }
         }
     }
@@ -1139,16 +1145,36 @@ function set_meal_editor_data()
     }
 
 
-    // Set the meal ingredients list
-    var ingredients = '';
-    for (var i = 0; i < current_meal.ingredients.length; i++)
+    // Clear the current ingredient list and then populate it with the ingredients
+    document.getElementById('ingredients_unordered_list').innerHTML = "";
+    for (var i = 0; i < meal.ingredients.length; i++)
     {
-        var x = ''
-        if (is_edit_mode)
-            x = 'x';
-        ingredients += '<li class="flex-ingredient-item"><div class="ingredient" id="ingredient_' + i + '">' + current_meal.ingredients[i] + '</div><div class="remove_ingredient_button" id="button_' + i + '">' + x + '</div></li>';
+        // Create the HTML elements
+        var ingredient_element = document.createElement("li");
+        var ingredient_name_element = document.createElement("div");
+        var ingredient_name_text_node = document.createTextNode(meal.ingredients[i]);
+        var ingredient_remove_button = document.createElement("div");
+        var ingredient_remove_button_icon = is_edit_mode ? 'x' : '';
+
+
+        // Setup the ingredient name element (nested in the ingredient element)
+        ingredient_name_element.classList.add("ingredient");
+        ingredient_name_element.id = "ingredient_" + i;
+        ingredient_name_element.appendChild(ingredient_name_text_node);
+
+        // Setup the ingredient remove button (nested in the ingredient element)
+        ingredient_remove_button.classList.add("remove_ingredient_button");
+        ingredient_remove_button.id = "button_" + i;
+        ingredient_remove_button.innerHTML = ingredient_remove_button_icon;
+        
+        // Setup the ingredient element (with the nested name and remove button)
+        ingredient_element.classList.add("flex-ingredient-item");
+        ingredient_element.appendChild(ingredient_name_element);
+        ingredient_element.appendChild(ingredient_remove_button);
+
+        // Add the ingredient to the ingredients list
+        document.getElementById('ingredients_unordered_list').appendChild(ingredient_element);
     }
-    document.getElementById('ingredients_unordered_list').innerHTML = ingredients;
 
     // Setup the onclick functionality
     setup_ingredient_onclick_function();
@@ -1158,10 +1184,9 @@ function set_meal_editor_data()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* HIGHLIGHT_CURRENT_MEAL
+* Highlights the currently selected meal in the meal list so the user knows which one they are one
+* @param meal_id used to know which meal in the list to highlight
 */
 function highlight_current_meal(meal_id)
 {
@@ -1177,50 +1202,52 @@ function highlight_current_meal(meal_id)
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
+* REMOVE_INGREDIENT
+* Removes an ingredient from the current meal
+* @param ingredient_index used to know which ingredient to remove
 * @return
 */
 function remove_ingredient(ingredient_index)
 {
+    // Check if in edit mode (only remove in edit mode)
     if (is_edit_mode)
     {
+        // Remove (or splice) the ingredient from the ingredient list
         current_meal.ingredients.splice(ingredient_index, 1);
-        set_meal_editor_data();
+
+        // Repopulate the meal editor to reflect the change
+        populate_meal_editor(current_meal);
     }
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SAVE_MEAL_PLAN
+* Saves all the user's meal plans to storage
 */
 function save_meal_plan()
 {
     try
     {
-        localStorage.user_meal_plan_data = JSON.stringify(monthly_meal_plan_data);
+        localStorage.user_meal_plan_data = JSON.stringify(meal_plans);
     }
     catch (exception)
     {
-        alert("We are unable to save your meal plan. We apologize for any inconvenience.")
+        // Alert the user there was a problem saving
+        alert("We are unable to save your meal plans. We apologize for any inconvenience.");
     }
 
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SAVE_MEAL_LIST
+* Saves the user's current meal list (as shown in the interface) to storage.
 */
 function save_meal_list() {
     try {
         localStorage.user_meal_list = JSON.stringify(meals);
     }
     catch (exception) {
-        alert("We are unable to save your meal plan. We apologize for any inconvenience.")
+        // Alert the user there was a problem saving
+        alert("We are unable to save your changes to the meals in your meal list. We apologize for any inconvenience.");
     }
 }
