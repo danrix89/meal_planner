@@ -18,17 +18,14 @@ var is_edit_mode = false;
 // Global flag to know if the user is currently adding a new meal
 var is_adding_new_meal = false;
 
-// Global flag to know if the edited data needs to be auto-saved
-var is_need_to_auto_save = false;
-
-// Used for recovering from cancelled saves/edits
+// Used for knowing what the previous selected meal was in case we need to unselect it when we select a new one, etc.
 var previous_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
 
 // The currently selected and updated meal
 var current_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
 
-// The temporary meal used in autosave functionality
-var auto_saved_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
+// Used to record a meals data before and edit, so in case the user cancels the edit, the meal can be put back to the way it was before the edit
+var meal_before_edit = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
 
 // The array of every months meal plan
 var meal_plans = { "meal_plans": [] };
@@ -42,7 +39,12 @@ var example_meal_plan_json_api = "https://api.myjson.com/bins/156vi5";
 // Hard coded default meals for meal list
 var default_meals_json_api = "https://api.myjson.com/bins/skhh9";
 
+// Firebase API URL used for calls the that API
+var firebase_api = "https://www.gstatic.com/firebasejs/3.6.6/firebase.js";
+
+// The list of user meals
 var meals;
+
 
 
 
@@ -60,6 +62,10 @@ var meals;
 * @para event : The event object for when the page is loaded (not used in this function)
 */
 function on_page_load(event) {
+
+    $.getScript(firebase_api, initialize_firebase);
+
+
     // Check if the user has visted the site before and 
     if (document.cookie[0] != "has_visited=true") {
         // Show a welcome screen if they haven't visited before
@@ -93,6 +99,31 @@ function on_page_load(event) {
     setup_calendar_save_button_onclick_function();
 
 };
+
+/**
+* INITIALIZE_FIREBASE
+* Initializes the Firebase javascript file
+*/
+function initialize_firebase() {
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
+        authDomain: "my-mealplanner.firebaseapp.com",
+        databaseURL: "https://my-mealplanner.firebaseio.com",
+        storageBucket: "my-mealplanner.appspot.com",
+        messagingSenderId: "470333058555"
+    };
+
+    firebase.initializeApp(config);
+    var test = document.getElementById("test");
+    var dbRef = firebase.database().ref().child('test');
+
+    meals = dbRef.
+
+    dbRef.on('value', snap => test.innerText = snap.val());
+
+
+}
 
 /**
 * GET_USER_MEALS
@@ -408,7 +439,7 @@ function populate_calendar_with_meal_plan() {
         image_element.setAttribute('draggable', 'true');
         image_element.setAttribute('ondragstart', 'drag_meal(event)');
         image_element.setAttribute('data-meal-id', meal_id);
-        image_element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+        image_element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
 
         calendar_day_element.appendChild(image_element);
     }
@@ -577,7 +608,7 @@ function drop_meal(event) {
         add_new_meal_to_current_month_meal_plan(day, meal_id);
         meal_id = current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id;
         var element = document.getElementById(new_id);
-        element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+        element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
         element.setAttribute("data-meal-id", meal_id);
     }
     else // ... Else, the data should be transfered/moved
@@ -605,7 +636,7 @@ function drop_meal(event) {
                 ev.target.appendChild(element);
                 var meal_id = element.getAttribute("data-meal-id");
                 ev.target.setAttribute("src", image_url);
-                element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+                element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
                 current_calendar_month_meal_plan.meal_plan.splice(index_of_meal_to_replace, 1);
                 update_day(current_calendar_month_meal_plan, target_day, meal_id);
             }
@@ -613,7 +644,7 @@ function drop_meal(event) {
         else {
             ev.target.appendChild(element);
             var meal_id = element.getAttribute("data-meal-id");
-            element.onclick = (function (a_meal_id) { return function () { onclick_calendar_meal(a_meal_id); } })(meal_id);
+            element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
             target_day = document.getElementById(data).parentElement.getAttribute("data-day");
             update_day(current_calendar_month_meal_plan, target_day, meal_id);
         }
@@ -737,7 +768,7 @@ function setup_meal_onclick_function()
 {
     for (var i = 0; i < meals.length; i++)
     {
-        document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { onclick_meal(current_i); } })(meals[i].id);
+        document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { select_meal_in_meal_list(current_i); } })(meals[i].id);
     }
 }
 
@@ -747,7 +778,7 @@ function setup_meal_onclick_function()
 */
 function setup_add_meal_onclick_function()
 {
-    document.getElementById('add_button').onclick = (function (meal_id) { return function () { on_add_meal_buton_click(meal_id); } })(current_meal.id);
+    document.getElementById('add_button').onclick = add_new_meal_to_list;
 }
 
 /**
@@ -769,7 +800,7 @@ function setup_ingredient_onclick_function()
 */
 function setup_add_ingredient_button_onclick_function()
 {
-    document.getElementById('ingredient_add_button').onclick = (function (current_i) { return function () { add_ingredient_button_onclick(current_i); } })(1);
+    document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
 /**
@@ -778,9 +809,9 @@ function setup_add_ingredient_button_onclick_function()
 */
 function setup_input_onkeypress_function()
 {
-    document.getElementById('meal_name_input').onkeypress = (function (nothing) { return function () { on_meal_name_input_key_press(nothing); } })(0);
-    document.getElementById('meal_name_input').onkeydown = (function (ev) { return function () { on_meal_name_input_key_press(nothing); } })(0);
-    document.getElementById('recipe_text_area').onkeypress = (function (nothing) { return function () { on_meal_intstructions_input_key_press(nothing); } })(0);
+    document.getElementById('meal_name_input').onkeypress = update_meal_name_with_field_value;
+    document.getElementById('meal_name_input').onkeydown = update_meal_name_with_field_value;
+    document.getElementById('recipe_text_area').onkeypress = update_meal_recipe_instructions_with_text_area_value;
 }
 
 /**
@@ -798,7 +829,7 @@ function setup_edit_button_onclick_function()
 */
 function setup_cancel_button_onclick_function()
 {
-    document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_button_onclick(meal_id); } })(current_meal.id);
+    document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_meal_edit_changes(meal_id); } })(current_meal.id);
 }
 
 /**
@@ -838,77 +869,85 @@ function setup_calendar_save_button_onclick_function()
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SELECT_MEAL_IN_MEAL_LIST
+* Select and highlight a meal in the meal list (if not in edit mode)
+* and populate the editor with its data
+* @param meal_id the the newly selected/clicked meal
 */
-function onclick_meal(meal_id)
-{
-    if (!is_edit_mode)
-    {
+function select_meal_in_meal_list(meal_id) {
+    // Only do this if not in edit mode
+    if (!is_edit_mode) {
+        // Chage the current meal to the newly selected/clicked meal
         set_current_meal(meal_id);
+
+        // Populate the meal editor with the current meal
         populate_meal_editor(current_meal);
+
+        // Highlight the selected/clicked meal
         highlight_current_meal(meal_id);
     }
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* SELECT_MEAL_IN_CALENDAR
+* Select a meal in the calendar (if not in edit mode) and 
+* populate the editor with its data
+* @param meal_id the the newly selected/clicked meal
 */
-function onclick_calendar_meal(meal_id) {
-    if (!is_edit_mode)
-    {
+function select_meal_in_calendar(meal_id) {
+    if (!is_edit_mode) {
+        // Chage the current meal to the newly selected/clicked meal
         set_current_meal_with_calendar_meal(meal_id);
+
+        // Populate the meal editor with the current meal
         populate_meal_editor(current_meal);
     }
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* UPDATE_MEAL_NAME_WITH_FIELD_VALUE
+* Update the current meal's name with the text in the meal name text field.
 */
-function on_meal_name_input_key_press(nothing)
+function update_meal_name_with_field_value()
 {
+    // Set the current meal's name to the value fo the field
     current_meal.name = document.getElementById('meal_name_input').value;
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* ON_MEAL_INTSTRUCTIONS_INPUT_KEY_PRESS
+* Update the current meal's recipe instructions with the text in the 
+* instructions text area.
 */
-function on_meal_intstructions_input_key_press(nothing)
+function update_meal_recipe_instructions_with_text_area_value()
 {
+    // Set the current meal's name to the value fo the text area
     current_meal.recipe = document.getElementById('recipe_text_area').value;
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* ADD_NEW_MEAL_TO_LIST
+* Actions for when the add meal button is clicked in the meal list (a.k.a. the + button)
 */
-function on_add_meal_buton_click(meal_id)
+function add_new_meal_to_list()
 {
     if (!is_edit_mode && !is_adding_new_meal)
     {
         is_adding_new_meal = true;
         is_edit_mode = true;
-        set_current_meal(meal_id);
         var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
         var new_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
         new_meal.id = latest_meal_id.toString();
         new_meal.image_url = "images\\default_image.jpg"
 
+        // Set the previous and current meal
+        previous_meal = current_meal;
         current_meal = new_meal;
+
+        // Add the new meal to the user's list of meals
         meals.push(current_meal);
+
+        // Populate the editor with the new meal (all fields will be blank)
         populate_meal_editor(current_meal);
         document.getElementById('meal_name_input').focus();
 
@@ -917,12 +956,10 @@ function on_add_meal_buton_click(meal_id)
 }
 
 /**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
+* ADD_INGREDIENT
+* Adds an ingredient to the current_meal with the value of the ingredient text field.
 */
-function add_ingredient_button_onclick(ingredient_index)
+function add_ingredient()
 {
     if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
     {
@@ -934,31 +971,44 @@ function add_ingredient_button_onclick(ingredient_index)
 }
 
 /**
-* FUNCTION_NAME
-* Description
+* EDIT_BUTTON_ONCLICK
+* Actions for when the edit button is clicked (
 * @param
 * @return
 */
 function edit_button_onclick(meal_id)
 {
+    // If we were in edit mode, then the user is clicking the
+    // save button (which was the edit button - now it looks 
+    // like a checkmark), so we need to save the user's work.
     if (is_edit_mode)
     {
-        // Save changes to meal name and instructions
+        // ...Save changes to meal name and instructions
         current_meal.name = document.getElementById('meal_name_input').value;
         current_meal.recipe = document.getElementById('recipe_text_area').value;
 
+        // If we were adding then set the flag so we know 
+        // we aren't in adding meal mode
         if (is_adding_new_meal)
         {
             is_adding_new_meal = false;
         }
+        
+        // Populate the meal list to reflect our changes
         populate_meal_list();
     }
     else
     {
-        is_need_to_auto_save = true;
+        // Save the current meal before we edit it so we 
+        // can recover if the user decides to cancel their 
+        // changes
+        meal_before_edit = current_meal;
     }
 
+    // Toggle edit mode
     is_edit_mode = !is_edit_mode;
+
+    // Populate the meal editor to reflect being in edit mode or not
     populate_meal_editor(current_meal);
 }
 
@@ -968,17 +1018,18 @@ function edit_button_onclick(meal_id)
 * @param
 * @return
 */
-function cancel_button_onclick(meal_id)
+function cancel_meal_edit_changes(meal_id)
 {
     if (is_edit_mode) {
         // Take everything out of edit mode / adding mode
         is_edit_mode = false;
 
-        // Check if adding...
+        // Check if adding we were adding a new meal
         if (is_adding_new_meal)
         {
             is_adding_new_meal = false;
-            // Remove current meal from meals
+
+            // Remove current meal from meals because 
             for (var i = 0; i < meals.length; i++)
             {
                 if (meals[i].id == meal_id) {
@@ -990,15 +1041,10 @@ function cancel_button_onclick(meal_id)
             current_meal = previous_meal;
         }
         else {
-            // Replace the values of the current meal
-            current_meal.name = auto_saved_meal.name;
-            current_meal.recipe = auto_saved_meal.recipe;
-            // Clear out current meal recipes then add them back from  auto save
-            current_meal.ingredients.length = 0;
-            for (var i = 0; i < auto_saved_meal.ingredients.length; i++)
-            {
-                current_meal.ingredients.push(auto_saved_meal.ingredients[i]);
-            }
+            // We aren't adding a new meal. This means we're editing 
+            // the current meal, so we need to put the current meal 
+            // back to the way it was before we started editing.
+            current_meal = meal_before_edit;
         }
 
         populate_meal_editor(current_meal);
@@ -1118,20 +1164,6 @@ function populate_meal_editor(meal)
         document.getElementById('cancel_button').parentElement.style.visibility = "visible";
         document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
         document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
-
-        if (is_need_to_auto_save)
-        {
-            // Auto save the meal data in the auto_saved_meal
-            is_need_to_auto_save = false;
-            auto_saved_meal.name = meal.name;
-            auto_saved_meal.recipe = meal.recipe;
-            // Clear the auto save ingredients just in case, then set them to the current meal's ingredients
-            auto_saved_meal.ingredients.length = 0;
-            for (var i = 0; i < meal.ingredients.length; i++)
-            {
-                auto_saved_meal.ingredients.push(meal.ingredients[i]);
-            }
-        }
     }
     else
     {
@@ -1229,6 +1261,22 @@ function save_meal_plan()
     try
     {
         localStorage.user_meal_plan_data = JSON.stringify(meal_plans);
+
+        $.getScript(firebase_api, function () {
+
+            var config = {
+                apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
+                authDomain: "my-mealplanner.firebaseapp.com",
+                databaseURL: "https://my-mealplanner.firebaseio.com",
+                storageBucket: "my-mealplanner.appspot.com",
+                messagingSenderId: "470333058555"
+            };
+
+            firebase.initializeApp(config);
+
+            firebase.database().ref().child('test').set(JSON.stringify(meals));
+        });
+
     }
     catch (exception)
     {

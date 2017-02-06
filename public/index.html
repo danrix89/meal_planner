@@ -11,7 +11,7 @@
     <script src="meal_planner.js"></script>
 </head>
 <body onload="on_page_load(event)">
-    <!-- <h1 id="test"></h1> -->
+    <h1 id="test"></h1>
     <div class="main_box">
 
         <div class="app_title">
@@ -121,21 +121,5 @@
             </div>
         </div>
     </div>
-    <script>
-        // Initialize Firebase
-        var config = {
-            apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
-            authDomain: "my-mealplanner.firebaseapp.com",
-            databaseURL: "https://my-mealplanner.firebaseio.com",
-            storageBucket: "my-mealplanner.appspot.com",
-            messagingSenderId: "470333058555"
-        };
-        firebase.initializeApp(config);
-
-        //var test = document.getElementById("test");
-        var dbRef = firebase.database().ref().child('test');
-
-        //dbRef.on('value', snap => test.innerText = snap.val());
-    </script>
 </body>
 </html>
