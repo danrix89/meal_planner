@@ -1,5 +1,31 @@
 
 /*****************************************************/
+/***** Global Constants ******************************/
+/*****************************************************/
+
+// API for getting an example meal plan (testing purposes)
+const example_meal_plan_json_api = "https://api.myjson.com/bins/156vi5";
+
+// API for getting default meals for the user's meal list
+const default_meals_json_api = "https://api.myjson.com/bins/skhh9";
+
+// Firebase API URL used for calls the that API
+const firebase_api = "https://www.gstatic.com/firebasejs/3.6.6/firebase.js";
+
+// Constant for the Firebase configuration
+const firebase_configuration = {
+    apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
+    authDomain: "my-mealplanner.firebaseapp.com",
+    databaseURL: "https://my-mealplanner.firebaseio.com",
+    storageBucket: "my-mealplanner.appspot.com",
+    messagingSenderId: "470333058555"
+};
+
+// An array of the month names
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+
+/*****************************************************/
 /***** Global Variables ******************************/
 /*****************************************************/
 
@@ -8,9 +34,6 @@ var todays_date = new Date();
 
 // The current or most recently chosen date on the calendar (defaulted intially to today's date)
 var calendar_date = todays_date;
-
-// An array of the month names
-var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 // Global flag to know if the user is currently editing a meal (edit mode)
 var is_edit_mode = false;
@@ -33,23 +56,20 @@ var meal_plans = { "meal_plans": [] };
 // The meal plan for the month the users is currently viewing
 var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
 
-// Hard coded example month meal plan
-var example_meal_plan_json_api = "https://api.myjson.com/bins/156vi5";
-
-// Hard coded default meals for meal list
-var default_meals_json_api = "https://api.myjson.com/bins/skhh9";
-
-// Firebase API URL used for calls the that API
-var firebase_api = "https://www.gstatic.com/firebasejs/3.6.6/firebase.js";
-
 // The list of user meals
 var meals;
 
+// The current user (if "null" then no one is logged in)
+var user = {};
 
+// A reference to Firebase
+var firebase_ref = {};
 
+// A reference to the firebase database
+var db_ref = {};
 
-
-
+// A reference to the firsebase authentication
+var auth_ref = {};
 
 /*****************************************************/
 /******** Functions **********************************/
@@ -63,10 +83,142 @@ var meals;
 */
 function on_page_load(event) {
 
+    // Initialize firebase
     $.getScript(firebase_api, initialize_firebase);
 
+    // Setup sign-in Page
+    setup_sign_in_controls();
 
-    // Check if the user has visted the site before and 
+    // Initialize the App
+    initialize_meal_planner_app();
+};
+
+/**
+* INITIALIZE_FIREBASE
+* Initializes the firebase_ref global variable and other firebase global reference
+* variables to be used in the app, using the Firebase javascript file.
+*/
+function initialize_firebase() {
+    // Initialize Firebase
+
+    firebase.initializeApp(firebase_configuration);
+    firebase_ref = firebase;
+    db_ref = firebase.database();
+    auth_ref = firebase.auth();
+    console.log("Firebase Initialized");
+
+    // Setup authentiation state change actions
+    auth_ref.onAuthStateChanged(firebase_user => {
+        if (firebase_user) {
+            // Set the user
+            user = firebase_user;
+            console.log(user.uid);
+
+            // Populate the calendar, meal list, etc.
+
+            // Go the the meal planning page (leave the sign in page)
+            document.getElementById("sign_in_page").setAttribute("class", "hide");
+            document.getElementById("main_box").classList.remove("hide");
+        } else {
+            // Set user to null
+            user = null;
+            console.log("not logged in!!!!!");
+
+            // Clear calendar, meal list, etc.
+
+            // Return to the sign in page
+            document.getElementById("sign_in_page").setAttribute("class", "sign_in_page");
+            document.getElementById("main_box").classList.add("hide");
+        }
+    });
+
+    //db_ref.on('value', snap => document.getElementById("test").innerText = snap.val());
+}
+
+/**
+* SETUP_SIGN_IN_CONTROLS
+* Sets up the sign-in option buttons with click actions.
+*/
+function setup_sign_in_controls() {
+
+    var btnCreateAccount = document.getElementById("btnCreateAccount");
+    btnCreateAccount.setAttribute("onclick", "create_new_account(auth_ref, firebase_ref)");
+
+    var btnLogin = document.getElementById("btnLogin");
+    btnLogin.setAttribute("onclick", "log_in(auth_ref, firebase_ref)");
+
+    var btnGoogle = document.getElementById("btnGoogle");
+    btnGoogle.setAttribute("onClick", "log_in_with_google(auth_ref, firebase_ref)");
+
+    var btnFacebook = document.getElementById("btnFacebook");
+    btnFacebook.setAttribute("onClick", "log_in_with_facebook(auth_ref, firebase_ref)");
+}
+
+function create_new_account(auth_ref, firebase_ref) {
+    // Get the data from the fields
+    var txtEmail = document.getElementById("txtEmail").value;
+    var txtPassword = document.getElementById("txtPassword").value;
+
+    const promise = auth_ref.createUserWithEmailAndPassword(txtEmail, txtPassword);
+
+    promise
+        .then(user => console.log("Logged In"))
+        .catch (function(event) {console.log(event.message);
+    });
+}
+
+function log_in(auth_ref, firebase_ref) {
+    // Get the data from the fields
+    var txtEmail = document.getElementById("txtEmail").value;
+    var txtPassword = document.getElementById("txtPassword").value;
+
+    const promise = auth.signInWithEmailAndPassword(txtEmail, txtPassword);
+
+    promise
+        .then(user => console.log("Logged In"))
+        .catch (function(event) {console.log(event.message);
+    });
+
+}
+
+function log_in_with_google(auth_ref, firebase_ref) {
+    var provider = new firebase_ref.auth.GoogleAuthProvider();
+    log_in_with_provider(auth_ref, firebase_ref, provider);
+}
+
+function log_in_with_facebook(auth_ref, firebase_ref) {
+    var provider = new firebase_ref.auth.FacebookAuthProvider();
+    log_in_with_provider(auth_ref, firebase_ref, provider);
+}
+
+function log_in_with_provider(auth_ref, firebase_ref, provider) {
+    auth_ref.signInWithPopup(provider)
+        .then(function(result) {
+            console.log("Signed-in : " + result.user.uid);
+            // // This gives you a Google Access Token. You can use it to access the Google API.
+            // var token = result.credential.accessToken;
+            // // The signed-in user info.
+            // var user = result.user;
+            // // ...
+        })
+        .catch(function(error) {
+            console.log(error.message);
+            // // Handle Errors here.
+            // var errorCode = error.code;
+            // var errorMessage = error.message;
+            // // The email of the user's account used.
+            // var email = error.email;
+            // // The firebase.auth.AuthCredential type that was used.
+            // var credential = error.credential;
+            // // ...
+    });
+}
+
+/**
+*
+*/
+function initialize_meal_planner_app() {
+    // Check if the user has visted the site before and
     if (document.cookie[0] != "has_visited=true") {
         // Show a welcome screen if they haven't visited before
         modal = document.getElementById('welcome_modal');
@@ -97,32 +249,7 @@ function on_page_load(event) {
     setup_calendar_print_button_onclick_function();
     setup_calendar_grocery_list_button_onclick_function();
     setup_calendar_save_button_onclick_function();
-
-};
-
-/**
-* INITIALIZE_FIREBASE
-* Initializes the Firebase javascript file
-*/
-function initialize_firebase() {
-    // Initialize Firebase
-    var config = {
-        apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
-        authDomain: "my-mealplanner.firebaseapp.com",
-        databaseURL: "https://my-mealplanner.firebaseio.com",
-        storageBucket: "my-mealplanner.appspot.com",
-        messagingSenderId: "470333058555"
-    };
-
-    firebase.initializeApp(config);
-    var test = document.getElementById("test");
-    var dbRef = firebase.database().ref().child('test');
-
-    meals = dbRef.
-
-    dbRef.on('value', snap => test.innerText = snap.val());
-
-
+    setup_calendar_log_out_button_onclick_function();
 }
 
 /**
@@ -140,7 +267,7 @@ function get_user_meals() {
     }
         // Else load the default meals
     else {
-        // Request the user's meal data  
+        // Request the user's meal data
         var request = new XMLHttpRequest();
         request.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {
@@ -182,7 +309,7 @@ function setup_calendar_title_and_nav_buttons() {
 
 /**
 * ON_BEFORE_UNLOAD
-* Actions to take before the web page is exited by the user (e.g. prompt the user if they saved 
+* Actions to take before the web page is exited by the user (e.g. prompt the user if they saved
 *
 * @para event : The event object for when the page is being exited (unloaded)
 */
@@ -220,8 +347,8 @@ function setup_initial_meal_plans() {
 
 /**
 * SET_INITIAL_CALENDAR_MONTH_MEAL_PLAN
-* Set the meal plan for the calendar's current month 
-* so the calendar will be populated with any saved 
+* Set the meal plan for the calendar's current month
+* so the calendar will be populated with any saved
 * plans for that month (if any).
 */
 function set_initial_calendar_month_meal_plan() {
@@ -286,7 +413,7 @@ function has_visited() {
 * Advances the calendar to a different month based on a_value and then repopulates the calendar
 * @param a_value is used to either increment or decrement the months
 */
-// 
+//
 function advance_month(a_value) {
     // Increment/Decrement the month
     calendar_date.setMonth(calendar_date.getMonth() + a_value)
@@ -453,7 +580,7 @@ function populate_calendar_with_meal_plan() {
 */
 function add_new_meal_to_current_month_meal_plan(day, meal_id)
 {
-    // A variable to store the meal from the user's 
+    // A variable to store the meal from the user's
     // meal list that matches the meal_id parameter
     var matched_meal;
 
@@ -493,7 +620,7 @@ function add_new_meal_to_current_month_meal_plan(day, meal_id)
         if (current_calendar_month_meal_plan.meal_plan.length > 0)
             latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
         new_meal.meal.id = (latest_meal_id + 1).toString();
-        
+
         // Copy over the name
         new_meal.meal.name = matched_meal.name;
 
@@ -558,7 +685,7 @@ function update_day(meal_plan, target_day, meal_id)
 
 /**
 * DRAG_MEAL
-* Begin dragging a meal. 
+* Begin dragging a meal.
 * @param event of the meal image being dragged
 */
 function drag_meal(event) {
@@ -571,8 +698,8 @@ function drag_meal(event) {
 * @param event of the meal image being dropped
 */
 function allow_meal_drop(event) {
-    // By default, data/elements cannot be dropped in other elements. 
-    // To allow a drop, we must prevent the default handling of the element. 
+    // By default, data/elements cannot be dropped in other elements.
+    // To allow a drop, we must prevent the default handling of the element.
     // This is done by calling the event.preventDefault() method for the ondragover event
     event.preventDefault();
 }
@@ -676,13 +803,13 @@ function drop_to_meal_list_garbage(event)
                 meals.splice(i, 1);
             }
         }
-        
+
         // Repopulate the meal list
         populate_meal_list();
         setup_meal_onclick_function();
     }
 }
-    
+
 /**
 * DROP_TO_CALENDAR_GARBAGE
 * Description
@@ -697,11 +824,11 @@ function drop_to_calendar_garbage(event)
     var element = document.getElementById(data);
     var meal_id = element.getAttribute("data-meal-id");
 
-    if (window.confirm("Are you sure you want to delete this meal from your meal plan?")) 
+    if (window.confirm("Are you sure you want to delete this meal from your meal plan?"))
     {
-        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) 
+        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
         {
-            if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id) 
+            if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
             {
                 current_calendar_month_meal_plan.meal_plan.splice(i, 1);
             }
@@ -743,7 +870,7 @@ function populate_meal_list()
         // Set up the meal name div element
         meal_name_element.classList.add("meal_name");
         meal_name_element.innerHTML = meals[i].name;
-        
+
         // Setup the meal list item element
         meal_list_item_element.id = "meal_list_item_" + id;
         meal_list_item_element.classList.add("flex-meal-item");
@@ -845,6 +972,15 @@ function setup_calendar_help_button_onclick_function()
 * SETUP_MEAL_ONCLICK_FUNCTION
 * Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
 */
+function setup_calendar_log_out_button_onclick_function()
+{
+    document.getElementById('log_out_button').onclick = (function (a_nothing) { return function () { calendar_log_out_button_onclick(a_nothing); } })(false);
+}
+
+/**
+* SETUP_MEAL_ONCLICK_FUNCTION
+* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*/
 function setup_calendar_print_button_onclick_function()
 {
     document.getElementById('print_button').onclick = (function (a_nothing) { return function () { calendar_print_button_onclick(a_nothing); } })(false);
@@ -890,7 +1026,7 @@ function select_meal_in_meal_list(meal_id) {
 
 /**
 * SELECT_MEAL_IN_CALENDAR
-* Select a meal in the calendar (if not in edit mode) and 
+* Select a meal in the calendar (if not in edit mode) and
 * populate the editor with its data
 * @param meal_id the the newly selected/clicked meal
 */
@@ -916,7 +1052,7 @@ function update_meal_name_with_field_value()
 
 /**
 * ON_MEAL_INTSTRUCTIONS_INPUT_KEY_PRESS
-* Update the current meal's recipe instructions with the text in the 
+* Update the current meal's recipe instructions with the text in the
 * instructions text area.
 */
 function update_meal_recipe_instructions_with_text_area_value()
@@ -979,7 +1115,7 @@ function add_ingredient()
 function edit_button_onclick(meal_id)
 {
     // If we were in edit mode, then the user is clicking the
-    // save button (which was the edit button - now it looks 
+    // save button (which was the edit button - now it looks
     // like a checkmark), so we need to save the user's work.
     if (is_edit_mode)
     {
@@ -987,20 +1123,20 @@ function edit_button_onclick(meal_id)
         current_meal.name = document.getElementById('meal_name_input').value;
         current_meal.recipe = document.getElementById('recipe_text_area').value;
 
-        // If we were adding then set the flag so we know 
+        // If we were adding then set the flag so we know
         // we aren't in adding meal mode
         if (is_adding_new_meal)
         {
             is_adding_new_meal = false;
         }
-        
+
         // Populate the meal list to reflect our changes
         populate_meal_list();
     }
     else
     {
-        // Save the current meal before we edit it so we 
-        // can recover if the user decides to cancel their 
+        // Save the current meal before we edit it so we
+        // can recover if the user decides to cancel their
         // changes
         meal_before_edit = current_meal;
     }
@@ -1029,7 +1165,7 @@ function cancel_meal_edit_changes(meal_id)
         {
             is_adding_new_meal = false;
 
-            // Remove current meal from meals because 
+            // Remove current meal from meals because
             for (var i = 0; i < meals.length; i++)
             {
                 if (meals[i].id == meal_id) {
@@ -1041,8 +1177,8 @@ function cancel_meal_edit_changes(meal_id)
             current_meal = previous_meal;
         }
         else {
-            // We aren't adding a new meal. This means we're editing 
-            // the current meal, so we need to put the current meal 
+            // We aren't adding a new meal. This means we're editing
+            // the current meal, so we need to put the current meal
             // back to the way it was before we started editing.
             current_meal = meal_before_edit;
         }
@@ -1061,6 +1197,17 @@ function calendar_help_button_onclick(a_nothing)
 {
     document.getElementById("welcome_modal_title").innerHTML = "Help";
     display_modal();
+}
+
+/**
+* FUNCTION_NAME
+* Description
+* @param
+* @return
+*/
+function calendar_log_out_button_onclick(a_nothing)
+{
+    auth_ref.signOut();
 }
 
 /**
@@ -1198,7 +1345,7 @@ function populate_meal_editor(meal)
         ingredient_remove_button.classList.add("remove_ingredient_button");
         ingredient_remove_button.id = "button_" + i;
         ingredient_remove_button.innerHTML = ingredient_remove_button_icon;
-        
+
         // Setup the ingredient element (with the nested name and remove button)
         ingredient_element.classList.add("flex-ingredient-item");
         ingredient_element.appendChild(ingredient_name_element);
@@ -1261,22 +1408,6 @@ function save_meal_plan()
     try
     {
         localStorage.user_meal_plan_data = JSON.stringify(meal_plans);
-
-        $.getScript(firebase_api, function () {
-
-            var config = {
-                apiKey: "AIzaSyBigHw-J3ndPKHwWc4UEIpK1VF89VJJWF8",
-                authDomain: "my-mealplanner.firebaseapp.com",
-                databaseURL: "https://my-mealplanner.firebaseio.com",
-                storageBucket: "my-mealplanner.appspot.com",
-                messagingSenderId: "470333058555"
-            };
-
-            firebase.initializeApp(config);
-
-            firebase.database().ref().child('test').set(JSON.stringify(meals));
-        });
-
     }
     catch (exception)
     {
@@ -1293,6 +1424,15 @@ function save_meal_plan()
 function save_meal_list() {
     try {
         localStorage.user_meal_list = JSON.stringify(meals);
+        // for (var meal in meals) {
+        //     if (meals.hasOwnProperty(meal)) {
+        //         var db_users_meals_ref = db_ref.ref().child('Users_Meals/' + user_id);
+        //         var meal_object = { name: txtMealName.value, recipe: txtMealRecipe.value, ingredients: { "ingredient_1": txtMealIngredient1.value, "ingredient_2": txtMealIngredient2.value, "ingredient_3": txtMealIngredient3.value } };
+        //         var new_users_meals_record_ref = db_users_meals_ref.push();
+        //         new_users_meals_record_ref.set(meal_object);
+        //         meal_id = new_users_meals_record_ref.key;
+        //     }
+        // }
     }
     catch (exception) {
         // Alert the user there was a problem saving

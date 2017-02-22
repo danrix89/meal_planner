@@ -4,6 +4,11 @@
 */
 
 
+.hide {
+    display: none;
+}
+
+
 /******************************************************************************************
 * MAIN LAYOUT
 ******************************************************************************************/
@@ -18,7 +23,7 @@ html, body {
 }
 
 .app_title {
-    background-color: #ff8333;
+    background-color: #ff8333; /*Orange*/
     height: 56px;
     margin-left: 3px;
     text-align: center;
@@ -26,7 +31,7 @@ html, body {
     line-height: 50px;
     font-size: 2em;
     color: white;
-    font-weight: bold;    
+    font-weight: bold;
 }
 
 .main_box{
@@ -75,7 +80,7 @@ html, body {
     border-radius: 200px;
     position: fixed;
     left: 60%;
-    bottom: 20px;   
+    bottom: 20px;
 }
 
 .meal_list_floating_button {
@@ -86,7 +91,7 @@ html, body {
     border-radius: 200px;
     position: absolute;
     bottom: 5%;
-    left: 85%;   
+    left: 85%;
 }
 
 .meal_list_floating_add_button {
@@ -97,7 +102,7 @@ html, body {
     border-radius: 200px;
     position: absolute;
     bottom: 5%;
-    left: 75%;   
+    left: 75%;
 }
 
 .meal_list_floating_cancel_button{
@@ -108,55 +113,55 @@ html, body {
     border-radius: 200px;
     position: absolute;
     bottom: 5%;
-    left: 75%;   
+    left: 75%;
 }
 
 div.calendar_floating_remove_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s; 
-    cursor: pointer;   
+    transition-duration: .2s;
+    cursor: pointer;
 }
 
 div.calendar_floating_remove_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 div.meal_list_floating_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s; 
-    cursor: pointer;   
+    transition-duration: .2s;
+    cursor: pointer;
 }
 
 div.meal_list_floating_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 div.meal_list_floating_add_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;   
-    cursor: pointer; 
+    transition-duration: .2s;
+    cursor: pointer;
 }
 
 div.meal_list_floating_add_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 div.meal_list_floating_cancel_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 div.meal_list_floating_cancel_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 
@@ -199,7 +204,7 @@ div.meal_list_floating_cancel_button:active {
     transition-duration: .5s;
 }
 
-.calendar_help_button {
+.title_button {
     border-radius: 200px;
     width: 50px;
     height: 50px;
@@ -210,7 +215,7 @@ div.meal_list_floating_cancel_button:active {
     margin-top: 2px;
 }
 
-.calendar_button_image {
+.button_image {
     height: 30px;
     width: 30px;
     color: orange;
@@ -221,24 +226,24 @@ div.calendar_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 div.calendar_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
-div.calendar_help_button:hover {
+div.title_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;
-    cursor: pointer;    
+    cursor: pointer;
 }
 
-div.calendar_help_button:active {
+div.title_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 
@@ -339,12 +344,12 @@ div.calendar_help_button:active {
 li.flex-meal-item:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 15px 0px rgba(100,100,100,.8);
-    transition-duration: .2s; 
-    cursor: pointer;   
+    transition-duration: .2s;
+    cursor: pointer;
 }
 
 li.flex-meal-item:active {
-    transform: scale(.9, .9);    
+    transform: scale(.9, .9);
 }
 
 /****************** Meal Images (both in the meal list and the calendar) ******************/
@@ -364,7 +369,7 @@ li.flex-meal-item:active {
     max-height: 75%;
 }
 
-[id^="calendar_day_div_"], 
+[id^="calendar_day_div_"],
 [id*="calendar_day_div_"] {
     margin: 0;
     padding: 0;
@@ -440,11 +445,11 @@ li.flex-meal-item:active {
     transform: scale(1.09, 1.09);
     box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
     transition-duration: .2s;
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 .remove_ingredient_button:active {
-    transform: scale(.9, .9);    
+    transform: scale(.9, .9);
 }
 
 .meal_data_input {
@@ -482,12 +487,12 @@ div.ingredient_add_field_and_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 div.ingredient_add_field_and_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }
 
 
@@ -570,7 +575,7 @@ div.ingredient_add_field_and_button:active {
     background-color: #ff8333;
     color: white;
     height: 15%;
-    
+
 }
 
 .welcome_modal_title {
@@ -593,11 +598,11 @@ div.ingredient_add_field_and_button:active {
     font-weight: bold;
 }
 
-.got_it_button:hover { 
-    cursor: pointer;   
+.got_it_button:hover {
+    cursor: pointer;
 }
 
 div.got_it_button:active {
     transform: scale(.95, .95);
-    transition-duration: -1s;    
+    transition-duration: -1s;
 }

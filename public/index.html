@@ -3,25 +3,52 @@
 <html>
 <head>
     <meta charset="utf-8" />
-    <title>MyMealPlanner</title>
+    <title>myMealPlanner</title>
     <link rel="shortcut icon" href="images/default_image.jpg" />
     <link rel="stylesheet" type="text/css" href="meal_planner.css">
+    <link rel="stylesheet" type="text/css" href="sign_in.css">
+    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.css" />
+    <script src="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.6.6/firebase.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
-    <script src="meal_planner.js"></script>
 </head>
 <body onload="on_page_load(event)">
-    <h1 id="test"></h1>
-    <div class="main_box">
+    <!-- <h1 id="test"></h1> -->
+
+    <div id="sign_in_page" class="sign_in_page">
+        <div id="logo_container" class="logo_container">
+            <img id="logo" class="logo" src="images/controls/logo_slogan.png">
+        </div>
+        <div id="main_controls_container" class="main_controls_container">
+            <div id="sign_in_fields_container" class="sign_in_fields_container">
+                <input id="txtEmail" class="sign_in_input padding_10" type="text" placeholder="Email" />
+                <input id="txtPassword" class="sign_in_input padding_10" type="password" placeholder="Password" />
+            </div>
+            <div id="sign_in_button_container" class="sign_in_button_container">
+                <button id="btnCreateAccount" class="create_account_button sign_in_button padding_10">Create Account</button>
+                <button id="btnLogin" class="login_button sign_in_button padding_10">Log In</button>
+            </div>
+            <div id="sign_in_provider_title_container" class="sign_in_provider_title_container padding_10">
+                Sign in with a provider
+            </div>
+            <div id="sign_in_provider_button_container" class="sign_in_provider_button_container">
+                <img id="btnGoogle" class="provider_button" src="images/controls/google.png" alt="Click here to sign in with Google">
+                <img id="btnFacebook" class="provider_button" src="images/controls/facebook.png" alt="Click here to sign in with Facebook">
+            </div>
+        </div>
+    </div>
+
+    <div id="main_box" class="main_box hide">
 
         <div class="app_title">
-            <div class="calendar_help_button" id="save_button"><img class="calendar_button_image" src="images\controls\save.png" /></div>
-            <div class="calendar_help_button" id="print_button"><img class="calendar_button_image" src="images\controls\print.png" /></div>
-            <div class="calendar_help_button" id="grocery_list_button"><img class="calendar_button_image" src="images\controls\list.png" /></div>
-            <div class="calendar_help_button" id="help_button"><img class="calendar_button_image" src="images\controls\question-mark.png" /></div>
-            MyMealPlanner
+            <div class="title_button" id="save_button"><img class="button_image" src="images\controls\save.png" /></div>
+            <div class="title_button" id="print_button"><img class="button_image" src="images\controls\print.png" /></div>
+            <div class="title_button" id="grocery_list_button"><img class="button_image" src="images\controls\list.png" /></div>
+            <div class="title_button" id="log_out_button"><img class="button_image" src="images\controls\log_out.png" /></div>
+            <div class="title_button" id="help_button"><img class="button_image" src="images\controls\question-mark.png" /></div>
+            myMealPlanner
         </div>
- 
+
         <!-- The Modal Welcome Dialog -->
         <div id="welcome_modal" class="welcome_modal">
             <!-- Modal content -->
@@ -54,13 +81,13 @@
             <div class="calendar_title_pane">
                 <ul class="flex_calendar_title_container">
                     <li class="flex_calendar_title_item">
-                        <div class="calendar_button" id="previous_month"><img class="calendar_button_image" src="images\controls\left-arrow.png" /></div>
+                        <div class="calendar_button" id="previous_month"><img class="button_image" src="images\controls\left-arrow.png" /></div>
                     </li>
                     <li class="flex_calendar_title_item" id="month_title">
                         Error: Contact Dan Rix
                     </li>
                     <li class="flex_calendar_title_item">
-                        <div class="calendar_button" id="next_month"><img class="calendar_button_image" src="images\controls\right-arrow.png" /></div>
+                        <div class="calendar_button" id="next_month"><img class="button_image" src="images\controls\right-arrow.png" /></div>
                     </li>
                 </ul>
             </div>
@@ -78,7 +105,7 @@
                 </div>
                 <div class="calendar_body">
                     <table class="calendar_body_container" id="calendar"></table>
-                    <div class="calendar_floating_remove_button" ondrop="drop_to_calendar_garbage(event)" ondragover="allow_meal_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
+                    <div class="calendar_floating_remove_button" ondrop="drop_to_calendar_garbage(event)" ondragover="allow_meal_drop(event)"><img class="button_image" src="images\controls\garbage.png" /></div>
                 </div>
             </div>
         </div>
@@ -90,8 +117,8 @@
                         <ul class="flex-meal-container" id="meal_unordered_list">
                             <!-- Populated by Json Meal Data -->
                         </ul>
-                        <div class="meal_list_floating_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img class="calendar_button_image" src="images\controls\garbage.png" /></div>
-                        <div class="meal_list_floating_add_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img id="add_button" class="calendar_button_image" src="images\controls\add.png" /></div>
+                        <div class="meal_list_floating_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img class="button_image" src="images\controls\garbage.png" /></div>
+                        <div class="meal_list_floating_add_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img id="add_button" class="button_image" src="images\controls\add.png" /></div>
                     </div>
                 </div>
             </div>
@@ -115,11 +142,12 @@
                         <p class="meal_editor_form_header">Instructions:</p>
                         <textarea class="recipe_text_area" id="recipe_text_area" rows="5"></textarea>
                     </div>
-                    <div class="meal_list_floating_cancel_button"><img id="cancel_button" class="calendar_button_image" src="images\controls\cancel.png" /></div>
-                    <div class="meal_list_floating_button"><img id="edit_button" class="calendar_button_image" src="images\controls\pen.png" /></div>
+                    <div class="meal_list_floating_cancel_button"><img id="cancel_button" class="button_image" src="images\controls\cancel.png" /></div>
+                    <div class="meal_list_floating_button"><img id="edit_button" class="button_image" src="images\controls\pen.png" /></div>
                 </div>
             </div>
         </div>
     </div>
+    <script src="meal_planner.js"></script>
 </body>
 </html>

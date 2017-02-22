@@ -1,0 +1,91 @@
+.hide {
+    display: none;
+}
+
+.sign_in_page {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background-color: #ff8333;;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.logo_container {
+    margin-bottom: 50px;
+}
+
+.main_controls_container {
+    display: flex;
+    flex-direction: column;
+    background-color: #33afff;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    border-radius: 50px;
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+}
+
+.padding_10 {
+    padding: 10px;
+}
+
+.sign_in_fields_container {
+    display: flex;
+    flex-direction: column;
+    /*justify-content: space-around;*/
+}
+
+.sign_in_input {
+    margin: 10px;
+    width: 400px;
+    height: 30px;
+    font-family: Arial;
+    font-size: 1.2em;
+    border-radius: 10px;
+    border: none;
+    /*border: 1px solid #33afff;*/
+}
+
+.sign_in_button {
+    margin: 10px;
+    font-size: 1.2em;
+    color: white;
+    background: #808080;
+    border-radius: 10px;
+    border: none;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.create_account_button {
+    color: #808080;
+    background: #33afff;
+}
+
+.create_account_button:hover {
+    transition: .5s;
+    color: white;
+    background: #ff8333;
+}
+
+.login_button:hover {
+    transition: .5s;
+    color: white;
+    background: #ff8333;
+}
+
+.sign_in_provider_title_container {
+    padding-top: 20px;
+    color: white;
+    font-weight: bold;
+}
+
+.provider_button {
+    padding: 15px;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
