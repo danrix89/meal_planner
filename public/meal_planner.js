@@ -152,32 +152,82 @@ function setup_sign_in_controls() {
 
     var btnFacebook = document.getElementById("btnFacebook");
     btnFacebook.setAttribute("onClick", "log_in_with_facebook(auth_ref, firebase_ref)");
+
+    var linkCreateAccount = document.getElementById("linkCreateAccount");
+    linkCreateAccount.addEventListener("click", toggle_create_account_view);
+}
+
+function toggle_create_account_view() {
+    var btnCreateAccount = document.getElementById("btnCreateAccount");
+    var linkCreateAccount = document.getElementById("linkCreateAccount");
+    var btnLogin = document.getElementById("btnLogin");
+    var sign_in_provider_title_container = document.getElementById("sign_in_provider_title_container");
+    var sign_in_provider_button_container = document.getElementById("sign_in_provider_button_container");
+
+    if (btnLogin.classList.contains("hide")) {
+        btnLogin.classList.remove("hide");
+    } else {
+        btnLogin.classList.add("hide");
+    }
+
+    // Commented out below, but I have to check with the users if they want this
+    // functionality or not...
+
+    // if (sign_in_provider_title_container.classList.contains("hide")) {
+    //     sign_in_provider_title_container.classList.remove("hide");
+    // } else {
+    //     sign_in_provider_title_container.classList.add("hide");
+    // }
+    //
+    // if (sign_in_provider_button_container.classList.contains("hide")) {
+    //     sign_in_provider_button_container.classList.remove("hide");
+    // } else {
+    //     sign_in_provider_button_container.classList.add("hide");
+    // }
+
+    if (btnCreateAccount.classList.contains("hide")) {
+        btnCreateAccount.classList.remove("hide");
+        linkCreateAccount.innerHTML = "Back to Log In";
+    } else {
+        btnCreateAccount.classList.add("hide");
+        linkCreateAccount.innerHTML = "Create Account";
+    }
 }
 
 function create_new_account(auth_ref, firebase_ref) {
     // Get the data from the fields
-    var txtEmail = document.getElementById("txtEmail").value;
-    var txtPassword = document.getElementById("txtPassword").value;
+    var txtEmail = document.getElementById("txtEmail");
+    var txtPassword = document.getElementById("txtPassword");
 
-    const promise = auth_ref.createUserWithEmailAndPassword(txtEmail, txtPassword);
+    if (txtPassword.value.length >= 6) {
+        const promise = auth.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
-    promise
-        .then(user => console.log("Logged In"))
-        .catch (function(event) {console.log(event.message);
-    });
+        promise
+            .then(user => console.log("Logged In"))
+            .catch (function(event) {console.log(event.message);
+        });
+    } else {
+        txtPassword.focus();
+        alert("Passwords must be 6 or more characters");
+    }
 }
 
 function log_in(auth_ref, firebase_ref) {
     // Get the data from the fields
-    var txtEmail = document.getElementById("txtEmail").value;
-    var txtPassword = document.getElementById("txtPassword").value;
+    var txtEmail = document.getElementById("txtEmail");
+    var txtPassword = document.getElementById("txtPassword");
 
-    const promise = auth.signInWithEmailAndPassword(txtEmail, txtPassword);
+    if (txtPassword.value.length >= 6) {
+        const promise = auth.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
-    promise
-        .then(user => console.log("Logged In"))
-        .catch (function(event) {console.log(event.message);
-    });
+        promise
+            .then(user => console.log("Logged In"))
+            .catch (function(event) {console.log(event.message);
+        });
+    } else {
+        txtPassword.focus();
+        alert("Passwords must be 6 or more characters");
+    }
 
 }
 
@@ -194,7 +244,6 @@ function log_in_with_facebook(auth_ref, firebase_ref) {
 function log_in_with_provider(auth_ref, firebase_ref, provider) {
     auth_ref.signInWithPopup(provider)
         .then(function(result) {
-            console.log("Signed-in : " + result.user.uid);
             // // This gives you a Google Access Token. You can use it to access the Google API.
             // var token = result.credential.accessToken;
             // // The signed-in user info.

@@ -60,17 +60,6 @@
     cursor: pointer;
 }
 
-.create_account_button {
-    color: #808080;
-    background: #33afff;
-}
-
-.create_account_button:hover {
-    transition: .5s;
-    color: white;
-    background: #ff8333;
-}
-
 .login_button:hover {
     transition: .5s;
     color: white;
