@@ -216,8 +216,8 @@ function create_new_account(auth_ref, firebase_ref) {
                                 // Write user meal to database
                                 var meal_json = meals[i];
                                 var meal_object = { name: meal_json.name, image: "someImage.png", recipe: meal_json.recipe, ingredients: {} };
-                                for (var i = 0; i < meal_json.ingredients.length; ++i) {
-                                    meal_object.ingredients[meal_json.ingredients[i]] = meal_json.ingredients[i];
+                                for (var j = 0; j < meal_json.ingredients.length; ++j) {
+                                    meal_object.ingredients[meal_json.ingredients[j]] = meal_json.ingredients[j];
                                 }
                                 var new_users_meals_record_ref = db_users_meals_ref.push();
                                 new_users_meals_record_ref.set(meal_object);
