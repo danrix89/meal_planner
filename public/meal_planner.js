@@ -195,7 +195,7 @@ function create_new_account(auth_ref, firebase_ref) {
     var txtPassword = document.getElementById("txtPassword");
 
     if (txtPassword.value.length >= 6) {
-        const promise = auth.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
+        const promise = auth_ref.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
         promise
             .then(function(firebase_user) {
