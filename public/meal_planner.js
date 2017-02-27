@@ -242,7 +242,7 @@ function log_in(firebase_authentication, firebase_ref) {
     var txtPassword = document.getElementById("txtPassword");
 
     if (txtPassword.value.length >= 6) {
-        const promise = auth.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
+        const promise = firebase_authentication.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
         promise
             .catch (function(event) {console.log(event.message);
