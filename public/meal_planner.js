@@ -929,7 +929,7 @@ function populate_meal_list()
 
     for (var i = 0; i < meals.length; i++)
     {
-        var id = 1 //meals[i].id;
+        var id = meals[i].id;
         var image_url = meals[i].image_url;
         var meal_list_item_element = document.createElement("li");
         var meal_name_element = document.createElement("div");
