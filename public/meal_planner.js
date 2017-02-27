@@ -882,7 +882,6 @@ function drop_to_meal_list_garbage(event)
 
         // Repopulate the meal list
         populate_meal_list();
-        setup_meal_onclick_function();
     }
 }
 
@@ -971,7 +970,10 @@ function setup_meal_onclick_function()
 {
     for (var i = 0; i < meals.length; i++)
     {
-        document.getElementById('drag_' + meals[i].id).onclick = (function (current_i) { return function () { select_meal_in_meal_list(current_i); } })(meals[i].id);
+        var id = meals[i].id
+        var element = document.getElementById('drag_' + id)
+        element.setAttribute("onclick","select_meal_in_meal_list(" + id + ")");
+        //element.onclick = (function (current_i) { return function () { select_meal_in_meal_list(current_i); } })(meals[i].id);
     }
 }
 
@@ -1007,8 +1009,7 @@ function setup_add_ingredient_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_input_onkeypress_function()
 {
@@ -1018,8 +1019,7 @@ function setup_input_onkeypress_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_edit_button_onclick_function()
 {
@@ -1027,8 +1027,7 @@ function setup_edit_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_cancel_button_onclick_function()
 {
@@ -1036,8 +1035,7 @@ function setup_cancel_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_calendar_help_button_onclick_function()
 {
@@ -1045,8 +1043,7 @@ function setup_calendar_help_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_calendar_log_out_button_onclick_function()
 {
@@ -1054,8 +1051,7 @@ function setup_calendar_log_out_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_calendar_print_button_onclick_function()
 {
@@ -1063,8 +1059,7 @@ function setup_calendar_print_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_calendar_grocery_list_button_onclick_function()
 {
@@ -1072,8 +1067,7 @@ function setup_calendar_grocery_list_button_onclick_function()
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when a meal in either the meal list or on the calendar is clicked
+*
 */
 function setup_calendar_save_button_onclick_function()
 {
