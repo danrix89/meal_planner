@@ -972,7 +972,7 @@ function setup_meal_onclick_function()
     {
         var id = meals[i].id
         var element = document.getElementById('drag_' + id)
-        element.setAttribute("onclick","select_meal_in_meal_list(" + id + ")");
+        element.setAttribute("onclick","select_meal_in_meal_list('" + id + "')");
         //element.onclick = (function (current_i) { return function () { select_meal_in_meal_list(current_i); } })(meals[i].id);
     }
 }
