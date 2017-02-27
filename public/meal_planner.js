@@ -895,6 +895,12 @@ function populate_meal_list()
     var users_meals_db_ref = firebase_database.ref("Users_Meals/" + user.uid);
     users_meals_db_ref.on("value", function(snapshot) {
       console.log(snapshot.val());
+      var object = snapshot.val()
+      for (var variable in object) {
+          if (object.hasOwnProperty(variable)) {
+              console.log(variable);
+          }
+      }
     });
 
     // Get the meal list (container) and clear it of any items
