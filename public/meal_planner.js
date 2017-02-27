@@ -169,8 +169,6 @@ function set_image_src(image_ref, image_element) {
 }
 
 function toggle_create_account_view() {
-    var chkboxUseDefaultMeals = document.getElementById("chkboxUseDefaultMeals");
-    var labelUseDefaultMeals = document.getElementById("labelUseDefaultMeals");
     var btnCreateAccount = document.getElementById("btnCreateAccount");
     var linkCreateAccount = document.getElementById("linkCreateAccount");
     var btnLogin = document.getElementById("btnLogin");
@@ -184,13 +182,9 @@ function toggle_create_account_view() {
     }
 
     if (btnCreateAccount.classList.contains("hide")) {
-        chkboxUseDefaultMeals.classList.remove("hide");
-        labelUseDefaultMeals.classList.remove("hide");
         btnCreateAccount.classList.remove("hide");
         linkCreateAccount.innerHTML = "Back to Log In";
     } else {
-        chkboxUseDefaultMeals.classList.add("hide");
-        labelUseDefaultMeals.classList.add("hide");
         btnCreateAccount.classList.add("hide");
         linkCreateAccount.innerHTML = "Create Account";
     }
@@ -209,33 +203,32 @@ function create_new_account(auth_ref, firebase_ref) {
                 var user_id = firebase_user.uid;
                 // Create the user in the database
                 db_ref.ref().child('Users').child(user_id).set({ display_name: firebase_user.displayName, email: firebase_user.email });
-                // Check if they wanted the default meals
-                if (document.getElementById("chkboxUseDefaultMeals").checked) {
-                    // If so, populate the Users_Meals with the defaults
-                    // Request the user's meal data
-                    var request = new XMLHttpRequest();
-                    request.onreadystatechange = function () {
-                        if (this.readyState == 4 && this.status == 200) {
-                            // Once retrieved, set the meals variable and populate the interface
-                            var db_defaultMeals_ref = db_ref.ref().child('DefaultMeals');
-                            meals = JSON.parse(request.responseText);
-                            for (var i = 0; i < meals.length; i++) {
-                                // Write user meal to database
-                                var meal_json = meals[i];
-                                var meal_object = { name: meal_json.name, image: "meal_images/default_images/default_image.jpg", recipe: meal_json.recipe, ingredients: {} };
-                                for (var j = 0; j < meal_json.ingredients.length; j++) {
-                                    meal_object.ingredients[meal_json.ingredients[j]] = meal_json.ingredients[j];
-                                }
-                                var new_users_meals_record_ref = db_defaultMeals_ref.push();
-                                new_users_meals_record_ref.set(meal_object);
+
+                // populate the Users_Meals with the defaults
+                // Request the user's meal data
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        // Once retrieved, set the meals variable and populate the interface
+                        var db_defaultMeals_ref = db_ref.ref().child('DefaultMeals');
+                        meals = JSON.parse(request.responseText);
+                        for (var i = 0; i < meals.length; i++) {
+                            // Write user meal to database
+                            var meal_json = meals[i];
+                            var meal_object = { name: meal_json.name, image_path: "meal_images/default_images/default_image.jpg", recipe: meal_json.recipe, ingredients: {} };
+                            for (var j = 0; j < meal_json.ingredients.length; j++) {
+                                meal_object.ingredients[meal_json.ingredients[j]] = meal_json.ingredients[j];
                             }
+                            var new_users_meals_record_ref = db_defaultMeals_ref.push();
+                            new_users_meals_record_ref.set(meal_object);
                         }
-                    };
-                    request.open("GET", default_meals_json_api, true);
-                    request.send();
-                }
+                    }
+                };
+                request.open("GET", default_meals_json_api, true);
+                request.send();
+
             })
-            .catch (function(event) {console.log(event.message);
+            .catch (function(event) {alert(event.message);
         });
     } else {
         txtPassword.focus();
@@ -248,24 +241,17 @@ function log_in(auth_ref, firebase_ref) {
     var txtEmail = document.getElementById("txtEmail");
     var txtPassword = document.getElementById("txtPassword");
 
-    /************************************************/
-    user = { uid: "TEST_TEST_TEST_TEST_TEST_TEST" };
-    document.getElementById("sign_in_page").setAttribute("class", "hide");
-    document.getElementById("main_box").classList.remove("hide");
+    if (txtPassword.value.length >= 6) {
+        const promise = auth.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
-    /************************************************/
-
-    // if (txtPassword.value.length >= 6) {
-    //     const promise = auth.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
-    //
-    //     promise
-    //         .then(user => console.log("Logged In"))
-    //         .catch (function(event) {console.log(event.message);
-    //     });
-    // } else {
-    //     txtPassword.focus();
-    //     alert("Passwords must be 6 or more characters");
-    // }
+        promise
+            .then(user => console.log("Logged In"))
+            .catch (function(event) {console.log(event.message);
+        });
+    } else {
+        txtPassword.focus();
+        alert("Passwords must be 6 or more characters");
+    }
 }
 
 function log_in_with_google(auth_ref, firebase_ref) {
@@ -282,26 +268,37 @@ function log_in_with_provider(auth_ref, firebase_ref, provider) {
     auth_ref.signInWithPopup(provider).catch(function(error) {console.log(error.message);});
 }
 
+
+
+
+
+
+
+
+
+
+
+
 /**
 *
 */
 function initialize_meal_planner_app() {
-    // Check if the user has visted the site before and
-    if (document.cookie[0] != "has_visited=true") {
-        // Show a welcome screen if they haven't visited before
-        modal = document.getElementById('welcome_modal');
-        setup_got_it_button_onclick_function();
-        display_modal();
-    }
+    // // Check if the user has visted the site before and
+    // if (document.cookie[0] != "has_visited=true") {
+    //     // Show a welcome screen if they haven't visited before
+    //     modal = document.getElementById('welcome_modal');
+    //     setup_got_it_button_onclick_function();
+    //     display_modal();
+    // }
+    //
+    // // Set a cookie saying that the user has visited
+    // document.cookie = "has_visited=true";
 
-    // Set a cookie saying that the user has visited
-    document.cookie = "has_visited=true";
+    // // Add close modal function to the window.onclick event
+    // window.addEventListener("click", close_modal);
 
     // Set what happens when the user leaves the web page
     window.onbeforeunload = on_before_unload;
-
-    // Add close modal function to the window.onclick event
-    window.addEventListener("click", close_modal);
 
     // Set the meals from user's meals in storage
     get_user_meals();
