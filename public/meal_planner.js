@@ -66,13 +66,13 @@ var user = {};
 var firebase_ref = {};
 
 // A reference to the firebase database
-var db_ref = {};
+var firebase_database = {};
 
 // A reference to the firsebase authentication
-var auth_ref = {};
+var firebase_authentication = {};
 
 // A reference to the firsebase authentication
-var storage_ref = {};
+var firebase_storage = {};
 
 /*****************************************************/
 /******** Functions **********************************/
@@ -100,17 +100,17 @@ function initialize_firebase() {
 
     firebase.initializeApp(firebase_configuration);
     firebase_ref = firebase;
-    db_ref = firebase.database();
-    auth_ref = firebase.auth();
-    storage_ref = firebase.storage().ref();
+    firebase_database = firebase.database();
+    firebase_authentication = firebase.auth();
+    firebase_storage = firebase.storage();
     console.log("Firebase Initialized");
 
     // Setup authentiation state change actions
-    auth_ref.onAuthStateChanged(firebase_user => {
+    firebase_authentication.onAuthStateChanged(firebase_user => {
         if (firebase_user) {
             // Set the user
             user = firebase_user;
-            console.log(user.uid);
+            console.log("User '" + user.uid + "' is logged in.");
 
             // Populate the calendar, meal list, etc.
             initialize_meal_planner_app();
@@ -121,7 +121,7 @@ function initialize_firebase() {
         } else {
             // Set user to null
             user = null;
-            console.log("not logged in!!!!!");
+            console.log("No user is logged in!");
 
             // Clear calendar, meal list, etc.
 
@@ -143,16 +143,16 @@ function initialize_firebase() {
 function setup_sign_in_controls() {
 
     var btnCreateAccount = document.getElementById("btnCreateAccount");
-    btnCreateAccount.setAttribute("onclick", "create_new_account(auth_ref, firebase_ref)");
+    btnCreateAccount.setAttribute("onclick", "create_new_account(firebase_authentication, firebase_ref)");
 
     var btnLogin = document.getElementById("btnLogin");
-    btnLogin.setAttribute("onclick", "log_in(auth_ref, firebase_ref)");
+    btnLogin.setAttribute("onclick", "log_in(firebase_authentication, firebase_ref)");
 
     var btnGoogle = document.getElementById("btnGoogle");
-    btnGoogle.setAttribute("onClick", "log_in_with_google(auth_ref, firebase_ref)");
+    btnGoogle.setAttribute("onClick", "log_in_with_google(firebase_authentication, firebase_ref)");
 
     var btnFacebook = document.getElementById("btnFacebook");
-    btnFacebook.setAttribute("onClick", "log_in_with_facebook(auth_ref, firebase_ref)");
+    btnFacebook.setAttribute("onClick", "log_in_with_facebook(firebase_authentication, firebase_ref)");
 
     var linkCreateAccount = document.getElementById("linkCreateAccount");
     linkCreateAccount.addEventListener("click", toggle_create_account_view);
@@ -190,19 +190,19 @@ function toggle_create_account_view() {
     }
 }
 
-function create_new_account(auth_ref, firebase_ref) {
+function create_new_account(firebase_authentication, firebase_ref) {
     // Get the data from the fields
     var txtEmail = document.getElementById("txtEmail");
     var txtPassword = document.getElementById("txtPassword");
 
     if (txtPassword.value.length >= 6) {
-        const promise = auth_ref.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
+        const promise = firebase_authentication.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
         promise
             .then(function(firebase_user) {
                 var user_id = firebase_user.uid;
                 // Create the user in the database
-                db_ref.ref().child('Users').child(user_id).set({ display_name: firebase_user.displayName, email: firebase_user.email });
+                firebase_database.ref().child('Users').child(user_id).set({ display_name: firebase_user.displayName, email: firebase_user.email });
 
                 // populate the Users_Meals with the defaults
                 // Request the user's meal data
@@ -210,7 +210,7 @@ function create_new_account(auth_ref, firebase_ref) {
                 request.onreadystatechange = function () {
                     if (this.readyState == 4 && this.status == 200) {
                         // Once retrieved, set the meals variable and populate the interface
-                        var db_defaultMeals_ref = db_ref.ref().child('Users_Meals/' + user_id);
+                        var db_defaultMeals_ref = firebase_database.ref().child('Users_Meals/' + user_id);
                         meals = JSON.parse(request.responseText);
                         for (var i = 0; i < meals.length; i++) {
                             // Write user meal to database
@@ -236,7 +236,7 @@ function create_new_account(auth_ref, firebase_ref) {
     }
 }
 
-function log_in(auth_ref, firebase_ref) {
+function log_in(firebase_authentication, firebase_ref) {
     // Get the data from the fields
     var txtEmail = document.getElementById("txtEmail");
     var txtPassword = document.getElementById("txtPassword");
@@ -245,7 +245,6 @@ function log_in(auth_ref, firebase_ref) {
         const promise = auth.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
         promise
-            .then(user => console.log("Logged In"))
             .catch (function(event) {console.log(event.message);
         });
     } else {
@@ -254,18 +253,18 @@ function log_in(auth_ref, firebase_ref) {
     }
 }
 
-function log_in_with_google(auth_ref, firebase_ref) {
+function log_in_with_google(firebase_authentication, firebase_ref) {
     var provider = new firebase_ref.auth.GoogleAuthProvider();
-    log_in_with_provider(auth_ref, firebase_ref, provider);
+    log_in_with_provider(firebase_authentication, firebase_ref, provider);
 }
 
-function log_in_with_facebook(auth_ref, firebase_ref) {
+function log_in_with_facebook(firebase_authentication, firebase_ref) {
     var provider = new firebase_ref.auth.FacebookAuthProvider();
-    log_in_with_provider(auth_ref, firebase_ref, provider);
+    log_in_with_provider(firebase_authentication, firebase_ref, provider);
 }
 
-function log_in_with_provider(auth_ref, firebase_ref, provider) {
-    auth_ref.signInWithPopup(provider).catch(function(error) {console.log(error.message);});
+function log_in_with_provider(firebase_authentication, firebase_ref, provider) {
+    firebase_authentication.signInWithPopup(provider).catch(function(error) {console.log(error.message);});
 }
 
 
@@ -310,10 +309,10 @@ function initialize_meal_planner_app() {
     setup_initial_meal_plans();
 
     // Setup button on click event functions
-    setup_calendar_help_button_onclick_function();
-    setup_calendar_print_button_onclick_function();
-    setup_calendar_grocery_list_button_onclick_function();
-    setup_calendar_save_button_onclick_function();
+    // setup_calendar_help_button_onclick_function();
+    // setup_calendar_print_button_onclick_function();
+    // setup_calendar_grocery_list_button_onclick_function();
+    // setup_calendar_save_button_onclick_function();
     setup_calendar_log_out_button_onclick_function();
 }
 
@@ -322,32 +321,12 @@ function initialize_meal_planner_app() {
 * Get the user's meals from storage (not the meal plans but their list of meals)
 */
 function get_user_meals() {
-    if (localStorage.user_meal_list != undefined && localStorage.user_meal_list != "undefined") {
-        meals = JSON.parse(localStorage.user_meal_list);
-        populate_meal_list();
-        previous_meal = meals[0];
-        set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
-        populate_calendar_days();
-        populate_meal_editor(current_meal);
-    }
-        // Else load the default meals
-    else {
-        // Request the user's meal data
-        var request = new XMLHttpRequest();
-        request.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                // Once retrieved, set the meals variable and populate the interface
-                meals = JSON.parse(request.responseText);
-                populate_meal_list();
-                previous_meal = meals[0];
-                set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
-                populate_calendar_days();
-                populate_meal_editor(current_meal);
-            }
-        };
-        request.open("GET", default_meals_json_api, true);
-        request.send();
-    }
+    meals = [];
+    populate_meal_list();
+    previous_meal = meals[0];
+    set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+    populate_calendar_days();
+    populate_meal_editor(current_meal);
 }
 
 
@@ -913,13 +892,18 @@ function drop_to_calendar_garbage(event)
 */
 function populate_meal_list()
 {
+    var users_meals_db_ref = firebase_database.ref("Users_Meals/" + user.uid);
+    users_meals_db_ref.on("value", function(snapshot) {
+      console.log(snapshot.val());
+    });
+
     // Get the meal list (container) and clear it of any items
     var meal_list_element = document.getElementById('meal_unordered_list');
     meal_list_element.innerHTML = "";
 
     for (var i = 0; i < meals.length; i++)
     {
-        var id = meals[i].id;
+        var id = 1 //meals[i].id;
         var image_url = meals[i].image_url;
         var meal_list_item_element = document.createElement("li");
         var meal_name_element = document.createElement("div");
@@ -927,7 +911,7 @@ function populate_meal_list()
 
         // Set up the meal image element
         image_element.id = "drag_" + id;
-        image_element.src = image_url;
+        set_image_src(firebase_storage.ref().child('meal_images/default_images/default_image.jpg'), image_element);
         image_element.draggable = true;
         image_element.setAttribute('ondragstart', 'drag_meal(event)');
         image_element.setAttribute("data-meal-id", id);
@@ -1193,7 +1177,7 @@ function edit_button_onclick(meal_id)
         if (is_adding_new_meal)
         {
             // Write user meal to database
-            var db_users_meals_ref = db_ref.ref().child('Users_Meals/' + user.uid);
+            var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
             var meal_object = { name: current_meal.name, image: "someImage.png", recipe: current_meal.recipe, ingredients: {} };
             for (var i = 0; i < current_meal.ingredients.length; ++i) {
                 meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
@@ -1282,7 +1266,7 @@ function calendar_help_button_onclick(a_nothing)
 */
 function calendar_log_out_button_onclick(a_nothing)
 {
-    auth_ref.signOut();
+    firebase_authentication.signOut();
 }
 
 /**
@@ -1501,7 +1485,7 @@ function save_meal_list() {
         localStorage.user_meal_list = JSON.stringify(meals);
         // for (var meal in meals) {
         //     if (meals.hasOwnProperty(meal)) {
-        //         var db_users_meals_ref = db_ref.ref().child('Users_Meals/' + user_id);
+        //         var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user_id);
         //         var meal_object = { name: txtMealName.value, recipe: txtMealRecipe.value, ingredients: { "ingredient_1": txtMealIngredient1.value, "ingredient_2": txtMealIngredient2.value, "ingredient_3": txtMealIngredient3.value } };
         //         var new_users_meals_record_ref = db_users_meals_ref.push();
         //         new_users_meals_record_ref.set(meal_object);
