@@ -342,9 +342,10 @@ function get_user_meals() {
               meal_json.recipe = meal_from_db.recipe;
               var i = 0;
               for (ingredient in meal_from_db.ingredients) {
-                  meal_json.ingredients[i] = ingredient.value;
+                  meal_json.ingredients[i] = ingredient;
                   i++;
               }
+              meals.push(meal_json);
               //console.log(variable);
           }
       }
