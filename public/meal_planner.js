@@ -938,7 +938,7 @@ function populate_meal_list()
 
         // Set up the meal image element
         image_element.id = "drag_" + id;
-        set_image_src(firebase_storage.ref().child('meal_images/default_images/default_image.jpg'), image_element);
+        set_image_src(firebase_storage.ref().child(image_url), image_element);
         image_element.draggable = true;
         image_element.setAttribute('ondragstart', 'drag_meal(event)');
         image_element.setAttribute("data-meal-id", id);
