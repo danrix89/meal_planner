@@ -349,14 +349,16 @@ function get_user_meals() {
               //console.log(variable);
           }
       }
+
+
+      populate_meal_list();
+      previous_meal = meals[0];
+      set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
+      populate_calendar_days();
+      populate_meal_editor(current_meal);
     });
 
 
-    populate_meal_list();
-    previous_meal = meals[0];
-    set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
-    populate_calendar_days();
-    populate_meal_editor(current_meal);
 }
 
 
