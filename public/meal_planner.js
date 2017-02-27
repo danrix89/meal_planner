@@ -210,7 +210,7 @@ function create_new_account(auth_ref, firebase_ref) {
                 request.onreadystatechange = function () {
                     if (this.readyState == 4 && this.status == 200) {
                         // Once retrieved, set the meals variable and populate the interface
-                        var db_defaultMeals_ref = db_ref.ref().child('DefaultMeals');
+                        var db_defaultMeals_ref = db_ref.ref().child('Users_Meals');
                         meals = JSON.parse(request.responseText);
                         for (var i = 0; i < meals.length; i++) {
                             // Write user meal to database
