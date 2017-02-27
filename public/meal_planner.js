@@ -88,12 +88,6 @@ function on_page_load(event) {
 
     // Initialize firebase
     $.getScript(firebase_api, initialize_firebase);
-
-    // Setup sign-in Page
-    setup_sign_in_controls();
-
-    // Initialize the App
-    initialize_meal_planner_app();
 };
 
 /**
@@ -108,7 +102,7 @@ function initialize_firebase() {
     firebase_ref = firebase;
     db_ref = firebase.database();
     auth_ref = firebase.auth();
-    storage_ref = firebase.storage();
+    storage_ref = firebase.storage().ref();
     console.log("Firebase Initialized");
 
     // Setup authentiation state change actions
@@ -119,6 +113,7 @@ function initialize_firebase() {
             console.log(user.uid);
 
             // Populate the calendar, meal list, etc.
+            initialize_meal_planner_app();
 
             // Go the the meal planning page (leave the sign in page)
             document.getElementById("sign_in_page").setAttribute("class", "hide");
@@ -136,7 +131,9 @@ function initialize_firebase() {
         }
     });
 
-    //db_ref.on('value', snap => document.getElementById("test").innerText = snap.val());
+    // Setup sign-in Page
+    setup_sign_in_controls();
+
 }
 
 /**
@@ -159,6 +156,16 @@ function setup_sign_in_controls() {
 
     var linkCreateAccount = document.getElementById("linkCreateAccount");
     linkCreateAccount.addEventListener("click", toggle_create_account_view);
+}
+
+function set_image_src(image_ref, image_element) {
+    image_ref.getDownloadURL()
+        .then( function(url) {
+            image_element.src = url;
+        })
+        .catch( function (error) {
+            console.log(error.message);
+        })
 }
 
 function toggle_create_account_view() {
@@ -210,16 +217,16 @@ function create_new_account(auth_ref, firebase_ref) {
                     request.onreadystatechange = function () {
                         if (this.readyState == 4 && this.status == 200) {
                             // Once retrieved, set the meals variable and populate the interface
-                            var db_users_meals_ref = db_ref.ref().child('Users_Meals/' + user.uid);
+                            var db_defaultMeals_ref = db_ref.ref().child('DefaultMeals');
                             meals = JSON.parse(request.responseText);
-                            for (var i = 0; i < meals.length; ++i) {
+                            for (var i = 0; i < meals.length; i++) {
                                 // Write user meal to database
                                 var meal_json = meals[i];
-                                var meal_object = { name: meal_json.name, image: "someImage.png", recipe: meal_json.recipe, ingredients: {} };
-                                for (var j = 0; j < meal_json.ingredients.length; ++j) {
+                                var meal_object = { name: meal_json.name, image: "meal_images/default_images/default_image.jpg", recipe: meal_json.recipe, ingredients: {} };
+                                for (var j = 0; j < meal_json.ingredients.length; j++) {
                                     meal_object.ingredients[meal_json.ingredients[j]] = meal_json.ingredients[j];
                                 }
-                                var new_users_meals_record_ref = db_users_meals_ref.push();
+                                var new_users_meals_record_ref = db_defaultMeals_ref.push();
                                 new_users_meals_record_ref.set(meal_object);
                             }
                         }
