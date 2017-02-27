@@ -322,6 +322,35 @@ function initialize_meal_planner_app() {
 */
 function get_user_meals() {
     meals = [];
+
+    var users_meals_db_ref = firebase_database.ref("Users_Meals/" + user.uid);
+    users_meals_db_ref.on("value", function(snapshot) {
+      var user_meals = snapshot.val()
+      for (var meal_id in user_meals) {
+          if (user_meals.hasOwnProperty(meal_id)) {
+              var meal_from_db = user_meals[meal_id];
+              var meal_json = { id: meal_id,
+                                name: "",
+                                image_url: "",
+                                image_source_url: "",
+                                ingredients: [],
+                                recipe: ""
+                              }
+
+              meal_json.name = meal_from_db.name;
+              meal_json.image_url = meal_from_db.image_path;
+              meal_json.recipe = meal_from_db.recipe;
+              var i = 0;
+              for (ingredient in meal_from_db.ingredients) {
+                  meal_json.ingredients[i] = ingredient.value;
+                  i++;
+              }
+              //console.log(variable);
+          }
+      }
+    });
+
+
     populate_meal_list();
     previous_meal = meals[0];
     set_current_meal(meals[0].id); // Set the initial current/previous meals to the first meal when loading the page.
@@ -892,17 +921,6 @@ function drop_to_calendar_garbage(event)
 */
 function populate_meal_list()
 {
-    var users_meals_db_ref = firebase_database.ref("Users_Meals/" + user.uid);
-    users_meals_db_ref.on("value", function(snapshot) {
-      console.log(snapshot.val());
-      var object = snapshot.val()
-      for (var variable in object) {
-          if (object.hasOwnProperty(variable)) {
-              console.log(variable);
-          }
-      }
-    });
-
     // Get the meal list (container) and clear it of any items
     var meal_list_element = document.getElementById('meal_unordered_list');
     meal_list_element.innerHTML = "";
