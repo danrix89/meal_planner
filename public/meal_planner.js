@@ -941,7 +941,7 @@ function populate_meal_list()
 
     // Setup onclick functions
     setup_meal_onclick_function();
-    setup_add_meal_onclick_function();
+    document.getElementById('add_button').onclick = setup_meal_editor_for_adding_new_meal;
 }
 
 /**
@@ -953,19 +953,9 @@ function setup_meal_onclick_function()
     for (var i = 0; i < meals.length; i++)
     {
         var id = meals[i].id
-        var element = document.getElementById('drag_' + id)
+        var element = document.getElementById('drag_' + id);
         element.setAttribute("onclick","select_meal_in_meal_list('" + id + "')");
-        //element.onclick = (function (current_i) { return function () { select_meal_in_meal_list(current_i); } })(meals[i].id);
     }
-}
-
-/**
-* SETUP_ADD_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for when the add meal button is clicked (the "+" icon in the meal list)
-*/
-function setup_add_meal_onclick_function()
-{
-    document.getElementById('add_button').onclick = add_new_meal_to_list;
 }
 
 /**
@@ -977,17 +967,10 @@ function setup_ingredient_onclick_function()
 {
     for (var i = 0; i < current_meal.ingredients.length; i++)
     {
-        document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
+        var element = document.getElementById('button_' + i);
+        element.setAttribute("onclick", "remove_ingredient('" + i + "')");
+        //document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
     }
-}
-
-/**
-* SETUP_ADD_INGREDIENT_BUTTON_ONCLICK_FUNCTION
-* Sets up the onclick function of the add ingredient button (next to the ingredient text field when in edit mode)
-*/
-function setup_add_ingredient_button_onclick_function()
-{
-    document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
 /**
@@ -1005,7 +988,9 @@ function setup_input_onkeypress_function()
 */
 function setup_edit_button_onclick_function()
 {
-    document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
+    var element = document.getElementById('edit_button');
+    element.setAttribute("onclick", "edit_button_onclick('" + current_meal.id + "')");
+    // document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
 }
 
 /**
@@ -1013,7 +998,9 @@ function setup_edit_button_onclick_function()
 */
 function setup_cancel_button_onclick_function()
 {
-    document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_meal_edit_changes(meal_id); } })(current_meal.id);
+    var element = document.getElementById('edit_button');
+    element.setAttribute("onclick", "cancel_meal_edit_changes('" + current_meal.id + "')");
+    // document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_meal_edit_changes(meal_id); } })(current_meal.id);
 }
 
 /**
@@ -1074,26 +1061,19 @@ function update_meal_recipe_instructions_with_text_area_value()
 }
 
 /**
-* ADD_NEW_MEAL_TO_LIST
+* Setup_meal_editor_for_adding_new_meal
 * Actions for when the add meal button is clicked in the meal list (a.k.a. the + button)
 */
-function add_new_meal_to_list()
+function setup_meal_editor_for_adding_new_meal()
 {
     if (!is_edit_mode && !is_adding_new_meal)
     {
         is_adding_new_meal = true;
         is_edit_mode = true;
-        var latest_meal_id = (parseInt(meals[meals.length - 1].id) + 1);
-        var new_meal = { id: "", name: "", image_url: "", ingredients: [], recipe: "" };
-        new_meal.id = latest_meal_id.toString();
-        new_meal.image_url = "images\\default_image.jpg"
 
         // Set the previous and current meal
         previous_meal = current_meal;
-        current_meal = new_meal;
-
-        // Add the new meal to the user's list of meals
-        meals.push(current_meal);
+        current_meal = { id: "", name: "", image_url: "", ingredients: [], recipe: "" };
 
         // Populate the editor with the new meal (all fields will be blank)
         populate_meal_editor(current_meal);
@@ -1141,13 +1121,12 @@ function edit_button_onclick(meal_id)
         {
             // Write user meal to database
             var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
-            var meal_object = { name: current_meal.name, image: "someImage.png", recipe: current_meal.recipe, ingredients: {} };
+            var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
             for (var i = 0; i < current_meal.ingredients.length; ++i) {
                 meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
             }
             var new_users_meals_record_ref = db_users_meals_ref.push();
             new_users_meals_record_ref.set(meal_object);
-            // var meal_id = new_users_meals_record_ref.key;
 
             is_adding_new_meal = false;
         }
@@ -1381,7 +1360,7 @@ function populate_meal_editor(meal)
     setup_ingredient_onclick_function();
     setup_edit_button_onclick_function();
     setup_cancel_button_onclick_function();
-    setup_add_ingredient_button_onclick_function();
+    document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
 /**
