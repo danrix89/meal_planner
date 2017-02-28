@@ -350,6 +350,7 @@ function set_meals(user_meals_from_db) {
             meal.image_url = user_meals_from_db[meal_id].image_path;
             meal.image_source_url = "";
             meal.recipe = user_meals_from_db[meal_id].recipe;
+            meal.ingredients = [];
             var i = 0;
             for (ingredient in user_meals_from_db[meal_id].ingredients) {
                 meal.ingredients[i] = ingredient;
