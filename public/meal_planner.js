@@ -322,8 +322,8 @@ function initialize_meal_planner_app() {
 * Get the user's meals from storage (not the meal plans but their list of meals)
 */
 function initialize_user_meals_from_db_snapshot(db_snapshot) {
-    var user_meals_from_db = db_snapshot.val();
-    set_meals(user_meals_from_db);
+
+    set_meals_from_db_snapshot(db_snapshot);
 
     // Set the initial current/previous meals to the first meal when loading the page.
     previous_meal = meals[0];
@@ -335,7 +335,8 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     populate_calendar_days();
 }
 
-function set_meals(user_meals_from_db) {
+function set_meals_from_db_snapshot(db_snapshot) {
+    var user_meals_from_db = db_snapshot.val();
 
     // Loop through each of the meals (by id)
     for (var meal_id in user_meals_from_db) {
@@ -1080,7 +1081,21 @@ function setup_meal_editor_for_adding_new_meal()
         document.getElementById('meal_name_input').focus();
 
         setup_input_onkeypress_function();
+
+        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
     }
+}
+
+/**
+* INITIALIZE_USER_MEALS_FROM_DB_SNAPSHOT
+* Get the user's meals from storage (not the meal plans but their list of meals)
+*/
+function refresh_meal_list_and_editor_from_db_snapshot(db_snapshot) {
+    // Reset meals from the snapshot
+    set_meals_from_db_snapshot(db_snapshot);
+    // Populate the app interface with data
+    populate_meal_list();
+    populate_meal_editor(current_meal);
 }
 
 /**
@@ -1127,6 +1142,7 @@ function edit_button_onclick(meal_id)
             }
             var new_users_meals_record_ref = db_users_meals_ref.push();
             new_users_meals_record_ref.set(meal_object);
+            current_meal.id = new_users_meals_record_ref.uid;
 
             is_adding_new_meal = false;
         }
