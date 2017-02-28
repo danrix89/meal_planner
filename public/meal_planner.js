@@ -232,7 +232,7 @@ function create_new_account() {
                     // Loop through each of the default meals (by id)
                     for (var default_meal_id in default_meals) {
                         // Ensure the id is valid
-                        if (user_meals_from_db.hasOwnProperty(default_meal_id)) {
+                        if (default_meals.hasOwnProperty(default_meal_id)) {
                             // Create a new user meal
                             var new_users_meals_record_ref = db_users_meals_ref.push();
 
