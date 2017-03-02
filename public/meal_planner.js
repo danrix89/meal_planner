@@ -1152,8 +1152,8 @@ function edit_button_onclick()
     document.getElementById('meal_ingredient_input').value = '';
     document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
-    document.getElementById('cancel_button').classList.remove("hide");
-    document.getElementById('confirm_button').classList.remove("hide");
+    document.getElementById('cancel_button_div').classList.remove("hide");
+    document.getElementById('confirm_button_div').classList.remove("hide");
 
     // Save the current meal before we edit it so we can recover if the user
     // decides to cancel their changes
