@@ -393,7 +393,7 @@ function log_in_with_provider(provider) {
 
 function set_meals_from_db_snapshot(db_snapshot) {
     var user_meals_from_db = db_snapshot.val();
-    meals = [];
+    //meals = [];
 
     // Loop through each of the meals (by id)
     for (var meal_id in user_meals_from_db) {
@@ -1139,12 +1139,13 @@ function setup_meal_editor_for_adding_new_meal()
 }
 
 /**
-* INITIALIZE_USER_MEALS_FROM_DB_SNAPSHOT
-* Get the user's meals from storage (not the meal plans but their list of meals)
+*
 */
 function refresh_meal_list_and_editor_from_db_snapshot(db_snapshot) {
     // Reset meals from the snapshot
+    meals = [];
     set_meals_from_db_snapshot(db_snapshot);
+
     // Populate the app interface with data
     populate_meal_list();
     populate_meal_editor(current_meal);
