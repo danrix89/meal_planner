@@ -393,7 +393,7 @@ function log_in_with_provider(provider) {
 
 function set_meals_from_db_snapshot(db_snapshot) {
     var user_meals_from_db = db_snapshot.val();
-    //meals = [];
+    meals = [];
 
     // Loop through each of the meals (by id)
     for (var meal_id in user_meals_from_db) {
@@ -1134,8 +1134,6 @@ function setup_meal_editor_for_adding_new_meal()
     document.getElementById('meal_name_input').focus();
 
     setup_input_onkeypress_function();
-
-    firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
 }
 
 /**
@@ -1143,7 +1141,6 @@ function setup_meal_editor_for_adding_new_meal()
 */
 function refresh_meal_list_and_editor_from_db_snapshot(db_snapshot) {
     // Reset meals from the snapshot
-    meals = [];
     set_meals_from_db_snapshot(db_snapshot);
 
     // Populate the app interface with data
@@ -1211,6 +1208,8 @@ function edit_current_meal()
 */
 function confirm_changes()
 {
+    firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
+
     // Take everything out of edit mode
     is_edit_mode = false;
 
