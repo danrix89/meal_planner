@@ -105,15 +105,24 @@ html, body {
     left: 75%;
 }
 
+.meal_list_floating_confirm_button,
 .meal_list_floating_cancel_button{
     display: inline-block;
     height: 50px;
     width: 50px;
-    background-color: #FF4500;
     border-radius: 200px;
     position: absolute;
-    bottom: 5%;
-    left: 75%;
+    bottom: 10px;
+}
+
+.meal_list_floating_confirm_button {
+    background-color: #00e364;
+    right: 10px;
+}
+
+.meal_list_floating_cancel_button{
+    background-color: #FF4500;
+    right: 70px;
 }
 
 div.calendar_floating_remove_button:hover {
@@ -152,14 +161,16 @@ div.meal_list_floating_add_button:active {
     transition-duration: -1s;
 }
 
-div.meal_list_floating_cancel_button:hover {
+.meal_list_floating_confirm_button:hover,
+.meal_list_floating_cancel_button:hover {
     transform: scale(1.03, 1.03);
     box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
     transition-duration: .2s;
     cursor: pointer;
 }
 
-div.meal_list_floating_cancel_button:active {
+.meal_list_floating_confirm_button:active,
+.meal_list_floating_cancel_button:active {
     transform: scale(.95, .95);
     transition-duration: -1s;
 }

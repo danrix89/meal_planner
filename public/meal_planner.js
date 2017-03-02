@@ -164,6 +164,24 @@ function setup_sign_in_controls() {
 }
 
 /**
+* SETUP_APP_CONTROLS
+* Sets up the sign-in option buttons with click actions.
+*/
+function setup_app_controls() {
+    // Menu bar controls
+    document.getElementById('log_out_button').onclick = logout;
+
+    // Calendar controls
+    setup_calendar_title_and_nav_buttons();
+
+    // Meal List controls
+
+    // Editor controls
+    var element = document.getElementById("edit_button");
+    element.onclick = edit_button_onclick;
+}
+
+/**
 * SET_IMAGE_SRC
 * Sets the image url source on an HTML image (img) element.
 * @param = image_ref is the reference object to the image in the firebase storage.
@@ -256,19 +274,33 @@ function create_new_account() {
 * password length.
 */
 function log_in() {
-    // Get the data from the fields
-    var txtEmail = document.getElementById("txtEmail");
-    var txtPassword = document.getElementById("txtPassword");
-
-    if (txtPassword.value.length >= 6) {
-        const promise = firebase_authentication.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
-
-        promise
-            .catch (function(event) {alert(event.message);
-        });
+    var test_mode = true;
+    if (test_mode) {
+        ////////////////////////////////////////////////////////////////////////
+        //////////////////////////// TEST LOG IN ///////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
+        user = {};
+        user.uid = "ontlsfCfjpaHDnu5tpr0533Wvuo1";
+        initialize_meal_planner_app();
+        document.getElementById("sign_in_page").setAttribute("class", "hide");
+        document.getElementById("main_box").classList.remove("hide");
+        ////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////
     } else {
-        txtPassword.focus();
-        alert("Passwords must be 6 or more characters");
+        // Get the data from the fields
+        var txtEmail = document.getElementById("txtEmail");
+        var txtPassword = document.getElementById("txtPassword");
+
+        if (txtPassword.value.length >= 6) {
+            const promise = firebase_authentication.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
+
+            promise
+                .catch (function(event) {alert(event.message);
+            });
+        } else {
+            txtPassword.focus();
+            alert("Passwords must be 6 or more characters");
+        }
     }
 }
 
@@ -303,18 +335,13 @@ function log_in_with_provider(provider) {
 * Initializes the app (after a successful log in) with controls, fields, data, etc.
 */
 function initialize_meal_planner_app() {
-
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
 
-    // Setup the calendar title and nav buttons
-    setup_calendar_title_and_nav_buttons();
+    setup_app_controls();
 
     // Setup the current session's meal plans with user data
     setup_initial_meal_plans();
-
-    // Setup button on click event functions
-    document.getElementById('log_out_button').onclick = logout;
 }
 
 /**
@@ -970,7 +997,6 @@ function setup_ingredient_onclick_function()
     {
         var element = document.getElementById('button_' + i);
         element.setAttribute("onclick", "remove_ingredient('" + i + "')");
-        //document.getElementById('button_' + i).onclick = (function (current_i) { return function () { remove_ingredient(current_i); } })(i);
     }
 }
 
@@ -987,21 +1013,10 @@ function setup_input_onkeypress_function()
 /**
 *
 */
-function setup_edit_button_onclick_function()
-{
-    var element = document.getElementById('edit_button');
-    element.setAttribute("onclick", "edit_button_onclick('" + current_meal.id + "')");
-    // document.getElementById('edit_button').onclick = (function (meal_id) { return function () { edit_button_onclick(meal_id); } })(current_meal.id);
-}
-
-/**
-*
-*/
 function setup_cancel_button_onclick_function()
 {
-    var element = document.getElementById('edit_button');
+    var element = document.getElementById('cancel_button');
     element.setAttribute("onclick", "cancel_meal_edit_changes('" + current_meal.id + "')");
-    // document.getElementById('cancel_button').onclick = (function (meal_id) { return function () { cancel_meal_edit_changes(meal_id); } })(current_meal.id);
 }
 
 /**
@@ -1119,51 +1134,67 @@ function add_ingredient()
 * @param
 * @return
 */
-function edit_button_onclick(meal_id)
+function edit_button_onclick()
 {
-    // If we were in edit mode, then the user is clicking the
-    // save button (which was the edit button - now it looks
-    // like a checkmark), so we need to save the user's work.
-    if (is_edit_mode)
-    {
-        // ...Save changes to meal name and instructions
-        current_meal.name = document.getElementById('meal_name_input').value;
-        current_meal.recipe = document.getElementById('recipe_text_area').value;
+    // Hide the edit button
+    document.getElementById('edit_button').classList.add("hide");
 
-        // If we were adding then set the flag so we know
-        // we aren't in adding meal mode
-        if (is_adding_new_meal)
-        {
-            // Write user meal to database
-            var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
-            var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
-            for (var i = 0; i < current_meal.ingredients.length; ++i) {
-                meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
-            }
-            var new_users_meals_record_ref = db_users_meals_ref.push();
-            new_users_meals_record_ref.set(meal_object);
-            current_meal.id = new_users_meals_record_ref.uid;
+    // Show the edit mode controls/buttons
+    meal_name_iput.readOnly = false;
+    meal_instructions_text_area.readOnly = false;
+    document.getElementById('meal_ingredient_input').value = '';
+    document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
+    document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
+    document.getElementById('cancel_button').classList.remove("hide");
+    document.getElementById('confirm_button').classList.remove("hide");
 
-            is_adding_new_meal = false;
-        }
-
-        // Populate the meal list to reflect our changes
-        populate_meal_list();
-    }
-    else
-    {
-        // Save the current meal before we edit it so we
-        // can recover if the user decides to cancel their
-        // changes
-        meal_before_edit = current_meal;
-    }
+    // Save the current meal before we edit it so we can recover if the user
+    // decides to cancel their changes
+    meal_before_edit = current_meal;
 
     // Toggle edit mode
-    is_edit_mode = !is_edit_mode;
-
-    // Populate the meal editor to reflect being in edit mode or not
-    populate_meal_editor(current_meal);
+    is_edit_mode = true;
 }
+    // // If we were in edit mode, then the user is clicking the
+    // // save button (which was the edit button - now it looks
+    // // like a checkmark), so we need to save the user's work.
+    // if (is_edit_mode)
+    // {
+    //     // ...Save changes to meal name and instructions
+    //     current_meal.name = document.getElementById('meal_name_input').value;
+    //     current_meal.recipe = document.getElementById('recipe_text_area').value;
+    //
+    //     // If we were adding then set the flag so we know
+    //     // we aren't in adding meal mode
+    //     if (is_adding_new_meal)
+    //     {
+    //         // Write user meal to database
+    //         var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
+    //         var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
+    //         for (var i = 0; i < current_meal.ingredients.length; ++i) {
+    //             meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
+    //         }
+    //         var new_users_meals_record_ref = db_users_meals_ref.push();
+    //         new_users_meals_record_ref.set(meal_object);
+    //         current_meal.id = new_users_meals_record_ref.uid;
+    //
+    //         is_adding_new_meal = false;
+    //     }
+    //
+    //     // Populate the meal list to reflect our changes
+    //     populate_meal_list();
+    // }
+    // else
+    // {
+    //
+    // }
+    //
+    // // Toggle edit mode
+    // is_edit_mode = !is_edit_mode;
+    //
+    // // Populate the meal editor to reflect being in edit mode or not
+    // populate_meal_editor(current_meal);
+
 
 /**
 * FUNCTION_NAME
@@ -1317,27 +1348,16 @@ function populate_meal_editor(meal)
     // Handle Edit Mode
     if (is_edit_mode)
     {
-        // Set the text fields to read/write
-        meal_name_iput.readOnly = false;
-        meal_instructions_text_area.readOnly = false;
-        document.getElementById('meal_ingredient_input').value = '';
-
-        // Show the edit controls/buttons
-        document.getElementById('edit_button').src = "images\\controls\\check.png";
-        document.getElementById('edit_button').parentElement.style.backgroundColor = "#00e364";
-        document.getElementById('cancel_button').parentElement.style.visibility = "visible";
-        document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
-        document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
     }
     else
     {
-        meal_name_iput.readOnly = true;
-        meal_instructions_text_area.readOnly = true;
-        document.getElementById('edit_button').src = "images\\controls\\pen.png";
-        document.getElementById('edit_button').parentElement.style.backgroundColor = "#33afff";
-        document.getElementById('cancel_button').parentElement.style.visibility = "hidden";
-        document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
-        document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
+        // meal_name_iput.readOnly = true;
+        // meal_instructions_text_area.readOnly = true;
+        // document.getElementById('edit_button').src = "images\\controls\\pen.png";
+        // document.getElementById('edit_button').parentElement.style.backgroundColor = "#33afff";
+        // document.getElementById('cancel_button').parentElement.style.visibility = "hidden";
+        // document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
+        // document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
     }
 
 
@@ -1374,7 +1394,6 @@ function populate_meal_editor(meal)
 
     // Setup the onclick functionality
     setup_ingredient_onclick_function();
-    setup_edit_button_onclick_function();
     setup_cancel_button_onclick_function();
     document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }

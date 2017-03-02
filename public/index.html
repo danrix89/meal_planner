@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <title>myMealPlanner</title>
-    <link rel="shortcut icon" href="images/default_image.jpg" />
+    <link rel="shortcut icon" href="images/controls/title_tab_image.jpg" />
     <link rel="stylesheet" type="text/css" href="meal_planner.css">
     <link rel="stylesheet" type="text/css" href="sign_in.css">
     <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.css" />
@@ -133,7 +133,7 @@
                         <p class="meal_editor_form_header">Ingredients:</p>
                         <div class="ingredient_list">
                             <ul class="flex-ingredient-container" id="ingredients_unordered_list">
-                                <!-- Populated by Json Meal Data-->
+                                <!-- Populated by Meal Data-->
                             </ul>
                             <br />
                             <div class="ingredient_edit_mode_fields">
@@ -144,7 +144,8 @@
                         <p class="meal_editor_form_header">Instructions:</p>
                         <textarea class="recipe_text_area" id="recipe_text_area" rows="5"></textarea>
                     </div>
-                    <div class="meal_list_floating_cancel_button"><img id="cancel_button" class="button_image" src="images\controls\cancel.png" /></div>
+                    <div class="meal_list_floating_cancel_button hide"><img id="cancel_button" class="button_image" src="images\controls\cancel.png" /></div>
+                    <div class="meal_list_floating_confirm_button hide"><img id="confirm_button" class="button_image" src="images\controls\check.png" /></div>
                     <div class="meal_list_floating_button"><img id="edit_button" class="button_image" src="images\controls\pen.png" /></div>
                 </div>
             </div>
