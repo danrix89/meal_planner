@@ -178,7 +178,7 @@ function setup_app_controls() {
 
     // Editor controls
     document.getElementById("edit_button_div").onclick = edit_button_onclick;
-    document.getElementById("confirm_button_div")..classList.add("hide");
+    document.getElementById("confirm_button_div").classList.add("hide");
     document.getElementById("cancel_button_div").classList.add("hide");
     document.getElementById('meal_name_input').readOnly = true;
     document.getElementById('recipe_text_area').readOnly = true;
