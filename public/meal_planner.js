@@ -274,7 +274,7 @@ function create_new_account() {
 * password length.
 */
 function log_in() {
-    var test_mode = true;
+    var test_mode = false;
     if (test_mode) {
         ////////////////////////////////////////////////////////////////////////
         //////////////////////////// TEST LOG IN ///////////////////////////////
