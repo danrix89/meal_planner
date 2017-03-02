@@ -75,7 +75,7 @@ var firebase_authentication = {};
 var firebase_storage = {};
 
 /*****************************************************/
-/******** Functions **********************************/
+/* Firebase Initialization Functions *****************/
 /*****************************************************/
 
 /**
@@ -112,6 +112,99 @@ function initialize_firebase() {
     setup_sign_in_controls();
 }
 
+/*****************************************************/
+/* Sign-In Initialization Functions ******************/
+/*****************************************************/
+
+/**
+* SETUP_SIGN_IN_CONTROLS
+* Sets up the sign-in option buttons with click actions.
+*/
+function setup_sign_in_controls() {
+
+    var btnCreateAccount = document.getElementById("btnCreateAccount");
+    btnCreateAccount.setAttribute("onclick", "create_new_account()");
+
+    var btnLogin = document.getElementById("btnLogin");
+    btnLogin.setAttribute("onclick", "log_in()");
+
+    var btnGoogle = document.getElementById("btnGoogle");
+    btnGoogle.setAttribute("onClick", "log_in_with_google()");
+
+    var btnFacebook = document.getElementById("btnFacebook");
+    btnFacebook.setAttribute("onClick", "log_in_with_facebook()");
+
+    var linkCreateAccount = document.getElementById("linkCreateAccount");
+    linkCreateAccount.addEventListener("click", toggle_create_account_view);
+}
+
+/*****************************************************/
+/* App Initialization Functions **********************/
+/*****************************************************/
+
+/**
+* SETUP_APP_CONTROLS
+* Sets up the sign-in option buttons with click actions.
+*/
+function setup_app_controls() {
+    // Menu bar controls
+    document.getElementById('log_out_button').onclick = logout;
+
+    // Calendar controls
+    setup_calendar_title_and_nav_buttons();
+
+    // Meal List controls
+
+    // Editor controls
+    document.getElementById("edit_button_div").onclick = edit_current_meal;
+    document.getElementById("confirm_button_div").onclick = confirm_changes;
+    document.getElementById("cancel_button_div").onclick = cancel_changes;
+    document.getElementById("confirm_button_div").classList.add("hide");
+    document.getElementById("cancel_button_div").classList.add("hide");
+    document.getElementById('meal_name_input').readOnly = true;
+    document.getElementById('recipe_text_area').readOnly = true;
+    document.getElementById('meal_ingredient_input').value = '';
+    document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
+    document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
+
+}
+
+/**
+* INITIALIZE_MEAL_PLANNER_APP
+* Initializes the app (after a successful log in) with controls, fields, data, etc.
+*/
+function initialize_meal_planner_app() {
+    // Set the user's meals from the database.
+    firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
+
+    setup_app_controls();
+
+    // Setup the current session's meal plans with user data
+    setup_initial_meal_plans();
+}
+
+/**
+* INITIALIZE_USER_MEALS_FROM_DB_SNAPSHOT
+* Get the user's meals from storage (not the meal plans but their list of meals)
+*/
+function initialize_user_meals_from_db_snapshot(db_snapshot) {
+
+    set_meals_from_db_snapshot(db_snapshot);
+
+    // Set the initial current/previous meals to the first meal when loading the page.
+    previous_meal = meals[0];
+    set_current_meal(meals[0].id);
+
+    // Populate the app interface with data
+    populate_meal_list();
+    populate_meal_editor(current_meal);
+    populate_calendar_days();
+}
+
+/*****************************************************/
+/* Authentication Functions **************************/
+/*****************************************************/
+
 /**
 * ON_AUTHENTICATION_STATE_CHANGED
 * Handles what happens when a user logs in and out of the app.
@@ -142,53 +235,6 @@ function on_authentication_state_changed(firebase_user) {
 }
 
 /**
-* SETUP_SIGN_IN_CONTROLS
-* Sets up the sign-in option buttons with click actions.
-*/
-function setup_sign_in_controls() {
-
-    var btnCreateAccount = document.getElementById("btnCreateAccount");
-    btnCreateAccount.setAttribute("onclick", "create_new_account()");
-
-    var btnLogin = document.getElementById("btnLogin");
-    btnLogin.setAttribute("onclick", "log_in()");
-
-    var btnGoogle = document.getElementById("btnGoogle");
-    btnGoogle.setAttribute("onClick", "log_in_with_google()");
-
-    var btnFacebook = document.getElementById("btnFacebook");
-    btnFacebook.setAttribute("onClick", "log_in_with_facebook()");
-
-    var linkCreateAccount = document.getElementById("linkCreateAccount");
-    linkCreateAccount.addEventListener("click", toggle_create_account_view);
-}
-
-/**
-* SETUP_APP_CONTROLS
-* Sets up the sign-in option buttons with click actions.
-*/
-function setup_app_controls() {
-    // Menu bar controls
-    document.getElementById('log_out_button').onclick = logout;
-
-    // Calendar controls
-    setup_calendar_title_and_nav_buttons();
-
-    // Meal List controls
-
-    // Editor controls
-    document.getElementById("edit_button_div").onclick = edit_button_onclick;
-    document.getElementById("confirm_button_div").classList.add("hide");
-    document.getElementById("cancel_button_div").classList.add("hide");
-    document.getElementById('meal_name_input').readOnly = true;
-    document.getElementById('recipe_text_area').readOnly = true;
-    document.getElementById('meal_ingredient_input').value = '';
-    document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
-    document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
-
-}
-
-/**
 * SET_IMAGE_SRC
 * Sets the image url source on an HTML image (img) element.
 * @param = image_ref is the reference object to the image in the firebase storage.
@@ -204,6 +250,10 @@ function set_image_src(image_ref, image_element) {
             console.log(error.message);
         })
 }
+
+/*****************************************************/
+/* Sign-In Implementation Functions ******************/
+/*****************************************************/
 
 /**
 * TOGGLE_CREATE_ACCOUNT_VIEW
@@ -337,40 +387,13 @@ function log_in_with_provider(provider) {
     firebase_authentication.signInWithPopup(provider).catch(function(error) {console.log(error.message);} );
 }
 
-/**
-* INITIALIZE_MEAL_PLANNER_APP
-* Initializes the app (after a successful log in) with controls, fields, data, etc.
-*/
-function initialize_meal_planner_app() {
-    // Set the user's meals from the database.
-    firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
-
-    setup_app_controls();
-
-    // Setup the current session's meal plans with user data
-    setup_initial_meal_plans();
-}
-
-/**
-* INITIALIZE_USER_MEALS_FROM_DB_SNAPSHOT
-* Get the user's meals from storage (not the meal plans but their list of meals)
-*/
-function initialize_user_meals_from_db_snapshot(db_snapshot) {
-
-    set_meals_from_db_snapshot(db_snapshot);
-
-    // Set the initial current/previous meals to the first meal when loading the page.
-    previous_meal = meals[0];
-    set_current_meal(meals[0].id);
-
-    // Populate the app interface with data
-    populate_meal_list();
-    populate_meal_editor(current_meal);
-    populate_calendar_days();
-}
+/*****************************************************/
+/* App Implementation Functions **********************/
+/*****************************************************/
 
 function set_meals_from_db_snapshot(db_snapshot) {
     var user_meals_from_db = db_snapshot.val();
+    meals = [];
 
     // Loop through each of the meals (by id)
     for (var meal_id in user_meals_from_db) {
@@ -976,7 +999,7 @@ function populate_meal_list()
 
     // Setup onclick functions
     setup_meal_onclick_function();
-    document.getElementById('add_button').onclick = setup_meal_editor_for_adding_new_meal;
+    document.getElementById('add_button').onclick = setup_for_adding_new_meal;
 }
 
 /**
@@ -1015,15 +1038,6 @@ function setup_input_onkeypress_function()
     document.getElementById('meal_name_input').onkeypress = update_meal_name_with_field_value;
     document.getElementById('meal_name_input').onkeydown = update_meal_name_with_field_value;
     document.getElementById('recipe_text_area').onkeypress = update_meal_recipe_instructions_with_text_area_value;
-}
-
-/**
-*
-*/
-function setup_cancel_button_onclick_function()
-{
-    var element = document.getElementById('cancel_button');
-    element.setAttribute("onclick", "cancel_meal_edit_changes('" + current_meal.id + "')");
 }
 
 /**
@@ -1084,28 +1098,44 @@ function update_meal_recipe_instructions_with_text_area_value()
 }
 
 /**
-* Setup_meal_editor_for_adding_new_meal
+* Setup_for_adding_new_meal
 * Actions for when the add meal button is clicked in the meal list (a.k.a. the + button)
 */
-function setup_meal_editor_for_adding_new_meal()
+function setup_for_adding_new_meal()
 {
+    // Ensure the user isn't already editing or adding a meal
     if (!is_edit_mode && !is_adding_new_meal)
     {
         is_adding_new_meal = true;
         is_edit_mode = true;
 
-        // Set the previous and current meal
+        // Set the previous meal
         previous_meal = current_meal;
+
+        // Set the current meal to a new empty one for editing
         current_meal = { id: "", name: "", image_url: "", ingredients: [], recipe: "" };
 
-        // Populate the editor with the new meal (all fields will be blank)
-        populate_meal_editor(current_meal);
-        document.getElementById('meal_name_input').focus();
-
-        setup_input_onkeypress_function();
-
-        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
+        // Setup the meal editor
+        setup_meal_editor_for_adding_new_meal();
     }
+}
+
+/**
+* Setup_meal_editor_for_adding_new_meal
+* Actions for when the add meal button is clicked in the meal list (a.k.a. the + button)
+*/
+function setup_meal_editor_for_adding_new_meal()
+{
+    // Setup the meal editor
+    show_edit_mode_controls();
+
+    // Populate the editor with the new meal (all fields will be blank)
+    populate_meal_editor(current_meal);
+    document.getElementById('meal_name_input').focus();
+
+    setup_input_onkeypress_function();
+
+    firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
 }
 
 /**
@@ -1135,18 +1165,8 @@ function add_ingredient()
     }
 }
 
-/**
-* EDIT_BUTTON_ONCLICK
-* Actions for when the edit button is clicked (
-* @param
-* @return
-*/
-function edit_button_onclick()
-{
-    // Hide the edit button
+function show_edit_mode_controls() {
     document.getElementById('edit_button_div').classList.add("hide");
-
-    // Show the edit mode controls/buttons
     document.getElementById('meal_name_input').readOnly = false;
     document.getElementById('recipe_text_area').readOnly = false;
     document.getElementById('meal_ingredient_input').value = '';
@@ -1155,6 +1175,27 @@ function edit_button_onclick()
     document.getElementById('cancel_button_div').classList.remove("hide");
     document.getElementById('confirm_button_div').classList.remove("hide");
 
+}
+
+function hide_edit_mode_controls() {
+    document.getElementById('edit_button_div').classList.remove("hide");
+    document.getElementById('meal_name_input').readOnly = true;
+    document.getElementById('recipe_text_area').readOnly = true;
+    document.getElementById('meal_ingredient_input').value = '';
+    document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
+    document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
+    document.getElementById('cancel_button_div').classList.add("hide");
+    document.getElementById('confirm_button_div').classList.add("hide");
+}
+
+/**
+* EDIT_CURRENT_MEAL
+* Actions for when the edit button is clicked
+*/
+function edit_current_meal()
+{
+    show_edit_mode_controls();
+
     // Save the current meal before we edit it so we can recover if the user
     // decides to cancel their changes
     meal_before_edit = current_meal;
@@ -1162,46 +1203,41 @@ function edit_button_onclick()
     // Toggle edit mode
     is_edit_mode = true;
 }
-    // // If we were in edit mode, then the user is clicking the
-    // // save button (which was the edit button - now it looks
-    // // like a checkmark), so we need to save the user's work.
-    // if (is_edit_mode)
-    // {
-    //     // ...Save changes to meal name and instructions
-    //     current_meal.name = document.getElementById('meal_name_input').value;
-    //     current_meal.recipe = document.getElementById('recipe_text_area').value;
-    //
-    //     // If we were adding then set the flag so we know
-    //     // we aren't in adding meal mode
-    //     if (is_adding_new_meal)
-    //     {
-    //         // Write user meal to database
-    //         var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
-    //         var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
-    //         for (var i = 0; i < current_meal.ingredients.length; ++i) {
-    //             meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
-    //         }
-    //         var new_users_meals_record_ref = db_users_meals_ref.push();
-    //         new_users_meals_record_ref.set(meal_object);
-    //         current_meal.id = new_users_meals_record_ref.uid;
-    //
-    //         is_adding_new_meal = false;
-    //     }
-    //
-    //     // Populate the meal list to reflect our changes
-    //     populate_meal_list();
-    // }
-    // else
-    // {
-    //
-    // }
-    //
-    // // Toggle edit mode
-    // is_edit_mode = !is_edit_mode;
-    //
-    // // Populate the meal editor to reflect being in edit mode or not
-    // populate_meal_editor(current_meal);
 
+/**
+* Confirm Changes
+* Actions for when the edit button is clicked (
+*/
+function confirm_changes()
+{
+    // Take everything out of edit mode
+    is_edit_mode = false;
+
+    // ...Save changes to meal name and instructions
+    current_meal.name = document.getElementById('meal_name_input').value;
+    current_meal.recipe = document.getElementById('recipe_text_area').value;
+
+    // If we were adding then set the flag so we know we aren't in adding meal mode
+    if (is_adding_new_meal)
+    {
+        // Write user meal to database
+        var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
+        var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
+        for (var i = 0; i < current_meal.ingredients.length; ++i) {
+            meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
+        }
+        var new_users_meals_record_ref = db_users_meals_ref.push();
+        new_users_meals_record_ref.set(meal_object);
+        current_meal.id = new_users_meals_record_ref.uid;
+
+        is_adding_new_meal = false;
+    }
+
+    // Populate the meal list to reflect our changes
+    populate_meal_list();
+
+    hide_edit_mode_controls();
+}
 
 /**
 * FUNCTION_NAME
@@ -1209,37 +1245,26 @@ function edit_button_onclick()
 * @param
 * @return
 */
-function cancel_meal_edit_changes(meal_id)
+function cancel_changes()
 {
-    if (is_edit_mode) {
-        // Take everything out of edit mode / adding mode
-        is_edit_mode = false;
+    // Take everything out of edit mode
+    is_edit_mode = false;
 
-        // Check if adding we were adding a new meal
-        if (is_adding_new_meal)
-        {
-            is_adding_new_meal = false;
+    // Check if adding we were adding a new meal
+    if (is_adding_new_meal) {
+        is_adding_new_meal = false;
 
-            // Remove current meal from meals because
-            for (var i = 0; i < meals.length; i++)
-            {
-                if (meals[i].id == meal_id) {
-                    meals.splice(i, 1);
-                }
-            }
-
-            // set current meal back to previous meal
-            current_meal = previous_meal;
-        }
-        else {
-            // We aren't adding a new meal. This means we're editing
-            // the current meal, so we need to put the current meal
-            // back to the way it was before we started editing.
-            current_meal = meal_before_edit;
-        }
-
-        populate_meal_editor(current_meal);
+        // set current meal back to previous meal
+        current_meal = previous_meal;
+    } else {
+        // We aren't adding a new meal. This means we're editing
+        // the current meal, so we need to put the current meal
+        // back to the way it was before we started editing.
+        current_meal = meal_before_edit;
     }
+
+    hide_edit_mode_controls();
+    populate_meal_editor(current_meal);
 }
 
 /**
@@ -1401,7 +1426,6 @@ function populate_meal_editor(meal)
 
     // Setup the onclick functionality
     setup_ingredient_onclick_function();
-    setup_cancel_button_onclick_function();
     document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
