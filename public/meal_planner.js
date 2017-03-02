@@ -1232,6 +1232,15 @@ function confirm_changes()
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.uid;
     } else {
+        // Save the changes to the database
+        var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
+        var meal_object = { name: current_meal.name, image_path: current_meal.image_url, recipe: current_meal.recipe, ingredients: {} };
+        for (var i = 0; i < current_meal.ingredients.length; ++i) {
+            meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
+        }
+        db_users_meals_meal_ref.set(meal_object);
+
+        // Refresh the meal list with those changes
         firebase_database.ref("Users_Meals/" + user.uid).on("value", refresh_meal_list_and_editor_from_db_snapshot);
     }
 
