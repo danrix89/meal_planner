@@ -1208,8 +1208,6 @@ function edit_current_meal()
 */
 function confirm_changes()
 {
-    firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
-
     // Take everything out of edit mode
     is_edit_mode = false;
 
@@ -1220,6 +1218,10 @@ function confirm_changes()
     // If we were adding then set the flag so we know we aren't in adding meal mode
     if (is_adding_new_meal)
     {
+        is_adding_new_meal = false;
+
+        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
+
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
         var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
@@ -1229,12 +1231,9 @@ function confirm_changes()
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.uid;
-
-        is_adding_new_meal = false;
+    } else {
+        firebase_database.ref("Users_Meals/" + user.uid).on("value", refresh_meal_list_and_editor_from_db_snapshot);
     }
-
-    // Populate the meal list to reflect our changes
-    populate_meal_list();
 
     hide_edit_mode_controls();
 }
