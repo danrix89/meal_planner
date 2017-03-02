@@ -177,8 +177,15 @@ function setup_app_controls() {
     // Meal List controls
 
     // Editor controls
-    var element = document.getElementById("edit_button");
-    element.onclick = edit_button_onclick;
+    document.getElementById("edit_button_div").onclick = edit_button_onclick;
+    document.getElementById("confirm_button_div")..classList.add("hide");
+    document.getElementById("cancel_button_div").classList.add("hide");
+    document.getElementById('meal_name_input').readOnly = true;
+    document.getElementById('recipe_text_area').readOnly = true;
+    document.getElementById('meal_ingredient_input').value = '';
+    document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
+    document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
+
 }
 
 /**
@@ -1137,7 +1144,7 @@ function add_ingredient()
 function edit_button_onclick()
 {
     // Hide the edit button
-    document.getElementById('edit_button').classList.add("hide");
+    document.getElementById('edit_button_div').classList.add("hide");
 
     // Show the edit mode controls/buttons
     document.getElementById('meal_name_input').readOnly = false;
