@@ -1140,8 +1140,8 @@ function edit_button_onclick()
     document.getElementById('edit_button').classList.add("hide");
 
     // Show the edit mode controls/buttons
-    meal_name_iput.readOnly = false;
-    meal_instructions_text_area.readOnly = false;
+    document.getElementById('meal_name_input').readOnly = false;
+    document.getElementById('recipe_text_area').readOnly = false;
     document.getElementById('meal_ingredient_input').value = '';
     document.getElementById('meal_ingredient_input').parentElement.style.visibility = "visible";
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
