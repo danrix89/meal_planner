@@ -697,8 +697,27 @@ function populate_calendar_with_meal_plan() {
 * @param day on the calendar that the meal is being planned for
 * @param meal_id from the meal in the users meal list
 */
-function add_new_meal_to_meal_plan(day, meal_id)
+function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
 {
+    firebase_database.ref().child('Users_Meals/' + user.uid + "/" + meal_id).once("value", function(db_snapshot) {
+        console.log("db_snapshot.val(): " + db_snapshot.val());
+        // (db_snapshot.val())[meal_id]
+        // var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+        // var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
+    }, function(errorObject) {
+        console.log("The read failed: " + errorObject.code);
+        console.log("The read failed: " + errorObject.message);
+    });
+
+
+    // Create the mealPlan object
+    var mealPlan_object = {};
+
+
+    // Set the new mealPlan record with the mealPlan object
+
+
+
     // A variable to store the meal from the user's
     // meal list that matches the meal_id parameter
     var matched_meal;
@@ -835,6 +854,8 @@ function drop_meal(event) {
     // Get the data from the dropped meal
     var data = event.dataTransfer.getData("text");
 
+    var meal_id = document.getElementById(data).getAttribute("data-meal-id");
+
     // Find the parent element of the dropped meal (where did we drag it from?)
     var parent_element = document.getElementById(data).parentElement;
 
@@ -858,13 +879,13 @@ function drop_meal(event) {
             var day = event.target.getAttribute("data-day");
             if (already_existing_plannedMonth_id != null) {
                 // If so, then add the new meal to that month
-                add_new_meal_to_meal_plan(day, already_existing_plannedMonth_id);
+                add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
             } else {
                 // If not, then create a new plannedMonth
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
                 var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
                 new_plannedMonths_record_ref.set(plannedMonth_object);
-                add_new_meal_to_meal_plan(day, new_plannedMonths_record_ref.uid);
+                add_new_meal_to_meal_plan(day, meal_id, new_plannedMonths_record_ref.uid);
             }
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
