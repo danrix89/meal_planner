@@ -700,10 +700,11 @@ function populate_calendar_with_meal_plan() {
 function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
 {
     firebase_database.ref().child('Users_Meals/' + user.uid + "/" + meal_id).once("value", function(db_snapshot) {
-        console.log("db_snapshot.val(): " + db_snapshot.val());
-        // (db_snapshot.val())[meal_id]
-        // var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
-        // var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+        var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
+        var meal_object = db_snapshot.val();
+        meal_object.day = day;
+        new_mealPlan_record_ref.set(meal_object);
     }, function(errorObject) {
         console.log("The read failed: " + errorObject.code);
         console.log("The read failed: " + errorObject.message);
