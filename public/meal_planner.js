@@ -841,9 +841,8 @@ function drop_meal(event) {
     // If the parent element is a meal list item, copy the data over...
     if (parent_element.className.includes("flex-meal-item")) {
         // Get the meal plan for the current month from the database (using the "formatted_date")
-        var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths' + user.uid)
-
-        db_users_plannedMonths_ref.on("value", function(snapshot) {
+        var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid)
+        db_users_plannedMonths_ref.once("value", function(snapshot) {
             // Loop through the months to see if one matches the current formatted_date
             var already_existing_plannedMonth_id = null;
             var plannedMonths_MealPlans = snapshot.val()
@@ -876,7 +875,7 @@ function drop_meal(event) {
         var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
         var new_id = data + "_calendar";
         calendar_meal_day_element.id = new_id;
-        calendar_meal_day_element.setAttribute("", "select_meal_in_calendar(" + meal_id + ")");
+        calendar_meal_day_element.setAttribute("onclick", "select_meal_in_calendar(" + meal_id + ")");
         calendar_meal_day_element.setAttribute("data-meal-id", meal_id);
         event.target.appendChild(calendar_meal_day_element);
     }
