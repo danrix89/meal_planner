@@ -669,6 +669,9 @@ function days_in_month(month, year) {
 * Populate the current month with the meals the that month's meal plans (if any)
 */
 function populate_calendar_with_meal_plan() {
+    // Get the currently view month's meal plan from the database
+    // Populate the calendar with meal plan
+
     for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
         var meal_id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
         var day = current_calendar_month_meal_plan.meal_plan[i].day;
@@ -694,7 +697,7 @@ function populate_calendar_with_meal_plan() {
 * @param day on the calendar that the meal is being planned for
 * @param meal_id from the meal in the users meal list
 */
-function add_new_meal_to_current_month_meal_plan(day, meal_id)
+function add_new_meal_to_meal_plan(day, meal_id)
 {
     // A variable to store the meal from the user's
     // meal list that matches the meal_id parameter
@@ -706,8 +709,7 @@ function add_new_meal_to_current_month_meal_plan(day, meal_id)
     // Find the meal from the users meal list using the meal_id parameter
     for (var i = 0; i < meals.length; i++) {
         // Copy the meal info from meals into the new_meal object
-        if (meals[i].id == meal_id)
-        {
+        if (meals[i].id == meal_id) {
             matched_meal = meals[i];
             is_meal_found = true;
             break;
@@ -838,23 +840,48 @@ function drop_meal(event) {
 
     // If the parent element is a meal list item, copy the data over...
     if (parent_element.className.includes("flex-meal-item")) {
-        var node_copy = document.getElementById(data).cloneNode(true);
-        var new_id = data + "_calendar";
-        var element_count = $('[id^=' + new_id + ']').length;
-        new_id += (element_count + 1).toString();
-        node_copy.id = new_id;
-        event.target.appendChild(node_copy);
+        // Get the meal plan for the current month from the database (using the "formatted_date")
+        var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths' + user.uid)
 
-        // Create a new meal with the meal info from meals matching meal_id to add to the meal plan
-        var day = event.target.getAttribute("data-day");
-        var meal_id = document.getElementById(data).getAttribute("data-meal-id");
-        add_new_meal_to_current_month_meal_plan(day, meal_id);
-        meal_id = current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id;
-        var element = document.getElementById(new_id);
-        element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
-        element.setAttribute("data-meal-id", meal_id);
+        db_users_plannedMonths_ref.on("value", function(snapshot) {
+            // Loop through the months to see if one matches the current formatted_date
+            var already_existing_plannedMonth_id = null;
+            var plannedMonths_MealPlans = snapshot.val()
+            for (var plannedMonth_id in plannedMonths_MealPlans) {
+                if (plannedMonths_MealPlans.hasOwnProperty(plannedMonth_id)) {
+                    if (plannedMonths_MealPlans[plannedMonth_id].formatted_date == formatted_date(calendar_date)) {
+                        already_existing_plannedMonth_id = plannedMonth_id;
+                        break;
+                    }
+                }
+            }
+
+            var day = event.target.getAttribute("data-day");
+            if (already_existing_plannedMonth_id != null) {
+                // If so, then add the new meal to that month
+                add_new_meal_to_meal_plan(day, already_existing_plannedMonth_id);
+            } else {
+                // If not, then create a new plannedMonth
+                var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
+                var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
+                new_plannedMonths_record_ref.set(plannedMonth_object);
+                add_new_meal_to_meal_plan(day, new_plannedMonths_record_ref.uid);
+            }
+        }, function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+          console.log("The read failed: " + errorObject.message);
+        });
+
+        // Create a new meal calendar day element
+        var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
+        var new_id = data + "_calendar";
+        calendar_meal_day_element.id = new_id;
+        calendar_meal_day_element.setAttribute("", "select_meal_in_calendar(" + meal_id + ")");
+        calendar_meal_day_element.setAttribute("data-meal-id", meal_id);
+        event.target.appendChild(calendar_meal_day_element);
     }
-    else // ... Else, the data should be transfered/moved
+    // Else, the data should be transfered/moved
+    else
     {
         // Copy the image over with onclick functionality
         var element = document.getElementById(data);
@@ -883,8 +910,7 @@ function drop_meal(event) {
                 current_calendar_month_meal_plan.meal_plan.splice(index_of_meal_to_replace, 1);
                 update_day(current_calendar_month_meal_plan, target_day, meal_id);
             }
-        }
-        else {
+        } else {
             ev.target.appendChild(element);
             var meal_id = element.getAttribute("data-meal-id");
             element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
