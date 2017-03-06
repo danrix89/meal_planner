@@ -177,6 +177,8 @@ function initialize_meal_planner_app() {
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
 
+    get_meal_plan_for_current_month();
+
     setup_app_controls();
 
     // Setup the current session's meal plans with user data
@@ -576,6 +578,16 @@ function formatted_date(a_date) {
 }
 
 /**
+*
+*/
+function get_meal_plan_for_current_month() {
+    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid)
+    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(snapshot) {
+        console.log(snapshot.key);
+    });
+}
+
+/**
 * POPULATE_CALENDAR_DAYS
 * Populates the calendar with squares (days) and the populates it with meal plan data
 */
@@ -700,6 +712,7 @@ function populate_calendar_with_meal_plan() {
 function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
 {
     firebase_database.ref().child('Users_Meals/' + user.uid + "/" + meal_id).once("value", function(db_snapshot) {
+        // Add the meal to the database
         var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
         var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
         var meal_object = db_snapshot.val();
@@ -709,76 +722,6 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
         console.log("The read failed: " + errorObject.code);
         console.log("The read failed: " + errorObject.message);
     });
-
-
-    // Create the mealPlan object
-    var mealPlan_object = {};
-
-
-    // Set the new mealPlan record with the mealPlan object
-
-
-
-    // A variable to store the meal from the user's
-    // meal list that matches the meal_id parameter
-    var matched_meal;
-
-    // A flag to know if a matching meal was found
-    var is_meal_found = false;
-
-    // Find the meal from the users meal list using the meal_id parameter
-    for (var i = 0; i < meals.length; i++) {
-        // Copy the meal info from meals into the new_meal object
-        if (meals[i].id == meal_id) {
-            matched_meal = meals[i];
-            is_meal_found = true;
-            break;
-        }
-    }
-
-    // Check if the meal was found and then
-    // copy the data from the matched_meal to the new_meal
-    if (is_meal_found)
-    {
-        // Variable the represents the new meal object to be added to the calendar
-        var new_meal = {
-            "day": day,
-            "meal": {
-                "id": '',
-                "name": '',
-                "image_url": '',
-                "ingredients": [],
-                "recipe": ''
-            }
-        };
-
-        // Find out the latest_meal_id in the current_calendar_month_meal_plan's meal_plan (default to zero)
-        // then set the ID of the new_meal
-        var latest_meal_id = 0;
-        if (current_calendar_month_meal_plan.meal_plan.length > 0)
-            latest_meal_id = parseInt(current_calendar_month_meal_plan.meal_plan[current_calendar_month_meal_plan.meal_plan.length - 1].meal.id)
-        new_meal.meal.id = (latest_meal_id + 1).toString();
-
-        // Copy over the name
-        new_meal.meal.name = matched_meal.name;
-
-        // Copy of the image url
-        new_meal.meal.image_url = matched_meal.image_url;
-
-        // Copy over all the ingredients
-        for (var j = 0; j < matched_meal.ingredients.length; j++) {
-            new_meal.meal.ingredients.push(matched_meal.ingredients[j]);
-        }
-
-        // Copy of the recipe instructions
-        new_meal.meal.recipe = matched_meal.recipe;
-
-        // Add the new_meal to the current_calendar_month_meal_plan
-        current_calendar_month_meal_plan.meal_plan.push(new_meal);
-
-        // Update the meal plan
-        update_meal_plan(current_calendar_month_meal_plan);
-    }
 }
 
 /**
@@ -959,11 +902,13 @@ function drop_to_meal_list_garbage(event)
 
     if (window.confirm("Are you sure you want to delete this meal forever?"))
     {
-        for (var i = 0; i < meals.length; i++)
-        {
-            if (meals[i].id == meal_id)
-            {
+        // Delete the meal from the Users_Meals in the database
+
+        // Remove the meal from the "meals" in memory
+        for (var i = 0; i < meals.length; i++) {
+            if (meals[i].id == meal_id) {
                 meals.splice(i, 1);
+                break;
             }
         }
 
@@ -988,19 +933,8 @@ function drop_to_calendar_garbage(event)
 
     if (window.confirm("Are you sure you want to delete this meal from your meal plan?"))
     {
-        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
-        {
-            if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
-            {
-                current_calendar_month_meal_plan.meal_plan.splice(i, 1);
-            }
-        }
-
-        // Repopulate the calendar
-        populate_calendar_days();
-
-        // Update the meal plan for that month to reflect the change
-        update_meal_plan(current_calendar_month_meal_plan);
+        // Delete the PlannedMonths_MealPlans record for that day
+        // Remove the meal from the calendar (HTML)
     }
 }
 
