@@ -585,7 +585,7 @@ function get_meal_plan_for_current_month() {
         for (var plannedMonth_id in db_snapshot.val()) {
             if (db_snapshot.val().hasOwnProperty(plannedMonth_id)) {
                 // Just to make sure we got back the right record and only one record
-                if (formatted_date(calendar_date) == db_snapshot.val()[plannedMonth_id]) {
+                if (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date) {
                     var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
                     db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
                         var meal_plans = db_mealPlans_snapshot.val();
