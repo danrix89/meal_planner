@@ -174,14 +174,13 @@ function setup_app_controls() {
 * Initializes the app (after a successful log in) with controls, fields, data, etc.
 */
 function initialize_meal_planner_app() {
+    setup_app_controls();
+
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
 
-    setup_app_controls();
-
-    // Setup the current session's meal plans with user data
+    // Set the user's meal plan for the current month from the database.
     get_meal_plan_for_current_month();
-    //setup_initial_meal_plans();
 }
 
 /**
@@ -444,43 +443,6 @@ function setup_calendar_title_and_nav_buttons() {
 }
 
 /**
-* SETUP_INITIAL_MONTHLY_MEAL_PLAN_DATA
-* Does the initial set up of what the user's meal plans are
-* to later be displayed.
-*/
-function setup_initial_meal_plans() {
-    // Get all the user's saved meal plans from storage
-    var previously_saved_meal_plan_data = localStorage.user_meal_plan_data;
-
-    // If the user has meal plan data
-    if (previously_saved_meal_plan_data != null) {
-        // Set the meal plan data object
-        meal_plans = JSON.parse(previously_saved_meal_plan_data);
-
-        // set the meal plan for the currently view calendar month
-        set_initial_calendar_month_meal_plan();
-    }
-}
-
-/**
-* SET_INITIAL_CALENDAR_MONTH_MEAL_PLAN
-* Set the meal plan for the calendar's current month
-* so the calendar will be populated with any saved
-* plans for that month (if any).
-*/
-function set_initial_calendar_month_meal_plan() {
-    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
-        if (meal_plans.meal_plans[i].formatted_date == formatted_date(calendar_date)) {
-            current_calendar_month_meal_plan = meal_plans.meal_plans[i];
-            return;
-        }
-    }
-
-    // If we've gotten this far, then the current month doesn't have a meal plan
-    current_calendar_month_meal_plan.formatted_date = formatted_date(calendar_date);
-}
-
-/**
 * DISPLAY_MODAL
 * Displays the welcome modal dialog
 */
@@ -680,7 +642,7 @@ function populate_calendar_days() {
     }
 
     // Now populate the month with any meal data
-    populate_calendar_with_meal_plan();
+    get_meal_plan_for_current_month();
 }
 
 /**
