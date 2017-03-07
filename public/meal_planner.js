@@ -225,15 +225,14 @@ function on_authentication_state_changed(firebase_user) {
         user = firebase_user;
         console.log("User '" + user.uid + "' is logged in.");
 
-        firebase_database.ref('Users').equalTo(user.uid).once('value', function(db_snapshot) {
-            var user_record = db_snapshot.val();
-            if (user_record == null) {
+        firebase_database.ref('Users').child(user.uid).once('value', function(snapshot) {
+            if (db_snapshot.val() == null) {
                 create_new_user_data(user);
-            } else if (!is_app_initialized) {
+            } else if (!is_app_initialized){
                 // Populate the calendar, meal list, etc.
                 initialize_meal_planner_app();
             }
-        })
+        });
 
         // Go to the app (hide the sign in controls)
         document.getElementById("sign_in_page").setAttribute("class", "hide");
