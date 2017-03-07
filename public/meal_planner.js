@@ -219,6 +219,10 @@ function on_authentication_state_changed(firebase_user) {
         user = firebase_user;
         console.log("User '" + user.uid + "' is logged in.");
 
+        var user_record_ref = firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
+            console.log(db_snapshot);
+        })
+
         // Populate the calendar, meal list, etc.
         initialize_meal_planner_app();
 
@@ -387,11 +391,6 @@ function log_in_with_facebook() {
 */
 function log_in_with_provider(provider) {
     firebase_authentication.signInWithPopup(provider)
-        .then(function(firebase_user) {
-            var user_record_ref = firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
-                console.log(db_snapshot);
-            })
-        })
         .catch(function(error) {
             console.log(error.message);
         });
