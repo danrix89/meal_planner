@@ -59,6 +59,9 @@ var current_plannedMonth = { id: null, formatted_date: null };
 // The meal plan for the month the users is currently viewing
 var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
 
+// Flag to know when the app and its controls have been initialized
+var is_app_initialized = false;
+
 // The list/array of user meals
 var meals = [];
 
@@ -181,6 +184,8 @@ function initialize_meal_planner_app() {
 
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
+
+    is_app_initialized = true;
 }
 
 /**
@@ -219,12 +224,15 @@ function on_authentication_state_changed(firebase_user) {
         user = firebase_user;
         console.log("User '" + user.uid + "' is logged in.");
 
-        var user_record_ref = firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
-            console.log(db_snapshot);
+        firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
+            var user_record = db_snapshot.val();
+            if (user_record == null) {
+                create_new_user_data(user);
+            } else if (!is_app_initialized) {
+                // Populate the calendar, meal list, etc.
+                initialize_meal_planner_app();
+            }
         })
-
-        // Populate the calendar, meal list, etc.
-        initialize_meal_planner_app();
 
         // Go to the app (hide the sign in controls)
         document.getElementById("sign_in_page").setAttribute("class", "hide");
@@ -301,34 +309,40 @@ function create_new_account() {
         const promise = firebase_authentication.createUserWithEmailAndPassword(txtEmail.value, txtPassword.value);
 
         promise
-            .then(function(firebase_user) {
-                // Create the user in the database
-                firebase_database.ref().child('Users').child(firebase_user.uid).set({ display_name: firebase_user.displayName, email: firebase_user.email });
-
-                // Set the user's meals in the database as the default meals
-                firebase_database.ref("DefaultMeals").on("value", function(db_snapshot) {
-                    var default_meals = db_snapshot.val();
-                    var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + firebase_user.uid);
-
-                    // Loop through each of the default meals (by id)
-                    for (var default_meal_id in default_meals) {
-                        // Ensure the id is valid
-                        if (default_meals.hasOwnProperty(default_meal_id)) {
-                            // Create a new user meal
-                            var new_users_meals_record_ref = db_users_meals_ref.push();
-
-                            // Set the new user meal to the default one
-                            new_users_meals_record_ref.set(default_meals[default_meal_id]);
-                        }
-                    }
-                });
-            })
+            .then(create_new_user_data)
             .catch (function(event) {alert(event.message);
         });
     } else {
         txtPassword.focus();
         alert("Passwords must be 6 or more characters");
     }
+}
+
+function create_new_user_data(firebase_user) {
+    // Create the user in the database
+    firebase_database.ref().child('Users').child(firebase_user.uid).set({ display_name: firebase_user.displayName, email: firebase_user.email });
+
+    // Set the user's meals in the database as the default meals
+    firebase_database.ref("DefaultMeals").on("value", function(db_snapshot) {
+        var default_meals = db_snapshot.val();
+        var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + firebase_user.uid);
+
+        // Loop through each of the default meals (by id)
+        for (var default_meal_id in default_meals) {
+            // Ensure the id is valid
+            if (default_meals.hasOwnProperty(default_meal_id)) {
+                // Create a new user meal
+                var new_users_meals_record_ref = db_users_meals_ref.push();
+
+                // Set the new user meal to the default one
+                new_users_meals_record_ref.set(default_meals[default_meal_id]);
+            }
+        }
+
+        if (!is_app_initialized) {
+            initialize_meal_planner_app();
+        }
+    });
 }
 
 /**
