@@ -1117,7 +1117,9 @@ function show_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
     document.getElementById('cancel_button_div').classList.remove("hide");
     document.getElementById('confirm_button_div').classList.remove("hide");
-
+    for (var i = 0; i < current_meal.ingredients.length; ++i) {
+        document.getElementById('button_' + current_meal.ingredients[i]).classList.remove("hide");
+    }
 }
 
 function hide_edit_mode_controls() {
@@ -1129,6 +1131,9 @@ function hide_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
     document.getElementById('cancel_button_div').classList.add("hide");
     document.getElementById('confirm_button_div').classList.add("hide");
+    for (var i = 0; i < current_meal.ingredients.length; ++i) {
+        document.getElementById('button_' + current_meal.ingredients[i]).classList.add("hide");
+    }
 }
 
 /**
@@ -1349,7 +1354,7 @@ function populate_meal_editor(meal)
 
         // Setup the ingredient remove button (nested in the ingredient element)
         ingredient_remove_button.classList.add("remove_ingredient_button");
-        ingredient_remove_button.id = "button_" + i;
+        ingredient_remove_button.id = "button_" + meal.ingredients[i];
         ingredient_remove_button.innerHTML = ingredient_remove_button_icon;
 
         // Setup the ingredient element (with the nested name and remove button)
