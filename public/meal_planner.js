@@ -53,6 +53,9 @@ var meal_before_edit = { "id": "", "name": "", "image_url": "", "ingredients": [
 // The array of every months meal plan
 var meal_plans = { "meal_plans": [] };
 
+// The possible database plannedMonth record data of the current month (null, if no record is in the database)
+var current_plannedMonth = { id: null, formatted_date: null };
+
 // The meal plan for the month the users is currently viewing
 var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
 
@@ -502,24 +505,7 @@ function advance_month(a_value) {
     // Display the formatted date on the calendar title
     document.getElementById("month_title").innerHTML = current_calendar_date;
 
-    // Check if a meal plan for this month already exists and set the current_calendar_month_meal_plan to that
-    var already_has_meal_plan = false;
-    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
-        if (meal_plans.meal_plans[i].formatted_date == current_calendar_date) {
-            current_calendar_month_meal_plan = meal_plans.meal_plans[i];
-            already_has_meal_plan = true;
-            break;
-        }
-    }
-
-    // If no meal plan exists create a new one and push it to the meal_plans
-    if (!already_has_meal_plan) {
-        var new_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
-        new_month_meal_plan.formatted_date = current_calendar_date;
-        new_month_meal_plan.meal_plan = [];
-        meal_plans.meal_plans.push(new_month_meal_plan);
-        current_calendar_month_meal_plan = new_month_meal_plan;
-    }
+    // TODO: Set the current_plannedMonth from the database?
 
     // Repopulate the calander
     populate_calendar_days();
@@ -544,33 +530,13 @@ function get_meal_plan_for_current_month() {
     var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid);
     db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
         for (var plannedMonth_id in db_snapshot.val()) {
-            if (db_snapshot.val().hasOwnProperty(plannedMonth_id)) {
-                // Just to make sure we got back the right record and only one record
-                if (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date) {
-                    var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
-                    db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
-                        var meal_plans = db_mealPlans_snapshot.val();
-                        for (var mealPlan_id in meal_plans) {
-                            if (meal_plans.hasOwnProperty(mealPlan_id)) {
-                                var meal_plan_object = meal_plans[mealPlan_id];
-
-                                var calendar_day_element = document.getElementById('calendar_day_div_' + meal_plan_object.day);
-
-                                var image_element = document.createElement("img");
-                                image_element.setAttribute('id', 'drag_' + mealPlan_id + '_calendar');
-                                set_image_src(firebase_storage.ref().child(meal_plan_object.image_path), image_element);
-                                image_element.setAttribute('draggable', 'true');
-                                image_element.setAttribute('ondragstart', 'drag_meal(event)');
-                                image_element.setAttribute('data-meal-id', mealPlan_id);
-                                image_element.setAttribute("onclick", "select_meal_in_calendar(" + mealPlan_id + ")");
-                                //image_element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(mealPlan_id);
-
-                                calendar_day_element.appendChild(image_element);
-                            }
-                        }
-                    });
-                    break;
-                }
+            if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date))) {
+                current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
+                var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+                db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
+                    populate_calendar_with_mealPlans_snapshot(db_mealPlans_snapshot.val());
+                });
+                break;
             }
         }
     });
@@ -644,6 +610,26 @@ function populate_calendar_days() {
     get_meal_plan_for_current_month();
 }
 
+function populate_calendar_with_mealPlans_snapshot(meal_plans_snapshot) {
+    for (var mealPlan_id in meal_plans_snapshot) {
+        if (meal_plans_snapshot.hasOwnProperty(mealPlan_id)) {
+            var meal_plan_object = meal_plans_snapshot[mealPlan_id];
+
+            var calendar_day_element = document.getElementById('calendar_day_div_' + meal_plan_object.day);
+
+            var image_element = document.createElement("img");
+            image_element.setAttribute('id', 'drag_' + mealPlan_id + '_calendar');
+            set_image_src(firebase_storage.ref().child(meal_plan_object.image_path), image_element);
+            image_element.setAttribute('draggable', 'true');
+            image_element.setAttribute('ondragstart', 'drag_meal(event)');
+            image_element.setAttribute('data-meal-id', mealPlan_id);
+            image_element.setAttribute("onclick", "select_meal_in_calendar(" + mealPlan_id + ")");
+
+            calendar_day_element.appendChild(image_element);
+        }
+    }
+}
+
 /**
 * FIRST_DAY_OF_MONTH
 * Return the first day of the week for a given month (e.g. Monday = August 1, 2016).
@@ -663,33 +649,6 @@ function first_day_of_month(year, month) {
 */
 function days_in_month(month, year) {
     return new Date(year, month + 1, 0).getDate();
-}
-
-/**
-* POPULATE_CALENDAR_WITH_MEAL_PLAN
-* Populate the current month with the meals the that month's meal plans (if any)
-*/
-function populate_calendar_with_meal_plan() {
-    // Get the currently view month's meal plan from the database
-    // Populate the calendar with meal plan
-
-    for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
-        var meal_id = current_calendar_month_meal_plan.meal_plan[i].meal.id;
-        var day = current_calendar_month_meal_plan.meal_plan[i].day;
-        var image_url = current_calendar_month_meal_plan.meal_plan[i].meal.image_url;
-
-        var calendar_day_element = document.getElementById('calendar_day_div_' + day);
-
-        var image_element = document.createElement("img");
-        image_element.setAttribute('id', 'drag_' + meal_id + '_' + i + '_' + '_calendar');
-        image_element.setAttribute('src', image_url);
-        image_element.setAttribute('draggable', 'true');
-        image_element.setAttribute('ondragstart', 'drag_meal(event)');
-        image_element.setAttribute('data-meal-id', meal_id);
-        image_element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
-
-        calendar_day_element.appendChild(image_element);
-    }
 }
 
 /**
@@ -813,12 +772,14 @@ function drop_meal(event) {
             if (already_existing_plannedMonth_id != null) {
                 // If so, then add the new meal to that month
                 add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
+                current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
             } else {
                 // If not, then create a new plannedMonth
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
                 var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
                 new_plannedMonths_record_ref.set(plannedMonth_object);
                 add_new_meal_to_meal_plan(day, meal_id, new_plannedMonths_record_ref.uid);
+                current_plannedMonth = { id: new_plannedMonths_record_ref.uid, formatted_date: formatted_date(calendar_date) };
             }
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
@@ -843,33 +804,9 @@ function drop_meal(event) {
         var image_url = element.getAttribute("src");
         var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
 
-        // Check if the user is overwriting a day by copying over...
-        var is_day_already_filled = false;
-        var index_of_meal_to_replace;
-        for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++) {
-            if (current_calendar_month_meal_plan.meal_plan[i].day == target_day) {
-                is_day_already_filled = true;
-                index_of_meal_to_replace = i;
-            }
-        }
+        // Update the "day" in the database record
 
-        // Handle copying the data over into the new day square on the calendar (even if it's already filled)
-        if (is_day_already_filled) {
-            if (window.confirm("Are you sure you want to replace this meal?")) {
-                ev.target.appendChild(element);
-                var meal_id = element.getAttribute("data-meal-id");
-                ev.target.setAttribute("src", image_url);
-                element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
-                current_calendar_month_meal_plan.meal_plan.splice(index_of_meal_to_replace, 1);
-                update_day(current_calendar_month_meal_plan, target_day, meal_id);
-            }
-        } else {
-            ev.target.appendChild(element);
-            var meal_id = element.getAttribute("data-meal-id");
-            element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(meal_id);
-            target_day = document.getElementById(data).parentElement.getAttribute("data-day");
-            update_day(current_calendar_month_meal_plan, target_day, meal_id);
-        }
+        // If the user is overwriting a day, delete the one that's being overwritten
     }
 }
 
@@ -892,6 +829,8 @@ function drop_to_meal_list_garbage(event)
     if (window.confirm("Are you sure you want to delete this meal forever?"))
     {
         // Delete the meal from the Users_Meals in the database
+        var meal_record_to_remove = firebase_database.ref().child("Users_Meals/" + user.uid + "/" + meal_id);
+        meal_record_to_remove.remove();
 
         // Remove the meal from the "meals" in memory
         for (var i = 0; i < meals.length; i++) {
@@ -923,7 +862,24 @@ function drop_to_calendar_garbage(event)
     if (window.confirm("Are you sure you want to delete this meal from your meal plan?"))
     {
         // Delete the PlannedMonths_MealPlans record for that day
+        if (current_plannedMonth.id != null && current_plannedMonth.formatted_date == formatted_date(calendar_date)) {
+            var mealPlan_record_to_remove = firebase_database.ref().child("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
+            mealPlan_record_to_remove.remove();
+        } else {
+            var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('');
+            db_plannedMonths_mealPlans_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+                for (var plannedMonth_id in db_snapshot.val()) {
+                    if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
+                        current_plannedMonth = { id: plannedMonth_id; formatted_date: formatted_date(calendar_date) };
+                        var mealPlan_record_to_remove = firebase_database.ref().child("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
+                        mealPlan_record_to_remove.remove();
+                    }
+                }
+            })
+        }
+
         // Remove the meal from the calendar (HTML)
+        get_meal_plan_for_current_month();
     }
 }
 
