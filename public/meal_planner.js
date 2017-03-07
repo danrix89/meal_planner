@@ -203,6 +203,7 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     // Populate the app interface with data
     populate_meal_list();
     populate_meal_editor(current_meal);
+    hide_edit_mode_controls();
 
     // This will also populate the calendar with any planned meals
     populate_calendar_days();
@@ -1344,7 +1345,6 @@ function populate_meal_editor(meal)
         var ingredient_name_element = document.createElement("div");
         var ingredient_name_text_node = document.createTextNode(meal.ingredients[i]);
         var ingredient_remove_button = document.createElement("div");
-        var ingredient_remove_button_icon = is_edit_mode ? 'x' : '';
 
 
         // Setup the ingredient name element (nested in the ingredient element)
@@ -1355,7 +1355,7 @@ function populate_meal_editor(meal)
         // Setup the ingredient remove button (nested in the ingredient element)
         ingredient_remove_button.classList.add("remove_ingredient_button");
         ingredient_remove_button.id = "button_" + meal.ingredients[i];
-        ingredient_remove_button.innerHTML = ingredient_remove_button_icon;
+        ingredient_remove_button.innerHTML = 'x';
 
         // Setup the ingredient element (with the nested name and remove button)
         ingredient_element.classList.add("flex-ingredient-item");
