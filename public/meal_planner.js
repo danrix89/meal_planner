@@ -225,7 +225,7 @@ function on_authentication_state_changed(firebase_user) {
         user = firebase_user;
         console.log("User '" + user.uid + "' is logged in.");
 
-        firebase_database.ref('Users').child(user.uid).once('value', function(snapshot) {
+        firebase_database.ref('Users').child(user.uid).once('value', function(db_snapshot) {
             if (db_snapshot.val() == null) {
                 create_new_user_data(user);
             } else if (!is_app_initialized){
