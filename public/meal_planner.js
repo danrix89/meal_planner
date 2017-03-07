@@ -1222,8 +1222,8 @@ function cancel_changes()
         current_meal = meal_before_edit;
     }
 
-    hide_edit_mode_controls();
     populate_meal_editor(current_meal);
+    hide_edit_mode_controls();
 }
 
 /**
@@ -1407,7 +1407,7 @@ function remove_ingredient(ingredient)
         current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
 
         // Remove the ingredient HTML element
-        var ingredient_element = document.getElementById('ingredient_' + ingredient);
-        ingredient_element.parentElement.removeChild(ingredient_element);
+        var ingredient_list_element = document.getElementById('ingredient_' + ingredient).parentElement;
+        ingredient_list_element.parentElement.removeChild(ingredient_list_element);
     }
 }
