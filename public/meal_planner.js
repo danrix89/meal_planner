@@ -597,7 +597,7 @@ function get_meal_plan_for_current_month() {
 
                                 var image_element = document.createElement("img");
                                 image_element.setAttribute('id', 'drag_' + mealPlan_id + '_calendar');
-                                image_element.setAttribute('src', meal_plan_object.image_path);
+                                set_image_src(firebase_storage.ref().child(image_url), image_element);
                                 image_element.setAttribute('draggable', 'true');
                                 image_element.setAttribute('ondragstart', 'drag_meal(event)');
                                 image_element.setAttribute('data-meal-id', mealPlan_id);
