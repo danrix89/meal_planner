@@ -386,7 +386,15 @@ function log_in_with_facebook() {
 * logs the user in using some provider.
 */
 function log_in_with_provider(provider) {
-    firebase_authentication.signInWithPopup(provider).catch(function(error) {console.log(error.message);} );
+    firebase_authentication.signInWithPopup(provider)
+        .then(function(firebase_user) {
+            var user_record_ref = firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
+                console.log(db_snapshot);
+            })
+        })
+        .catch(function(error) {
+            console.log(error.message);
+        });
 }
 
 /*****************************************************/
