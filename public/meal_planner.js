@@ -870,7 +870,7 @@ function drop_to_calendar_garbage(event)
             db_plannedMonths_mealPlans_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
                 for (var plannedMonth_id in db_snapshot.val()) {
                     if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
-                        current_plannedMonth = { id: plannedMonth_id; formatted_date: formatted_date(calendar_date) };
+                        current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
                         var mealPlan_record_to_remove = firebase_database.ref().child("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
                         mealPlan_record_to_remove.remove();
                     }
