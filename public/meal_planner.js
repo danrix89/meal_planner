@@ -524,25 +524,6 @@ function formatted_date(a_date) {
 }
 
 /**
-*
-*/
-function get_meal_plan_for_current_month() {
-    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid);
-    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
-        for (var plannedMonth_id in db_snapshot.val()) {
-            if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date)) {
-                current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
-                var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
-                db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
-                    populate_calendar_with_mealPlans_snapshot(db_mealPlans_snapshot.val());
-                });
-                break;
-            }
-        }
-    });
-}
-
-/**
 * POPULATE_CALENDAR_DAYS
 * Populates the calendar with squares (days) and the populates it with meal plan data
 */
@@ -610,7 +591,30 @@ function populate_calendar_days() {
     get_meal_plan_for_current_month();
 }
 
+/**
+*
+*/
+function get_meal_plan_for_current_month() {
+    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid);
+    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+        for (var plannedMonth_id in db_snapshot.val()) {
+            if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date)) {
+                current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
+                var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+                db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
+                    populate_calendar_with_mealPlans_snapshot(db_mealPlans_snapshot.val());
+                });
+                break;
+            }
+        }
+    });
+}
+
+/**
+*
+*/
 function populate_calendar_with_mealPlans_snapshot(meal_plans_snapshot) {
+
     for (var mealPlan_id in meal_plans_snapshot) {
         if (meal_plans_snapshot.hasOwnProperty(mealPlan_id)) {
             var meal_plan_object = meal_plans_snapshot[mealPlan_id];
@@ -823,8 +827,8 @@ function drop_to_meal_list_garbage(event)
     event.preventDefault();
 
     var data = event.dataTransfer.getData("text");
-    var element = document.getElementById(data);
-    var meal_id = element.getAttribute("data-meal-id");
+    var meal_element_to_be_removed = document.getElementById(data);
+    var meal_id = meal_element_to_be_removed.getAttribute("data-meal-id");
 
     if (window.confirm("Are you sure you want to delete this meal forever?"))
     {
@@ -840,8 +844,8 @@ function drop_to_meal_list_garbage(event)
             }
         }
 
-        // Repopulate the meal list
-        populate_meal_list();
+        // Remove that one item from the calendar (HTML)
+        meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed);
     }
 }
 
