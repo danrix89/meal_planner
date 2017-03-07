@@ -177,12 +177,11 @@ function initialize_meal_planner_app() {
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
 
-    get_meal_plan_for_current_month();
-
     setup_app_controls();
 
     // Setup the current session's meal plans with user data
-    setup_initial_meal_plans();
+    get_meal_plan_for_current_month();
+    //setup_initial_meal_plans();
 }
 
 /**
@@ -581,9 +580,38 @@ function formatted_date(a_date) {
 *
 */
 function get_meal_plan_for_current_month() {
-    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid)
-    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(snapshot) {
-        console.log(snapshot.key);
+    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid);
+    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+        for (var plannedMonth_id in db_snapshot.val()) {
+            if (db_snapshot.val().hasOwnProperty(plannedMonth_id)) {
+                // Just to make sure we got back the right record and only one record
+                if (formatted_date(calendar_date) == db_snapshot.val()[plannedMonth_id]) {
+                    var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+                    db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
+                        var meal_plans = db_mealPlans_snapshot.val();
+                        for (var mealPlan_id in meal_plans) {
+                            if (meal_plans.hasOwnProperty(mealPlan_id)) {
+                                var meal_plan_object = meal_plans[mealPlan_id];
+
+                                var calendar_day_element = document.getElementById('calendar_day_div_' + meal_plan_object.day);
+
+                                var image_element = document.createElement("img");
+                                image_element.setAttribute('id', 'drag_' + mealPlan_id + '_calendar');
+                                image_element.setAttribute('src', meal_plan_object.image_path);
+                                image_element.setAttribute('draggable', 'true');
+                                image_element.setAttribute('ondragstart', 'drag_meal(event)');
+                                image_element.setAttribute('data-meal-id', mealPlan_id);
+                                image_element.setAttribute("onclick", "select_meal_in_calendar(" + mealPlan_id + ")");
+                                //image_element.onclick = (function (a_meal_id) { return function () { select_meal_in_calendar(a_meal_id); } })(mealPlan_id);
+
+                                calendar_day_element.appendChild(image_element);
+                            }
+                        }
+                    });
+                    break;
+                }
+            }
+        }
     });
 }
 
