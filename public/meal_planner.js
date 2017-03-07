@@ -178,9 +178,6 @@ function initialize_meal_planner_app() {
 
     // Set the user's meals from the database.
     firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
-
-    // Set the user's meal plan for the current month from the database.
-    get_meal_plan_for_current_month();
 }
 
 /**
@@ -198,6 +195,8 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     // Populate the app interface with data
     populate_meal_list();
     populate_meal_editor(current_meal);
+
+    // This will also populate the calendar with any planned meals
     populate_calendar_days();
 }
 
