@@ -183,7 +183,7 @@ function initialize_meal_planner_app() {
     setup_app_controls();
 
     // Set the user's meals from the database.
-    firebase_database.ref("Users_Meals/" + user.uid).on("value", initialize_user_meals_from_db_snapshot);
+    firebase_database.ref("Users_Meals/" + user.uid).once("value", initialize_user_meals_from_db_snapshot);
 
     is_app_initialized = true;
 }
@@ -224,7 +224,7 @@ function on_authentication_state_changed(firebase_user) {
         user = firebase_user;
         console.log("User '" + user.uid + "' is logged in.");
 
-        firebase_database.ref().child('Users').equalTo(user.uid).once('value', function(db_snapshot) {
+        firebase_database.ref('Users').equalTo(user.uid).once('value', function(db_snapshot) {
             var user_record = db_snapshot.val();
             if (user_record == null) {
                 create_new_user_data(user);
@@ -320,12 +320,12 @@ function create_new_account() {
 
 function create_new_user_data(firebase_user) {
     // Create the user in the database
-    firebase_database.ref().child('Users').child(firebase_user.uid).set({ display_name: firebase_user.displayName, email: firebase_user.email });
+    firebase_database.ref('Users/'+ firebase_user.uid).set({ display_name: firebase_user.displayName, email: firebase_user.email });
 
     // Set the user's meals in the database as the default meals
-    firebase_database.ref("DefaultMeals").on("value", function(db_snapshot) {
+    firebase_database.ref("DefaultMeals").once("value", function(db_snapshot) {
         var default_meals = db_snapshot.val();
-        var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + firebase_user.uid);
+        var db_users_meals_ref = firebase_database.ref('Users_Meals/' + firebase_user.uid);
 
         // Loop through each of the default meals (by id)
         for (var default_meal_id in default_meals) {
@@ -616,12 +616,12 @@ function populate_calendar_days() {
 *
 */
 function get_meal_plan_for_current_month() {
-    var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid);
+    var db_users_plannedMonths_ref = firebase_database.ref('Users_PlannedMonths/' + user.uid);
     db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
         for (var plannedMonth_id in db_snapshot.val()) {
             if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date)) {
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
-                var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+                var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans/' + plannedMonth_id);
                 db_plannedMonths_mealPlans_ref.orderByChild("day").once("value", function(db_mealPlans_snapshot) {
                     populate_calendar_with_mealPlans_snapshot(db_mealPlans_snapshot.val());
                 });
@@ -684,9 +684,9 @@ function days_in_month(month, year) {
 */
 function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
 {
-    firebase_database.ref().child('Users_Meals/' + user.uid + "/" + meal_id).once("value", function(db_snapshot) {
+    firebase_database.ref('Users_Meals/' + user.uid + "/" + meal_id).once("value", function(db_snapshot) {
         // Add the meal to the database
-        var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('PlannedMonths_MealPlans/' + plannedMonth_id);
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans/' + plannedMonth_id);
         var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
         var meal_object = db_snapshot.val();
         meal_object.day = day;
@@ -779,7 +779,7 @@ function drop_meal(event) {
     // If the parent element is a meal list item, copy the data over...
     if (parent_element.className.includes("flex-meal-item")) {
         // Get the meal plan for the current month from the database (using the "formatted_date")
-        var db_users_plannedMonths_ref = firebase_database.ref().child('Users_PlannedMonths/' + user.uid)
+        var db_users_plannedMonths_ref = firebase_database.ref('Users_PlannedMonths/' + user.uid)
         db_users_plannedMonths_ref.once("value", function(snapshot) {
             // Loop through the months to see if one matches the current formatted_date
             var already_existing_plannedMonth_id = null;
@@ -855,7 +855,7 @@ function drop_to_meal_list_garbage(event)
     meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed); //
 
     // Delete the meal from the Users_Meals in the database
-    var meal_record_to_remove = firebase_database.ref().child("Users_Meals/" + user.uid + "/" + meal_id);
+    var meal_record_to_remove = firebase_database.ref("Users_Meals/" + user.uid + "/" + meal_id);
     meal_record_to_remove.remove();
 
     // Remove the meal from the "meals" in memory
@@ -886,15 +886,15 @@ function drop_to_calendar_garbage(event)
 
     // Delete the PlannedMonths_MealPlans record for that day
     if (current_plannedMonth.id != null && current_plannedMonth.formatted_date == formatted_date(calendar_date)) {
-        var mealPlan_record_to_remove = firebase_database.ref().child("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
+        var mealPlan_record_to_remove = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
         mealPlan_record_to_remove.remove();
     } else {
-        var db_plannedMonths_mealPlans_ref = firebase_database.ref().child('');
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
         db_plannedMonths_mealPlans_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
             for (var plannedMonth_id in db_snapshot.val()) {
                 if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
                     current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
-                    var mealPlan_record_to_remove = firebase_database.ref().child("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
+                    var mealPlan_record_to_remove = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
                     mealPlan_record_to_remove.remove();
                 }
             }
@@ -1168,7 +1168,7 @@ function confirm_changes()
         firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
 
         // Write user meal to database
-        var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user.uid);
+        var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
         var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
         for (var i = 0; i < current_meal.ingredients.length; ++i) {
             meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
@@ -1330,22 +1330,6 @@ function populate_meal_editor(meal)
     var meal_name_iput = document.getElementById('meal_name_input');
     meal_name_iput.value = meal.name;
 
-    // Handle Edit Mode
-    if (is_edit_mode)
-    {
-    }
-    else
-    {
-        // meal_name_iput.readOnly = true;
-        // meal_instructions_text_area.readOnly = true;
-        // document.getElementById('edit_button').src = "images\\controls\\pen.png";
-        // document.getElementById('edit_button').parentElement.style.backgroundColor = "#33afff";
-        // document.getElementById('cancel_button').parentElement.style.visibility = "hidden";
-        // document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
-        // document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
-    }
-
-
     // Clear the current ingredient list and then populate it with the ingredients
     document.getElementById('ingredients_unordered_list').innerHTML = "";
     for (var i = 0; i < meal.ingredients.length; i++)
@@ -1416,46 +1400,5 @@ function remove_ingredient(ingredient_index)
 
         // Repopulate the meal editor to reflect the change
         populate_meal_editor(current_meal);
-    }
-}
-
-/**
-* SAVE_MEAL_PLAN
-* Saves all the user's meal plans to storage
-*/
-function save_meal_plan()
-{
-    try
-    {
-        localStorage.user_meal_plan_data = JSON.stringify(meal_plans);
-    }
-    catch (exception)
-    {
-        // Alert the user there was a problem saving
-        alert("We are unable to save your meal plans. We apologize for any inconvenience.");
-    }
-
-}
-
-/**
-* SAVE_MEAL_LIST
-* Saves the user's current meal list (as shown in the interface) to storage.
-*/
-function save_meal_list() {
-    try {
-        localStorage.user_meal_list = JSON.stringify(meals);
-        // for (var meal in meals) {
-        //     if (meals.hasOwnProperty(meal)) {
-        //         var db_users_meals_ref = firebase_database.ref().child('Users_Meals/' + user_id);
-        //         var meal_object = { name: txtMealName.value, recipe: txtMealRecipe.value, ingredients: { "ingredient_1": txtMealIngredient1.value, "ingredient_2": txtMealIngredient2.value, "ingredient_3": txtMealIngredient3.value } };
-        //         var new_users_meals_record_ref = db_users_meals_ref.push();
-        //         new_users_meals_record_ref.set(meal_object);
-        //         meal_id = new_users_meals_record_ref.key;
-        //     }
-        // }
-    }
-    catch (exception) {
-        // Alert the user there was a problem saving
-        alert("We are unable to save your changes to the meals in your meal list. We apologize for any inconvenience.");
     }
 }
