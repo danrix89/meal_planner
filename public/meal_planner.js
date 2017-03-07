@@ -1091,6 +1091,7 @@ function refresh_meal_list_and_editor_from_db_snapshot(db_snapshot) {
     // Populate the app interface with data
     populate_meal_list();
     populate_meal_editor(current_meal);
+    hide_edit_mode_controls();
 }
 
 /**
