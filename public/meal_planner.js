@@ -970,8 +970,8 @@ function setup_ingredient_onclick_function()
 {
     for (var i = 0; i < current_meal.ingredients.length; i++)
     {
-        var element = document.getElementById('button_' + i);
-        element.setAttribute("onclick", "remove_ingredient('" + i + "')");
+        var element = document.getElementById('button_' + current_meal.ingredients[i]);
+        element.setAttribute("onclick", "remove_ingredient('" + current_meal.ingredients[i] + "')");
     }
 }
 
@@ -1349,7 +1349,7 @@ function populate_meal_editor(meal)
 
         // Setup the ingredient name element (nested in the ingredient element)
         ingredient_name_element.classList.add("ingredient");
-        ingredient_name_element.id = "ingredient_" + i;
+        ingredient_name_element.id = "ingredient_" + meal.ingredients[i];
         ingredient_name_element.appendChild(ingredient_name_text_node);
 
         // Setup the ingredient remove button (nested in the ingredient element)
@@ -1395,15 +1395,19 @@ function highlight_current_meal(meal_id)
 * @param ingredient_index used to know which ingredient to remove
 * @return
 */
-function remove_ingredient(ingredient_index)
+function remove_ingredient(ingredient)
 {
     // Check if in edit mode (only remove in edit mode)
     if (is_edit_mode)
     {
-        // Remove (or splice) the ingredient from the ingredient list
-        current_meal.ingredients.splice(ingredient_index, 1);
+        // Remove the ingredient from the meal in the database
+        firebase_database.ref('Users_Meals' + user.uid + '/' + current_meal.id + '/ingredients/' + ingredient).remove();
 
-        // Repopulate the meal editor to reflect the change
-        populate_meal_editor(current_meal);
+        // Remove (or splice) the ingredient from the ingredient list of the current meal
+        current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
+
+        // Remove the ingredient HTML element
+        var ingredient_element = document.getElementById('ingredient_' + ingredient);
+        ingredient_element.parentElement.removeChild(ingredient_element);
     }
 }
