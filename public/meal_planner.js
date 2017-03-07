@@ -844,8 +844,8 @@ function drop_to_meal_list_garbage(event)
             }
         }
 
-        // Remove that one item from the calendar (HTML)
-        meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed);
+        // Remove that one item from the calendar in HTML
+        meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed); //
     }
 }
 
