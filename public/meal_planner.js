@@ -797,7 +797,7 @@ function drop_meal(event) {
             if (already_existing_plannedMonth_id != null) {
                 // If so, then add the new meal to that month
                 add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
-                current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
+                current_plannedMonth = { id: plannedMonth_id, formatted_date: (snapshot.val()[plannedMonth_id]).formatted_date };
             } else {
                 // If not, then create a new plannedMonth
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
