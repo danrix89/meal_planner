@@ -1181,7 +1181,7 @@ function confirm_changes()
         }
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
-        current_meal.id = new_users_meals_record_ref.uid;
+        current_meal.id = new_users_meals_record_ref.key;
     } else {
         // Save the changes to the database
         var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
