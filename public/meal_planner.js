@@ -799,11 +799,11 @@ function drop_meal(event) {
                 add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (snapshot.val()[plannedMonth_id]).formatted_date };
             } else {
-                // If not, then create a new plannedMonth
+                // If not, then create a new plannedMonth and add the meal to that planned month
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
                 var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
                 new_plannedMonths_record_ref.set(plannedMonth_object);
-                add_new_meal_to_meal_plan(day, meal_id, new_plannedMonths_record_ref.uid);
+                add_new_meal_to_meal_plan(day, meal_id, new_plannedMonths_record_ref.key);
                 current_plannedMonth = { id: new_plannedMonths_record_ref.uid, formatted_date: formatted_date(calendar_date) };
             }
         }, function (errorObject) {
