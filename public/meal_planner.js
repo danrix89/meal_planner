@@ -820,7 +820,8 @@ function drop_meal(event) {
         });
 
         // Create a new meal calendar day element
-        add_meal_element_to_calendar(meal_id, document.getElementById(data).src, day);
+        var image_path = document.getElementById(data).getAttribute("data-image-path");
+        add_meal_element_to_calendar(meal_id, image_path, day);
         // var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
         // var new_id = data + "_calendar";
         // calendar_meal_day_element.id = new_id;
@@ -944,6 +945,7 @@ function add_meal_list_element(id, name, image_path) {
     image_element.draggable = true;
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute("data-meal-id", id);
+    image_element.setAttribute("data-image-path", image_path);
     image_element.setAttribute("onclick","select_meal_in_meal_list('" + id + "')");
 
     // Set up the meal name div element
