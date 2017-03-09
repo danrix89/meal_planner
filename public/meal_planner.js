@@ -849,11 +849,11 @@ function drop_to_meal_list_garbage(event)
     event.preventDefault();
 
     var data = event.dataTransfer.getData("text");
-    var meal_element_to_be_removed = document.getElementById(data);
-    var meal_id = meal_element_to_be_removed.getAttribute("data-meal-id");
+    var meal_id = document.getElementById(data).getAttribute("data-meal-id");
 
     // Remove that one item from the calendar in HTML
-    meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed); //
+    var meal_element_to_be_removed = document.getElementById("meal_list_item_" + meal_id);
+    meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed);
 
     // Delete the meal from the Users_Meals in the database
     var meal_record_to_remove = firebase_database.ref("Users_Meals/" + user.uid + "/" + meal_id);
