@@ -1096,8 +1096,9 @@ function update_meal_list_item_with_changes_from_db_snapshot(db_snapshot) {
     // Update the meal list item to reflect what's in the database
     var id = db_snapshot.key;
     // var meal_list_element = document.getElementById("meal_list_item_" + db_snapshot.key);
-    var meal_list_element_image = document.getElementById("drag_" + id).src = (db_snapshot.val())["image_path"];
-    var meal_list_element_name = document.getElementById("meal_list_name_" + id).innerHTML = (db_snapshot.val())["name"];
+
+    set_image_src(firebase_storage.ref().child((db_snapshot.val())["image_path"]), document.getElementById("drag_" + id));
+    document.getElementById("meal_list_name_" + id).innerHTML = (db_snapshot.val())["name"];
 
     // Select the newly edited meal (this should populate the meal editor)
     select_meal_in_meal_list(id)
