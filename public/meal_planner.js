@@ -42,13 +42,13 @@ var is_edit_mode = false;
 var is_adding_new_meal = false;
 
 // Used for knowing what the previous selected meal was in case we need to unselect it when we select a new one, etc.
-var previous_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
+var previous_meal = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
 
 // The currently selected and updated meal
-var current_meal = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
+var current_meal = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
 
 // Used to record a meals data before and edit, so in case the user cancels the edit, the meal can be put back to the way it was before the edit
-var meal_before_edit = { "id": "", "name": "", "image_url": "", "ingredients": [], "recipe": "" };
+var meal_before_edit = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
 
 // The array of every months meal plan
 var meal_plans = { "meal_plans": [] };
@@ -424,12 +424,12 @@ function set_meals_from_db_snapshot(db_snapshot) {
 
         // Ensure the id is valid
         if (user_meals_from_db.hasOwnProperty(meal_id)) {
-            // Create a meal object and set the id, name, image_url, ingredients
+            // Create a meal object and set the id, name, image_path, ingredients
             // etc.
             var meal = {}
             meal.id = meal_id;
             meal.name = user_meals_from_db[meal_id].name;
-            meal.image_url = user_meals_from_db[meal_id].image_path;
+            meal.image_path = user_meals_from_db[meal_id].image_path;
             meal.image_source_url = "";
             meal.recipe = user_meals_from_db[meal_id].recipe;
             meal.ingredients = [];
@@ -640,20 +640,26 @@ function populate_calendar_with_mealPlans_snapshot(meal_plans_snapshot) {
     for (var mealPlan_id in meal_plans_snapshot) {
         if (meal_plans_snapshot.hasOwnProperty(mealPlan_id)) {
             var meal_plan_object = meal_plans_snapshot[mealPlan_id];
-
-            var calendar_day_element = document.getElementById('calendar_day_div_' + meal_plan_object.day);
-
-            var image_element = document.createElement("img");
-            image_element.setAttribute('id', 'drag_' + mealPlan_id + '_calendar');
-            set_image_src(firebase_storage.ref().child(meal_plan_object.image_path), image_element);
-            image_element.setAttribute('draggable', 'true');
-            image_element.setAttribute('ondragstart', 'drag_meal(event)');
-            image_element.setAttribute('data-meal-id', mealPlan_id);
-            image_element.setAttribute("onclick", "select_meal_in_calendar(" + mealPlan_id + ")");
-
-            calendar_day_element.appendChild(image_element);
+            add_meal_element_to_calendar(mealPlan_id, meal_plan_object.image_path, meal_plan_object.day);
         }
     }
+}
+
+/**
+*
+*/
+function add_meal_element_to_calendar(id, image_path, day) {
+
+    var image_element = document.createElement("img");
+    image_element.id = 'drag_' + id + '_calendar';
+    image_element.setAttribute('draggable', 'true');
+    image_element.setAttribute('ondragstart', 'drag_meal(event)');
+    image_element.setAttribute('data-meal-id', id);
+    image_element.setAttribute("onclick", "select_meal_in_calendar(" + id + ")");
+    set_image_src(firebase_storage.ref().child(image_path), image_element);
+
+    var calendar_day_element = document.getElementById('calendar_day_div_' + day);
+    calendar_day_element.appendChild(image_element);
 }
 
 /**
@@ -777,6 +783,8 @@ function drop_meal(event) {
     // Find the parent element of the dropped meal (where did we drag it from?)
     var parent_element = document.getElementById(data).parentElement;
 
+    var day = event.target.getAttribute("data-day");
+
     // If the parent element is a meal list item, copy the data over...
     if (parent_element.className.includes("flex-meal-item")) {
         // Get the meal plan for the current month from the database (using the "formatted_date")
@@ -794,7 +802,6 @@ function drop_meal(event) {
                 }
             }
 
-            var day = event.target.getAttribute("data-day");
             if (already_existing_plannedMonth_id != null) {
                 // If so, then add the new meal to that month
                 add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
@@ -813,12 +820,13 @@ function drop_meal(event) {
         });
 
         // Create a new meal calendar day element
-        var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
-        var new_id = data + "_calendar";
-        calendar_meal_day_element.id = new_id;
-        calendar_meal_day_element.setAttribute("onclick", "select_meal_in_calendar(" + meal_id + ")");
-        calendar_meal_day_element.setAttribute("data-meal-id", meal_id);
-        event.target.appendChild(calendar_meal_day_element);
+        add_meal_element_to_calendar(meal_id, document.getElementById(data).src, day);
+        // var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
+        // var new_id = data + "_calendar";
+        // calendar_meal_day_element.id = new_id;
+        // calendar_meal_day_element.setAttribute("onclick", "select_meal_in_calendar(" + meal_id + ")");
+        // calendar_meal_day_element.setAttribute("data-meal-id", meal_id);
+        // event.target.appendChild(calendar_meal_day_element);
     }
     // Else, the data should be transfered/moved
     else
@@ -827,7 +835,7 @@ function drop_meal(event) {
         var element = document.getElementById(data);
         var target_parent = event.target.parentElement;
         var target_day = target_parent.getAttribute("data-day");
-        var image_url = element.getAttribute("src");
+        var image_path = element.getAttribute("src");
         var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
 
         // Update the "day" in the database record
@@ -915,24 +923,24 @@ function populate_meal_list()
 
     for (var i = 0; i < meals.length; i++)
     {
-        add_meal_list_element(meals[i].id, meals[i].name, meals[i].image_url);
+        add_meal_list_element(meals[i].id, meals[i].name, meals[i].image_path);
     }
 }
 
 /**
 * Add meal list element
-* Adds a meal list element to the meal list with an id, name, and image_url.
+* Adds a meal list element to the meal list with an id, name, and image_path.
 */
-function add_meal_list_element(id, name, image_url) {
+function add_meal_list_element(id, name, image_path) {
     var id = id;
-    var image_url = image_url;
+    var image_path = image_path;
     var meal_list_item_element = document.createElement("li");
     var meal_name_element = document.createElement("div");
     var image_element = document.createElement("img");
 
     // Set up the meal image element
     image_element.id = "drag_" + id;
-    set_image_src(firebase_storage.ref().child(image_url), image_element);
+    set_image_src(firebase_storage.ref().child(image_path), image_element);
     image_element.draggable = true;
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute("data-meal-id", id);
@@ -1052,7 +1060,7 @@ function setup_for_adding_new_meal()
         previous_meal = current_meal;
 
         // Set the current meal to a new empty one for editing
-        current_meal = { id: "", name: "", image_url: "", ingredients: [], recipe: "" };
+        current_meal = { id: "", name: "", image_path: "", ingredients: [], recipe: "" };
 
         // Setup the meal editor
         setup_meal_editor_for_adding_new_meal();
@@ -1196,7 +1204,7 @@ function confirm_changes()
     } else {
         // Save the changes to the database
         var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
-        var meal_object = { name: current_meal.name, image_path: current_meal.image_url, recipe: current_meal.recipe, ingredients: {} };
+        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: {} };
         for (var i = 0; i < current_meal.ingredients.length; ++i) {
             meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
         }
