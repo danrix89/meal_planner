@@ -1181,8 +1181,6 @@ function confirm_changes()
     {
         is_adding_new_meal = false;
 
-        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", add_meal_list_item_from_db_snapshot);
-
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
         var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
@@ -1192,6 +1190,8 @@ function confirm_changes()
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.key;
+
+        firebase_database.ref("Users_Meals/" + user.uid "/" + new_users_meals_record_ref.key).once("value", add_meal_list_item_from_db_snapshot);
     } else {
         // Save the changes to the database
         var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
@@ -1202,7 +1202,7 @@ function confirm_changes()
         db_users_meals_meal_ref.set(meal_object);
 
         // Refresh the meal list with those changes
-        db_users_meals_meal_ref.on("value", update_meal_list_item_with_changes_from_db_snapshot);
+        db_users_meals_meal_ref.once("value", update_meal_list_item_with_changes_from_db_snapshot);
     }
 
     hide_edit_mode_controls();
