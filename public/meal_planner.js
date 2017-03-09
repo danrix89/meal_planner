@@ -160,6 +160,7 @@ function setup_app_controls() {
     setup_calendar_title_and_nav_buttons();
 
     // Meal List controls
+    document.getElementById('add_button').onclick = setup_for_adding_new_meal;
 
     // Editor controls
     document.getElementById("edit_button_div").onclick = edit_current_meal;
@@ -914,51 +915,44 @@ function populate_meal_list()
 
     for (var i = 0; i < meals.length; i++)
     {
-        var id = meals[i].id;
-        var image_url = meals[i].image_url;
-        var meal_list_item_element = document.createElement("li");
-        var meal_name_element = document.createElement("div");
-        var image_element = document.createElement("img");
-
-        // Set up the meal image element
-        image_element.id = "drag_" + id;
-        set_image_src(firebase_storage.ref().child(image_url), image_element);
-        image_element.draggable = true;
-        image_element.setAttribute('ondragstart', 'drag_meal(event)');
-        image_element.setAttribute("data-meal-id", id);
-
-        // Set up the meal name div element
-        meal_name_element.classList.add("meal_name");
-        meal_name_element.innerHTML = meals[i].name;
-
-        // Setup the meal list item element
-        meal_list_item_element.id = "meal_list_item_" + id;
-        meal_list_item_element.classList.add("flex-meal-item");
-
-        // Insert the image and name into the meal list item
-        meal_list_item_element.appendChild(image_element);
-        meal_list_item_element.appendChild(meal_name_element);
-
-        document.getElementById('meal_unordered_list').appendChild(meal_list_item_element);
+        add_meal_list_element(meals[i].id, meals[i].name, meals[i].image_url);
     }
-
-    // Setup onclick functions
-    setup_meal_onclick_function();
-    document.getElementById('add_button').onclick = setup_for_adding_new_meal;
 }
 
 /**
-* SETUP_MEAL_ONCLICK_FUNCTION
-* Sets up the onclick function for meals in either the meal list
+* Add meal list element
+* Adds a meal list element to the meal list with an id, name, and image_url.
 */
-function setup_meal_onclick_function()
-{
-    for (var i = 0; i < meals.length; i++)
-    {
-        var id = meals[i].id
-        var element = document.getElementById('drag_' + id);
-        element.setAttribute("onclick","select_meal_in_meal_list('" + id + "')");
-    }
+function add_meal_list_element(id, name, image_url) {
+    var id = id;
+    var image_url = image_url;
+    var meal_list_item_element = document.createElement("li");
+    var meal_name_element = document.createElement("div");
+    var image_element = document.createElement("img");
+
+    // Set up the meal image element
+    image_element.id = "drag_" + id;
+    set_image_src(firebase_storage.ref().child(image_url), image_element);
+    image_element.draggable = true;
+    image_element.setAttribute('ondragstart', 'drag_meal(event)');
+    image_element.setAttribute("data-meal-id", id);
+    image_element.setAttribute("onclick","select_meal_in_meal_list('" + id + "')");
+
+    // Set up the meal name div element
+    meal_name_element.classList.add("meal_name");
+    meal_name_element.id = "meal_list_name_" + id;
+    meal_name_element.innerHTML = name;
+
+    // Setup the meal list item element
+    meal_list_item_element.id = "meal_list_item_" + id;
+    meal_list_item_element.classList.add("flex-meal-item");
+
+    // Insert the image and name into the meal list item
+    meal_list_item_element.appendChild(image_element);
+    meal_list_item_element.appendChild(meal_name_element);
+
+    // Insert all of it into the meal list
+    document.getElementById('meal_unordered_list').appendChild(meal_list_item_element);
 }
 
 /**
@@ -1082,16 +1076,32 @@ function setup_meal_editor_for_adding_new_meal()
 }
 
 /**
-*
+* Add meal list item from db snapshot
+* Adds a new meal list element to the meal list using the db snapshot of the newly added meal
 */
-function refresh_meal_list_and_editor_from_db_snapshot(db_snapshot) {
-    // Reset meals from the snapshot
-    set_meals_from_db_snapshot(db_snapshot);
+function add_meal_list_item_from_db_snapshot(db_snapshot) {
+    // Add the meal to the meal list from the snapshot
+    add_meal_list_element(db_snapshot.key, (db_snapshot.val())["name"], (db_snapshot.val())["image_path"])
 
-    // Populate the app interface with data
-    populate_meal_list();
-    populate_meal_editor(current_meal);
-    hide_edit_mode_controls();
+    // Select the newly added meal (this should populate the meal editor)
+    select_meal_in_meal_list(db_snapshot.key)
+    //populate_meal_editor(current_meal);
+}
+
+/**
+* Updates meal list item from db snapshot
+* Updates meal list element in the meal list using the db snapshot of the edited meal
+*/
+function update_meal_list_item_with_changes_from_db_snapshot(db_snapshot) {
+    // Update the meal list item to reflect what's in the database
+    var id = db_snapshot.key;
+    // var meal_list_element = document.getElementById("meal_list_item_" + db_snapshot.key);
+    var meal_list_element_image = document.getElementById("drag_" + id).src = (db_snapshot.val())["image_path"];
+    var meal_list_element_name = document.getElementById("meal_list_name_" + id).innerHTML = (db_snapshot.val())["name"];
+
+    // Select the newly edited meal (this should populate the meal editor)
+    select_meal_in_meal_list(id)
+    //populate_meal_editor(current_meal);
 }
 
 /**
@@ -1171,7 +1181,7 @@ function confirm_changes()
     {
         is_adding_new_meal = false;
 
-        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", refresh_meal_list_and_editor_from_db_snapshot);
+        firebase_database.ref("Users_Meals/" + user.uid).on("child_added", add_meal_list_item_from_db_snapshot);
 
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
@@ -1192,7 +1202,7 @@ function confirm_changes()
         db_users_meals_meal_ref.set(meal_object);
 
         // Refresh the meal list with those changes
-        firebase_database.ref("Users_Meals/" + user.uid).on("value", refresh_meal_list_and_editor_from_db_snapshot);
+        db_users_meals_meal_ref.on("value", update_meal_list_item_with_changes_from_db_snapshot);
     }
 
     hide_edit_mode_controls();
