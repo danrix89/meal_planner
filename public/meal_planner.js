@@ -983,10 +983,21 @@ function select_meal_in_meal_list(meal_id) {
 function select_meal_in_calendar(meal_id) {
     if (!is_edit_mode) {
         // Chage the current meal to the newly selected/clicked meal
-        set_current_meal_with_calendar_meal(meal_id);
+        previous_meal = current_meal;
+        if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
+            firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
+                current_meal.id = meal_id;
+                current_meal.image_path = (db_snapshot.val())["image_path"];
+                current_meal.name = (db_snapshot.val())["name"];
+                current_meal.recipe = (db_snapshot.val())["recipe"];
+                current_meal.ingredients = (db_snapshot.val())["ingredients"];
 
-        // Populate the meal editor with the current meal
-        populate_meal_editor(current_meal);
+                // Populate the meal editor with the current meal
+                populate_meal_editor(current_meal);
+            })
+        } else {
+            // TODO: If the current_plannedMonth is not this month, then update in and recall this function
+        }
     }
 }
 
@@ -1285,27 +1296,6 @@ function set_current_meal(meal_id)
     {
         if (meals[i].id == meal_id)
             current_meal = meals[i];
-    }
-}
-
-/**
-* FUNCTION_NAME
-* Description
-* @param
-*/
-function set_current_meal_with_calendar_meal(meal_id)
-{
-    previous_meal = current_meal;
-    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
-        firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
-            current_meal.id = meal_id;
-            current_meal.image_path = (db_snapshot.val())["image_path"];
-            current_meal.name = (db_snapshot.val())["name"];
-            current_meal.recipe = (db_snapshot.val())["recipe"];
-            current_meal.ingredients = (db_snapshot.val())["ingredients"];
-        })
-    } else {
-        // TODO: If the current_plannedMonth is not this month, then update in and recall this function
     }
 }
 
