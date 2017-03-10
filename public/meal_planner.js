@@ -42,22 +42,16 @@ var is_edit_mode = false;
 var is_adding_new_meal = false;
 
 // Used for knowing what the previous selected meal was in case we need to unselect it when we select a new one, etc.
-var previous_meal = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
+var previous_meal = { "id": "", "name": "", "image_path": "", "ingredients": {}, "recipe": "" };
 
 // The currently selected and updated meal
-var current_meal = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
+var current_meal = { "id": "", "name": "", "image_path": "", "ingredients": {}, "recipe": "" };
 
 // Used to record a meals data before and edit, so in case the user cancels the edit, the meal can be put back to the way it was before the edit
-var meal_before_edit = { "id": "", "name": "", "image_path": "", "ingredients": [], "recipe": "" };
-
-// The array of every months meal plan
-var meal_plans = { "meal_plans": [] };
+var meal_before_edit = { "id": "", "name": "", "image_path": "", "ingredients": {}, "recipe": "" };
 
 // The possible database plannedMonth record data of the current month (null, if no record is in the database)
 var current_plannedMonth = { id: null, formatted_date: null };
-
-// The meal plan for the month the users is currently viewing
-var current_calendar_month_meal_plan = { "formatted_date": "", "meal_plan": [] };
 
 // Flag to know when the app and its controls have been initialized
 var is_app_initialized = false;
@@ -432,12 +426,7 @@ function set_meals_from_db_snapshot(db_snapshot) {
             meal.image_path = user_meals_from_db[meal_id].image_path;
             meal.image_source_url = "";
             meal.recipe = user_meals_from_db[meal_id].recipe;
-            meal.ingredients = [];
-            var i = 0;
-            for (ingredient in user_meals_from_db[meal_id].ingredients) {
-                meal.ingredients[i] = ingredient;
-                i++;
-            }
+            meal.ingredients = user_meals_from_db[meal_id].ingredients;
 
             // Add the meal to the meals in memory
             meals.push(meal);
@@ -655,8 +644,7 @@ function add_meal_element_to_calendar(id, image_path, day) {
     image_element.setAttribute('draggable', 'true');
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute('data-meal-id', id);
-    image_element.onclick = (function(a_id) { return function() { select_meal_in_calendar(a_id); } })(id);
-    //image_element.setAttribute("onclick", "select_meal_in_calendar(" + id + ")");
+    image_element.setAttribute("onclick", "select_meal_in_calendar(" + id + ")");
     set_image_src(firebase_storage.ref().child(image_path), image_element);
 
     var calendar_day_element = document.getElementById('calendar_day_div_' + day);
@@ -703,26 +691,6 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
         console.log("The read failed: " + errorObject.code);
         console.log("The read failed: " + errorObject.message);
     });
-}
-
-/**
-* UPDATE_MEAL_PLAN
-* Update the user's meal plan's with the updated current month's meal plan
-*/
-function update_meal_plan(meal_plan)
-{
-    // Check if the meal_plan already exists in the list of meal_plans
-    for (var i = 0; i < meal_plans.meal_plans.length; i++) {
-        // If so, overwrite that meal plan with the new meal_plan (parameter)
-        if (meal_plans.meal_plans[i].formatted_date == meal_plan.formatted_date) {
-            meal_plans.meal_plans[i] = meal_plan;
-            return;
-        }
-    }
-
-    // If we've made it this far, then an existing meal plan was not found so add it as a new plan at the back
-    var back_index = meal_plans.meal_plans.length;
-    meal_plans.meal_plans.push(meal_plan);
 }
 
 /**
@@ -823,12 +791,6 @@ function drop_meal(event) {
         // Create a new meal calendar day element
         var image_path = document.getElementById(data).getAttribute("data-image-path");
         add_meal_element_to_calendar(meal_id, image_path, day);
-        // var calendar_meal_day_element = document.getElementById(data).cloneNode(true);
-        // var new_id = data + "_calendar";
-        // calendar_meal_day_element.id = new_id;
-        // calendar_meal_day_element.setAttribute("onclick", "select_meal_in_calendar(" + meal_id + ")");
-        // calendar_meal_day_element.setAttribute("data-meal-id", meal_id);
-        // event.target.appendChild(calendar_meal_day_element);
     }
     // Else, the data should be transfered/moved
     else
@@ -973,10 +935,11 @@ function add_meal_list_element(id, name, image_path) {
 */
 function setup_ingredient_onclick_function()
 {
-    for (var i = 0; i < current_meal.ingredients.length; i++)
-    {
-        var element = document.getElementById('button_' + current_meal.ingredients[i]);
-        element.setAttribute("onclick", "remove_ingredient('" + current_meal.ingredients[i] + "')");
+    for (var ingredient in current_meal.ingredients) {
+        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+            var ingredient_list_element = document.getElementById('button_' + ingredient);
+            ingredient_list_element.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+        }
     }
 }
 
@@ -1063,7 +1026,7 @@ function setup_for_adding_new_meal()
         previous_meal = current_meal;
 
         // Set the current meal to a new empty one for editing
-        current_meal = { id: "", name: "", image_path: "", ingredients: [], recipe: "" };
+        current_meal = { id: "", name: "", image_path: "", ingredients: {}, recipe: "" };
 
         // Setup the meal editor
         setup_meal_editor_for_adding_new_meal();
@@ -1096,7 +1059,6 @@ function add_meal_list_item_from_db_snapshot(db_snapshot) {
 
     // Select the newly added meal (this should populate the meal editor)
     select_meal_in_meal_list(db_snapshot.key)
-    //populate_meal_editor(current_meal);
 }
 
 /**
@@ -1113,7 +1075,6 @@ function update_meal_list_item_with_changes_from_db_snapshot(db_snapshot) {
 
     // Select the newly edited meal (this should populate the meal editor)
     select_meal_in_meal_list(id)
-    //populate_meal_editor(current_meal);
 }
 
 /**
@@ -1125,7 +1086,7 @@ function add_ingredient()
     if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
     {
         var ingredient = document.getElementById('meal_ingredient_input').value;
-        current_meal.ingredients.push(ingredient);
+        current_meal.ingredients[ingredient] = ingredient;
         document.getElementById('meal_ingredient_input').value = '';
         populate_meal_editor(current_meal);
     }
@@ -1140,8 +1101,10 @@ function show_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
     document.getElementById('cancel_button_div').classList.remove("hide");
     document.getElementById('confirm_button_div').classList.remove("hide");
-    for (var i = 0; i < current_meal.ingredients.length; ++i) {
-        document.getElementById('button_' + current_meal.ingredients[i]).classList.remove("hide");
+    for (var ingredient in current_meal.ingredients) {
+        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+            document.getElementById('button_' + ingredient).classList.remove("hide");
+        }
     }
 }
 
@@ -1154,8 +1117,10 @@ function hide_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
     document.getElementById('cancel_button_div').classList.add("hide");
     document.getElementById('confirm_button_div').classList.add("hide");
-    for (var i = 0; i < current_meal.ingredients.length; ++i) {
-        document.getElementById('button_' + current_meal.ingredients[i]).classList.add("hide");
+    for (var ingredient in current_meal.ingredients) {
+        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+            document.getElementById('button_' + ingredient).classList.add("hide");
+        }
     }
 }
 
@@ -1195,10 +1160,7 @@ function confirm_changes()
 
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
-        var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: {} };
-        for (var i = 0; i < current_meal.ingredients.length; ++i) {
-            meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
-        }
+        var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: current_meal.ingredients };
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.key;
@@ -1207,10 +1169,7 @@ function confirm_changes()
     } else {
         // Save the changes to the database
         var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
-        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: {} };
-        for (var i = 0; i < current_meal.ingredients.length; ++i) {
-            meal_object.ingredients[current_meal.ingredients[i]] = current_meal.ingredients[i];
-        }
+        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
         db_users_meals_meal_ref.set(meal_object);
 
         // Refresh the meal list with those changes
@@ -1317,7 +1276,6 @@ function calendar_save_button_onclick(a_nothing)
 * FUNCTION_NAME
 * Description
 * @param
-* @return
 */
 function set_current_meal(meal_id)
 {
@@ -1333,15 +1291,20 @@ function set_current_meal(meal_id)
 * FUNCTION_NAME
 * Description
 * @param
-* @return
 */
 function set_current_meal_with_calendar_meal(meal_id)
 {
     previous_meal = current_meal;
-    for (var i = 0; i < current_calendar_month_meal_plan.meal_plan.length; i++)
-    {
-        if (current_calendar_month_meal_plan.meal_plan[i].meal.id == meal_id)
-            current_meal = current_calendar_month_meal_plan.meal_plan[i].meal;
+    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
+        firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
+            current_meal.id = meal_id;
+            current_meal.image_path = (db_snapshot.val())["image_path"];
+            current_meal.name = (db_snapshot.val())["name"];
+            current_meal.recipe = (db_snapshot.val())["recipe"];
+            current_meal.ingredients = (db_snapshot.val())["ingredients"];
+        })
+    } else {
+        // TODO: If the current_plannedMonth is not this month, then update in and recall this function
     }
 }
 
@@ -1360,32 +1323,34 @@ function populate_meal_editor(meal)
 
     // Clear the current ingredient list and then populate it with the ingredients
     document.getElementById('ingredients_unordered_list').innerHTML = "";
-    for (var i = 0; i < meal.ingredients.length; i++)
-    {
-        // Create the HTML elements
-        var ingredient_element = document.createElement("li");
-        var ingredient_name_element = document.createElement("div");
-        var ingredient_name_text_node = document.createTextNode(meal.ingredients[i]);
-        var ingredient_remove_button = document.createElement("div");
+
+    for (var ingredient in meal.ingredients) {
+        if (meal.ingredients.hasOwnProperty(ingredient)) {
+            // Create the HTML elements
+            var ingredient_element = document.createElement("li");
+            var ingredient_name_element = document.createElement("div");
+            var ingredient_name_text_node = document.createTextNode(ingredient);
+            var ingredient_remove_button = document.createElement("div");
 
 
-        // Setup the ingredient name element (nested in the ingredient element)
-        ingredient_name_element.classList.add("ingredient");
-        ingredient_name_element.id = "ingredient_" + meal.ingredients[i];
-        ingredient_name_element.appendChild(ingredient_name_text_node);
+            // Setup the ingredient name element (nested in the ingredient element)
+            ingredient_name_element.classList.add("ingredient");
+            ingredient_name_element.id = "ingredient_" + ingredient;
+            ingredient_name_element.appendChild(ingredient_name_text_node);
 
-        // Setup the ingredient remove button (nested in the ingredient element)
-        ingredient_remove_button.classList.add("remove_ingredient_button");
-        ingredient_remove_button.id = "button_" + meal.ingredients[i];
-        ingredient_remove_button.innerHTML = 'x';
+            // Setup the ingredient remove button (nested in the ingredient element)
+            ingredient_remove_button.classList.add("remove_ingredient_button");
+            ingredient_remove_button.id = "button_" + ingredient;
+            ingredient_remove_button.innerHTML = 'x';
 
-        // Setup the ingredient element (with the nested name and remove button)
-        ingredient_element.classList.add("flex-ingredient-item");
-        ingredient_element.appendChild(ingredient_name_element);
-        ingredient_element.appendChild(ingredient_remove_button);
+            // Setup the ingredient element (with the nested name and remove button)
+            ingredient_element.classList.add("flex-ingredient-item");
+            ingredient_element.appendChild(ingredient_name_element);
+            ingredient_element.appendChild(ingredient_remove_button);
 
-        // Add the ingredient to the ingredients list
-        document.getElementById('ingredients_unordered_list').appendChild(ingredient_element);
+            // Add the ingredient to the ingredients list
+            document.getElementById('ingredients_unordered_list').appendChild(ingredient_element);
+        }
     }
 
     // Setup the onclick functionality
@@ -1425,8 +1390,9 @@ function remove_ingredient(ingredient)
         // Remove the ingredient from the meal in the database
         firebase_database.ref('Users_Meals' + user.uid + '/' + current_meal.id + '/ingredients/' + ingredient).remove();
 
-        // Remove (or splice) the ingredient from the ingredient list of the current meal
-        current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
+        // Remove (or delete) the ingredient from the ingredient list of the current meal
+        delete current_meal.ingredients[ingredient];
+        //current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
 
         // Remove the ingredient HTML element
         var ingredient_list_element = document.getElementById('ingredient_' + ingredient).parentElement;
