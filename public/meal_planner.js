@@ -930,16 +930,34 @@ function add_meal_list_element(id, name, image_path) {
 }
 
 /**
-* SETUP_INGREDIENT_ONCLICK_FUNCTION
-* Sets up the onclick function for each of the ingredient buttons for the currently selected meal
-* (e.g. If "Spaghetti" is selected meal the ingredients buttons: "Noodles" and "Sauce" will have the same onclick functionality)
+* Show Hide Ingredient Remove Buttons
+* Toggles between sh
 */
-function setup_ingredient_onclick_function()
+function show_hide_ingredeint_remove_buttons(isShow)
 {
-    for (var ingredient in current_meal.ingredients) {
-        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-            var ingredient_list_element = document.getElementById('button_' + ingredient);
-            ingredient_list_element.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+    if (isShow) {
+        for (var ingredient in current_meal.ingredients) {
+            if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+                var ingredient_name_element = document.getElementById("ingredient_" + ingredient);
+
+                // Setup the ingredient remove button (nested in the ingredient element)
+                var ingredient_remove_button = document.createElement("div");
+                ingredient_remove_button.classList.add("remove_ingredient_button");
+                ingredient_remove_button.id = "button_" + ingredient;
+                ingredient_remove_button.innerHTML = 'x';
+                ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+            }
+        }
+    } else {
+        for (var ingredient in current_meal.ingredients) {
+            if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+                // Check if the ingredient list item has a remove button
+                var ingredient_remove_button = document.getElementById("button_" + ingredient);
+                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                    // If so, remove the button from the list item element
+                    ingredient_remove_button.parentElement.removeChild(ingredient_remove_button);
+                }
+            }
         }
     }
 }
@@ -1113,11 +1131,7 @@ function show_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
     document.getElementById('cancel_button_div').classList.remove("hide");
     document.getElementById('confirm_button_div').classList.remove("hide");
-    for (var ingredient in current_meal.ingredients) {
-        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-            document.getElementById('button_' + ingredient).classList.remove("hide");
-        }
-    }
+    show_hide_ingredeint_remove_buttons(true);
 }
 
 function hide_edit_mode_controls() {
@@ -1129,11 +1143,7 @@ function hide_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
     document.getElementById('cancel_button_div').classList.add("hide");
     document.getElementById('confirm_button_div').classList.add("hide");
-    for (var ingredient in current_meal.ingredients) {
-        if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-            document.getElementById('button_' + ingredient).classList.add("hide");
-        }
-    }
+    show_hide_ingredeint_remove_buttons(false);
 }
 
 /**
@@ -1321,23 +1331,15 @@ function populate_meal_editor(meal)
             var ingredient_element = document.createElement("li");
             var ingredient_name_element = document.createElement("div");
             var ingredient_name_text_node = document.createTextNode(ingredient);
-            var ingredient_remove_button = document.createElement("div");
-
 
             // Setup the ingredient name element (nested in the ingredient element)
             ingredient_name_element.classList.add("ingredient");
             ingredient_name_element.id = "ingredient_" + ingredient;
             ingredient_name_element.appendChild(ingredient_name_text_node);
 
-            // Setup the ingredient remove button (nested in the ingredient element)
-            ingredient_remove_button.classList.add("remove_ingredient_button");
-            ingredient_remove_button.id = "button_" + ingredient;
-            ingredient_remove_button.innerHTML = 'x';
-
             // Setup the ingredient element (with the nested name and remove button)
             ingredient_element.classList.add("flex-ingredient-item");
             ingredient_element.appendChild(ingredient_name_element);
-            ingredient_element.appendChild(ingredient_remove_button);
 
             // Add the ingredient to the ingredients list
             document.getElementById('ingredients_unordered_list').appendChild(ingredient_element);
@@ -1345,7 +1347,6 @@ function populate_meal_editor(meal)
     }
 
     // Setup the onclick functionality
-    setup_ingredient_onclick_function();
     document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
