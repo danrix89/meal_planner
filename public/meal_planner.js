@@ -1002,9 +1002,9 @@ function select_meal_in_meal_list(meal_id) {
 function select_meal_in_calendar(meal_id) {
     if (!is_edit_mode) {
         // Chage the current meal to the newly selected/clicked meal
-        previous_meal = current_meal;
         if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
             firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
+                previous_meal = current_meal;
                 current_meal.id = meal_id;
                 current_meal.image_path = (db_snapshot.val())["image_path"];
                 current_meal.name = (db_snapshot.val())["name"];
