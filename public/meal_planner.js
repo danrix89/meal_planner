@@ -1005,11 +1005,8 @@ function select_meal_in_calendar(meal_id) {
         if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
             firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
                 previous_meal = current_meal;
-                current_meal.id = meal_id;
-                current_meal.image_path = (db_snapshot.val())["image_path"];
-                current_meal.name = (db_snapshot.val())["name"];
-                current_meal.recipe = (db_snapshot.val())["recipe"];
-                current_meal.ingredients = (db_snapshot.val())["ingredients"];
+                var meal_object = { id: meal_id, name: (db_snapshot.val())["name"], recipe: (db_snapshot.val())["recipe"], image_path: (db_snapshot.val())["image_path"], ingredients: (db_snapshot.val())["ingredients"]}
+                current_meal = meal_object;
 
                 // Populate the meal editor with the current meal
                 populate_meal_editor(current_meal);
