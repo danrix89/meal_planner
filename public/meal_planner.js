@@ -688,6 +688,9 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
         var meal_object = db_snapshot.val();
         meal_object.day = day;
         new_mealPlan_record_ref.set(meal_object);
+
+        // Create a new meal calendar day element
+        add_meal_element_to_calendar(new_mealPlan_record_ref.key, meal_object.image_path, day);
     }, function(errorObject) {
         console.log("The read failed: " + errorObject.code);
         console.log("The read failed: " + errorObject.message);
@@ -788,10 +791,6 @@ function drop_meal(event) {
           console.log("The read failed: " + errorObject.code);
           console.log("The read failed: " + errorObject.message);
         });
-
-        // Create a new meal calendar day element
-        var image_path = document.getElementById(data).getAttribute("data-image-path");
-        add_meal_element_to_calendar(meal_id, image_path, day);
     }
     // Else, the data should be transfered/moved
     else
@@ -1311,6 +1310,7 @@ function set_current_meal(meal_id)
     {
         if (meals[i].id == meal_id)
             current_meal = meals[i];
+            break;
     }
 }
 
