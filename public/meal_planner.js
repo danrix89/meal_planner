@@ -938,21 +938,23 @@ function show_hide_ingredeint_remove_buttons(isShow)
     if (isShow) {
         for (var ingredient in current_meal.ingredients) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-                var ingredient_name_element = document.getElementById("ingredient_" + ingredient);
+                var ingredient_name_element = document.getElementById(ingredient);
 
                 // Setup the ingredient remove button (nested in the ingredient element)
                 var ingredient_remove_button = document.createElement("div");
                 ingredient_remove_button.classList.add("remove_ingredient_button");
-                ingredient_remove_button.id = "button_" + ingredient;
+                ingredient_remove_button.id = "ingredient_remove_button_" + ingredient;
                 ingredient_remove_button.innerHTML = 'x';
                 ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+
+
             }
         }
     } else {
         for (var ingredient in current_meal.ingredients) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
                 // Check if the ingredient list item has a remove button
-                var ingredient_remove_button = document.getElementById("button_" + ingredient);
+                var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
                 if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
                     // If so, remove the button from the list item element
                     ingredient_remove_button.parentElement.removeChild(ingredient_remove_button);
@@ -988,7 +990,7 @@ function select_meal_in_meal_list(meal_id) {
         populate_meal_editor(current_meal);
 
         // Highlight the selected/clicked meal
-        highlight_current_meal(meal_id);
+        highlight_current_meal(meal_id, true);
     }
 }
 
@@ -1012,6 +1014,9 @@ function select_meal_in_calendar(meal_id) {
 
                 // Populate the meal editor with the current meal
                 populate_meal_editor(current_meal);
+
+                // Highlight the selected/clicked meal
+                highlight_current_meal(meal_id, false);
             })
         } else {
             // TODO: If the current_plannedMonth is not this month, then update in and recall this function
@@ -1332,9 +1337,12 @@ function populate_meal_editor(meal)
             var ingredient_name_element = document.createElement("div");
             var ingredient_name_text_node = document.createTextNode(ingredient);
 
+            // Setup the ingredient list item element
+            ingredient_element.id = ingredient;
+
             // Setup the ingredient name element (nested in the ingredient element)
             ingredient_name_element.classList.add("ingredient");
-            ingredient_name_element.id = "ingredient_" + ingredient;
+            ingredient_name_element.id = "ingredient_name_" + ingredient;
             ingredient_name_element.appendChild(ingredient_name_text_node);
 
             // Setup the ingredient element (with the nested name and remove button)
@@ -1355,17 +1363,24 @@ function populate_meal_editor(meal)
 * Highlights the currently selected meal in the meal list so the user knows which one they are one
 * @param meal_id used to know which meal in the list to highlight
 */
-function highlight_current_meal(meal_id)
+function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
 {
-    // Remove the highlight on the last selected meal
-    var element_id = "meal_list_item_" + (previous_meal.id);
-    var meal_list_element = document.getElementById(element_id);
-    meal_list_element.style.border = "0px solid #33afff";
+    // Remove the highlight on the last selected meal in the meal list (if any)
+    var meal_list_element = document.getElementById("meal_list_item_" + previous_meal.id);
+    if (meal_list_element != null && meal_list_element != undefined) {
+        meal_list_element.style.border = "0px solid #33afff";
+    }
 
-    // Add the highlight on the meal with meal_id
-    element_id = "meal_list_item_" + (meal_id);
-    meal_list_element = document.getElementById(element_id);
-    meal_list_element.style.border = "3px solid #33afff";
+    // TODO: Remove the highlight on the last selected meal in the calendar (if any)
+
+
+    if (is_being_selected_from_meal_list) {
+        // Add the highlight on the meal with meal_id
+        meal_list_element = document.getElementById("meal_list_item_" + meal_id);
+        meal_list_element.style.border = "3px solid #33afff";
+    } else {
+        // TODO: Highlight meals selected in the calendar
+    }
 }
 
 /**
