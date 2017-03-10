@@ -1317,9 +1317,10 @@ function set_current_meal(meal_id)
     previous_meal = current_meal;
     for (var i = 0; i < meals.length; i++)
     {
-        if (meals[i].id == meal_id)
+        if (meals[i].id == meal_id) {
             current_meal = meals[i];
             break;
+        }
     }
 }
 
