@@ -1019,6 +1019,15 @@ function select_meal_in_calendar(meal_id) {
             })
         } else {
             // TODO: If the current_plannedMonth is not this month, then update in and recall this function
+            var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
+            firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+                for (var plannedMonth_id in db_snapshot.val()) {
+                    if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
+                        current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
+                        select_meal_in_calendar(meal_id);
+                    }
+                }
+            })
         }
     }
 }
