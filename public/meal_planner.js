@@ -804,16 +804,52 @@ function drop_meal(event) {
         var element = document.getElementById(data);
         var target_parent = event.target.parentElement;
         var target_day = target_parent.getAttribute("data-day");
-        var image_path = element.getAttribute("src");
+        var image_path = element.getAttribute("data-image-path");
         var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
 
         // Update the "day" in the database record
+        overwrite_meal_plan_day(target_day, source_day);
 
-        // If the user is overwriting a day, delete the one that's being overwritten
+        // TODO: Remove the image from the source parentElement
+
+        // TODO: Replace the image in the target parentElement
     }
 }
 
+function overwrite_meal_plan_day(target_day, source_day) {
+    // Check if current_plannedMonth is the same as the current month...
+    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
+        // Save the changes to the database
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id);
+        db_plannedMonths_mealPlans_ref.once("value", function(db_snapshot) {
+            var meal_plans = db_snapshot.val();
+            for (var meal_plan_id in meal_plans) {
+                if (meal_plans.hasOwnProperty(meal_plan_id)) {
+                    if ((meal_plans[meal_plan_id]).day == source_day) {
+                        // TODO: Set the source meal's day with the new target_day
+                    }
 
+                    if ((meal_plans[meal_plan_id]).day == target_day) {
+                        // TODO: delete the meal that has the target_day
+                    }
+                }
+            }
+        });
+    } else {
+        // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
+        firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+            for (var plannedMonth_id in db_snapshot.val()) {
+                if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
+                    current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
+                    overwrite_meal_plan_day(target_day, source_day);
+                }
+            }
+        })
+    }
+
+    // If the user is overwriting a day, delete the one that's being overwritten
+}
 
 /**
 * DROP_TO_MEAL_LIST_GARBAGE
