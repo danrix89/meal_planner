@@ -1447,7 +1447,7 @@ function remove_ingredient(ingredient)
         //current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
 
         // Remove the ingredient HTML element
-        var ingredient_list_element = document.getElementById('ingredient_' + ingredient).parentElement;
+        var ingredient_list_element = document.getElementById(ingredient).parentElement;
         ingredient_list_element.parentElement.removeChild(ingredient_list_element);
     }
 }
