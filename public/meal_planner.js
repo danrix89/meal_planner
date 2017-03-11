@@ -1232,7 +1232,8 @@ function update_calendar_meal(id) {
     // Check if current_plannedMonth is the same as the current month...
     if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
         // Save the changes to the database
-        var db_plannedMonths_mealPlans_meal_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + id).once("value", function(db_snapshot) {
+        var db_plannedMonths_mealPlans_meal_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + id);
+        db_plannedMonths_mealPlans_meal_ref.once("value", function(db_snapshot) {
             var meal_object = {day: (db_snapshot.val()).day, name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
             db_plannedMonths_mealPlans_meal_ref.set(meal_object);
         });
