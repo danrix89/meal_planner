@@ -1422,7 +1422,7 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
     var meal_calendar_day_element = document.getElementById('drag_' + previous_meal.id + '_calendar');
     if (meal_calendar_day_element != null && meal_calendar_day_element != undefined) {
         if (meal_calendar_day_element.parentElement != null && meal_calendar_day_element.parentElement != undefined) {
-            meal_calendar_day_element.parentElement.style.backgroundColor  = "#33afff";
+            meal_calendar_day_element.parentElement.style.backgroundColor  = "";
         }
     }
 
