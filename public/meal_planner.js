@@ -1418,10 +1418,12 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
         meal_list_element.style.border = "0px solid #33afff";
     }
 
-    // TODO: Remove the highlight on the last selected meal in the calendar (if any)
-    var meal_calendar_day_element = document.getElementById('drag_' + previous_meal.id + '_calendar').parentElement;
+    // Remove the highlight on the last selected meal in the calendar (if any)
+    var meal_calendar_day_element = document.getElementById('drag_' + previous_meal.id + '_calendar');
     if (meal_calendar_day_element != null && meal_calendar_day_element != undefined) {
-        meal_calendar_day_element.style.backgroundColor  = "";
+        if (meal_calendar_day_element.parentElement != null && meal_calendar_day_element.parentElement != undefined) {
+            meal_calendar_day_element.parentElement.style.backgroundColor  = "#33afff";
+        }
     }
 
 
@@ -1431,11 +1433,12 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
         if (meal_list_element != null && meal_list_element != undefined) {
             meal_list_element.style.border = "3px solid #33afff";
         }
-
     } else {
-        meal_calendar_day_element = document.getElementById('drag_' + meal_id + '_calendar').parentElement;
+        meal_calendar_day_element = document.getElementById('drag_' + meal_id + '_calendar');
         if (meal_calendar_day_element != null && meal_calendar_day_element != undefined) {
-            meal_calendar_day_element.style.backgroundColor  = "#33afff";
+            if (meal_calendar_day_element.parentElement != null && meal_calendar_day_element.parentElement != undefined) {
+                meal_calendar_day_element.parentElement.style.backgroundColor  = "#33afff";
+            }
         }
 
     }
