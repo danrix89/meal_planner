@@ -41,6 +41,9 @@ var is_edit_mode = false;
 // Global flag to know if the user is currently adding a new meal
 var is_adding_new_meal = false;
 
+// Global flag to know if the currently selected meal is from the meal list (if false, it's from the calendar)
+var is_selected_meal_from_meal_list = true;
+
 // Used for knowing what the previous selected meal was in case we need to unselect it when we select a new one, etc.
 var previous_meal = { "id": "", "name": "", "image_path": "", "ingredients": {}, "recipe": "" };
 
@@ -644,7 +647,6 @@ function add_meal_element_to_calendar(id, image_path, day) {
     image_element.setAttribute('draggable', 'true');
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute('data-meal-id', id);
-    //image_element.setAttribute("onclick", "select_meal_in_calendar(" + id + ")");
     image_element.onclick = (function(a_id) { return function() { select_meal_in_calendar(a_id); } })(id);
     set_image_src(firebase_storage.ref().child(image_path), image_element);
 
@@ -988,6 +990,9 @@ function select_meal_in_meal_list(meal_id) {
         // Populate the meal editor with the current meal
         populate_meal_editor(current_meal);
 
+        // Set that you're selecting a meal from the meal list
+        is_selected_meal_from_meal_list = true;
+
         // Highlight the selected/clicked meal
         highlight_current_meal(meal_id, true);
     }
@@ -1011,11 +1016,14 @@ function select_meal_in_calendar(meal_id) {
                 // Populate the meal editor with the current meal
                 populate_meal_editor(current_meal);
 
+                // Set that you're selecting a meal from the meal list
+                is_selected_meal_from_meal_list = false;
+
                 // Highlight the selected/clicked meal
                 highlight_current_meal(meal_id, false);
             })
         } else {
-            // TODO: If the current_plannedMonth is not this month, then update in and recall this function
+            // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
             var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
             firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
                 for (var plannedMonth_id in db_snapshot.val()) {
@@ -1199,16 +1207,44 @@ function confirm_changes()
 
         firebase_database.ref("Users_Meals/" + user.uid + "/" + new_users_meals_record_ref.key).once("value", add_meal_list_item_from_db_snapshot);
     } else {
-        // Save the changes to the database
-        var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
-        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
-        db_users_meals_meal_ref.set(meal_object);
+        if (is_selected_meal_from_meal_list) {
+            // Save the changes to the database
+            var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
+            var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+            db_users_meals_meal_ref.set(meal_object);
 
-        // Refresh the meal list with those changes
-        db_users_meals_meal_ref.once("value", update_meal_list_item_with_changes_from_db_snapshot);
+            // Refresh the meal list with those changes
+            db_users_meals_meal_ref.once("value", update_meal_list_item_with_changes_from_db_snapshot);
+        } else {
+            // Update calendar meal
+            update_calendar_meal(current_meal.id);
+        }
     }
-
     hide_edit_mode_controls();
+}
+
+/**
+*
+*/
+function update_calendar_meal(id) {
+    // Check if current_plannedMonth is the same as the current month...
+    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
+        // Save the changes to the database
+        var db_plannedMonths_mealPlans_meal_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + id);
+        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+        db_plannedMonths_mealPlans_meal_ref.set(meal_object);
+    } else {
+        // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
+        var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
+        firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+            for (var plannedMonth_id in db_snapshot.val()) {
+                if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
+                    current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
+                    update_calendar_meal(id);
+                }
+            }
+        })
+    }
 }
 
 /**
