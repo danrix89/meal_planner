@@ -1439,15 +1439,15 @@ function remove_ingredient(ingredient)
     // Check if in edit mode (only remove in edit mode)
     if (is_edit_mode)
     {
-        // Remove the ingredient from the meal in the database
-        firebase_database.ref('Users_Meals' + user.uid + '/' + current_meal.id + '/ingredients/' + ingredient).remove();
+        // // Remove the ingredient from the meal in the database
+        // firebase_database.ref('Users_Meals' + user.uid + '/' + current_meal.id + '/ingredients/' + ingredient).remove();
 
         // Remove (or delete) the ingredient from the ingredient list of the current meal
         delete current_meal.ingredients[ingredient];
         //current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
 
         // Remove the ingredient HTML element
-        var ingredient_list_element = document.getElementById(ingredient).parentElement;
+        var ingredient_list_element = document.getElementById(ingredient);
         ingredient_list_element.parentElement.removeChild(ingredient_list_element);
     }
 }
