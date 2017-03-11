@@ -202,10 +202,12 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     populate_meal_list();
     populate_meal_editor(current_meal);
     hide_edit_mode_controls();
-    highlight_current_meal(meals[0].id, true);
 
     // This will also populate the calendar with any planned meals
     populate_calendar_days();
+
+    // Highlight the first meal in the meal list
+    highlight_current_meal(meals[0].id, true);
 }
 
 /*****************************************************/
