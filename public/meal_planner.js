@@ -1415,7 +1415,7 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
     // Remove the highlight on the last selected meal in the meal list (if any)
     var meal_list_element = document.getElementById("meal_list_item_" + previous_meal.id);
     if (meal_list_element != null && meal_list_element != undefined) {
-        meal_list_element.style.border = "0px solid #33afff";
+        meal_list_element.style.backgroundColor = "";
     }
 
     // Remove the highlight on the last selected meal in the calendar (if any)
@@ -1431,7 +1431,7 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
         // Add the highlight on the meal with meal_id
         meal_list_element = document.getElementById("meal_list_item_" + meal_id);
         if (meal_list_element != null && meal_list_element != undefined) {
-            meal_list_element.style.border = "3px solid #33afff";
+            meal_list_element.style.backgroundColor = "#33afff";
         }
     } else {
         meal_calendar_day_element = document.getElementById('drag_' + meal_id + '_calendar');
