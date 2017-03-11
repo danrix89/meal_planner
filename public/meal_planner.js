@@ -197,6 +197,7 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     // Set the initial current/previous meals to the first meal when loading the page.
     previous_meal = meals[0];
     set_current_meal(meals[0].id);
+    highlight_current_meal(meals[0].id, true);
 
     // Populate the app interface with data
     populate_meal_list();
@@ -1170,14 +1171,15 @@ function hide_edit_mode_controls() {
 */
 function edit_current_meal()
 {
+    // Toggle edit mode
+    is_edit_mode = true;
+
+    // Show the edit mode controls in the meal editor pane.
     show_edit_mode_controls();
 
     // Save the current meal before we edit it so we can recover if the user
     // decides to cancel their changes
     meal_before_edit = current_meal;
-
-    // Toggle edit mode
-    is_edit_mode = true;
 }
 
 /**
