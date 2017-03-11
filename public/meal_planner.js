@@ -1417,14 +1417,25 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
     }
 
     // TODO: Remove the highlight on the last selected meal in the calendar (if any)
+    var meal_calendar_image_element = document.getElementById('drag_' + previous_meal.id + '_calendar');
+    if (meal_calendar_image_element != null && meal_list_element != undefined) {
+        meal_calendar_image_element.style.border = "";
+    }
 
 
     if (is_being_selected_from_meal_list) {
         // Add the highlight on the meal with meal_id
         meal_list_element = document.getElementById("meal_list_item_" + meal_id);
-        meal_list_element.style.border = "3px solid #33afff";
+        if (meal_list_element != null && meal_list_element != undefined) {
+            meal_list_element.style.border = "3px solid #33afff";
+        }
+
     } else {
-        // TODO: Highlight meals selected in the calendar
+        meal_calendar_image_element = document.getElementById('drag_' + meal_id + '_calendar');
+        if (meal_calendar_image_element != null && meal_list_element != undefined) {
+            meal_calendar_image_element.style.border = "3px solid #33afff";
+        }
+
     }
 }
 
@@ -1439,12 +1450,8 @@ function remove_ingredient(ingredient)
     // Check if in edit mode (only remove in edit mode)
     if (is_edit_mode)
     {
-        // // Remove the ingredient from the meal in the database
-        // firebase_database.ref('Users_Meals' + user.uid + '/' + current_meal.id + '/ingredients/' + ingredient).remove();
-
         // Remove (or delete) the ingredient from the ingredient list of the current meal
         delete current_meal.ingredients[ingredient];
-        //current_meal.ingredients.splice(current_meal.ingredients.indexOf(ingredient), 1);
 
         // Remove the ingredient HTML element
         var ingredient_list_element = document.getElementById(ingredient);
