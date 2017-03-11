@@ -940,8 +940,6 @@ function show_hide_ingredeint_remove_buttons(isShow)
     if (isShow) {
         for (var ingredient in current_meal.ingredients) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-                var ingredient_name_element = document.getElementById(ingredient);
-
                 // Setup the ingredient remove button (nested in the ingredient element)
                 var ingredient_remove_button = document.createElement("div");
                 ingredient_remove_button.classList.add("remove_ingredient_button");
@@ -949,7 +947,7 @@ function show_hide_ingredeint_remove_buttons(isShow)
                 ingredient_remove_button.innerHTML = 'x';
                 ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
 
-
+                document.getElementById(ingredient).appendChild(ingredient_remove_button);
             }
         }
     } else {
@@ -1174,12 +1172,12 @@ function edit_current_meal()
     // Toggle edit mode
     is_edit_mode = true;
 
-    // Show the edit mode controls in the meal editor pane.
-    show_edit_mode_controls();
-
     // Save the current meal before we edit it so we can recover if the user
     // decides to cancel their changes
     meal_before_edit = current_meal;
+
+    // Show the edit mode controls in the meal editor pane.
+    show_edit_mode_controls();
 }
 
 /**
