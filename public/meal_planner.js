@@ -197,12 +197,12 @@ function initialize_user_meals_from_db_snapshot(db_snapshot) {
     // Set the initial current/previous meals to the first meal when loading the page.
     previous_meal = meals[0];
     set_current_meal(meals[0].id);
-    highlight_current_meal(meals[0].id, true);
 
     // Populate the app interface with data
     populate_meal_list();
     populate_meal_editor(current_meal);
     hide_edit_mode_controls();
+    highlight_current_meal(meals[0].id, true);
 
     // This will also populate the calendar with any planned meals
     populate_calendar_days();
