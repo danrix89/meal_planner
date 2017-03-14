@@ -795,7 +795,7 @@ function drop_meal(event) {
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (snapshot.val()[plannedMonth_id]).formatted_date };
                 // Check if a meal is already is that spot
                 firebase_database.ref('PlannedMonths_MealPlans/' + already_existing_plannedMonth_id).once("value", function(db_snapshot) {
-                    var meal_plans db_snapshot.val();
+                    var meal_plans = db_snapshot.val();
                     if (meal_plans != null && meal_plans != undefined) {
                         for (var meal_plan_id in meal_plans) {
                             if (meal_plans.hasOwnProperty(meal_plan_id) && meal_plans[meal_plan_id].day == day) {
