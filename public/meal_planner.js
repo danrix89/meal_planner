@@ -810,6 +810,7 @@ function drop_meal(event) {
 
         // Replace the image in the target parentElement
         set_image_src(firebase_storage.ref().child(image_path), target_meal_plan_image_element);
+        target_meal_plan_image_element.setAttribute("data-image-path", image_path);
         target_meal_plan_image_element.id = source_meal_plan_image_element.id;
 
         // Remove the image from the source parentElement
@@ -820,6 +821,11 @@ function drop_meal(event) {
     }
 }
 
+/**
+* Overwrite Meal Plan Day
+* Overwrites a meal plan day by updating the record of the source day with the
+* target day, and deleting the record with the target day.
+*/
 function overwrite_meal_plan_day(target_day, source_day) {
     // Check if current_plannedMonth is the same as the current month...
     if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
