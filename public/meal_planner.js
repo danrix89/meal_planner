@@ -801,11 +801,10 @@ function drop_meal(event) {
     else
     {
         // Copy the image over with onclick functionality
-        var element = document.getElementById(data);
-        var target_parent = event.target.parentElement;
-        var target_day = target_parent.getAttribute("data-day");
-        var image_path = element.getAttribute("data-image-path");
-        var source_day = document.getElementById(data).parentElement.getAttribute("data-day"); // Get a copy of the source parent's data-day attribtute
+        var source_meal_plan_image_element = document.getElementById(data);
+        var target_day = event.target.parentElement.getAttribute("data-day");
+        var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
+        var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
 
         // Update the "day" in the database record
         overwrite_meal_plan_day(target_day, source_day);
@@ -827,10 +826,12 @@ function overwrite_meal_plan_day(target_day, source_day) {
                 if (meal_plans.hasOwnProperty(meal_plan_id)) {
                     if ((meal_plans[meal_plan_id]).day == source_day) {
                         // TODO: Set the source meal's day with the new target_day
+                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id + "/day").set(target_day);
                     }
 
                     if ((meal_plans[meal_plan_id]).day == target_day) {
                         // TODO: delete the meal that has the target_day
+                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id).remove();
                     }
                 }
             }
