@@ -792,9 +792,28 @@ function drop_meal(event) {
             }
 
             if (already_existing_plannedMonth_id != null) {
-                // If so, then add the new meal to that month
-                add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (snapshot.val()[plannedMonth_id]).formatted_date };
+                // Check if a meal is already is that spot
+                firebase_database.ref('PlannedMonths_MealPlans/' + already_existing_plannedMonth_id).once("value", function(db_snapshot) {
+                    var meal_plans db_snapshot.val();
+                    if (meal_plans != null && meal_plans != undefined) {
+                        for (var meal_plan_id in meal_plans) {
+                            if (meal_plans.hasOwnProperty(meal_plan_id) && meal_plans[meal_plan_id].day == day) {
+                                // Delete the meal in the database
+                                firebase_database.ref('PlannedMonths_MealPlans/' + already_existing_plannedMonth_id + '/' + meal_plan_id).remove();
+
+                                // Remove the element from the calendar
+                                var meal_plan_image_element = document.getElementById('drag_' + meal_plan_id + '_calendar');
+                                meal_plan_image_element.parentElement.removeChild(meal_plan_image_element);
+
+                                // End the loop
+                                break;
+                            }
+                        }
+                        // Create a new meal
+                        add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
+                    }
+                })
             } else {
                 // If not, then create a new plannedMonth and add the meal to that planned month
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
