@@ -691,9 +691,13 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
         // Add the meal to the database
         var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans/' + plannedMonth_id);
         var new_mealPlan_record_ref = db_plannedMonths_mealPlans_ref.push();
-        var meal_object = db_snapshot.val();
-        meal_object.day = day;
-        new_mealPlan_record_ref.set(meal_object);
+        var meal_plan_object = db_snapshot.val();
+        meal_plan_object.day = day;
+        new_mealPlan_record_ref.set(meal_plan_object);
+
+        var meal_object = {id: new_mealPlan_record_ref.key, name: meal_plan_object.name, image_path: meal_plan_object.image_path, recipe: meal_plan_object.recipe, ingredients: meal_plan_object.ingredients};
+        previous_meal = current_meal;
+        current_meal = meal_object;
 
         // Create a new meal calendar day element
         add_meal_element_to_calendar(new_mealPlan_record_ref.key, meal_object.image_path, day);
@@ -845,9 +849,6 @@ function overwrite_meal_plan_day(target_day, source_day) {
                     }
 
                     if ((meal_plans[meal_plan_id]).day == target_day) {
-                        // Set the previous_meal to the meal plan of the target_day day
-                        var meal_object = {id: meal_plan_id, name: (meal_plans[meal_plan_id]).name, recipe: (meal_plans[meal_plan_id]).recipe, image_path: (meal_plans[meal_plan_id]).image_path, ingredients: (meal_plans[meal_plan_id]).ingredients};
-                        previous_meal = meal_object;
                         // Delete the meal that has the target_day
                         firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id).remove();
                     }
