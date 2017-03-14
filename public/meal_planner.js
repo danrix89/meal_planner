@@ -773,6 +773,12 @@ function drop_meal(event) {
     var parent_element = document.getElementById(data).parentElement;
 
     var day = event.target.getAttribute("data-day");
+    if (day == null) {
+        day = event.target.parentElement.getAttribute("data-day");
+        if (day == null) {
+            day = -1;
+        }
+    }
 
     // If the parent element is a meal list item, copy the data over...
     if (parent_element.className.includes("flex-meal-item")) {
