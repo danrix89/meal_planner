@@ -8,6 +8,99 @@
     display: none;
 }
 
+/******************************************************************************************
+* BUTTON STYLES
+******************************************************************************************/
+
+/* Meal Planner Buttons */
+.meal_planner_button {
+    width: 50px;
+    height: 50px;
+    background-color: #33afff;
+    border-radius: 200px;
+    /*display: inline-block;*/
+    float: right;
+    transition: .5s;
+    margin: 5px;
+}
+
+.meal_planner_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;
+}
+
+.meal_planner_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;
+}
+
+.button_image {
+    height: 60%;
+    width: 60%;
+    margin: 10px;
+}
+
+.meal_editor_confirm_button {
+    background-color: #00e364;
+}
+
+.meal_editor_cancel_button{
+    background-color: #FF4500;
+}
+
+/* Ingredient Edit Buttons */
+.remove_ingredient_button {
+    margin: 3px;
+    background-color: white;
+    color: #ff8333;
+    font-size: 1em;
+    text-align:center;
+    border-radius: 200px;
+    width: 20px;
+    float: right;
+}
+
+.remove_ingredient_button:hover {
+    transform: scale(1.09, 1.09);
+    box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
+    transition-duration: .2s;
+    cursor: pointer;
+}
+
+.remove_ingredient_button:active {
+    transform: scale(.9, .9);
+}
+
+.ingredient_add_button_image {
+    height: 15px;
+    width: 15px;
+    margin: 5px;
+}
+
+.ingredient_add_field_and_button{
+    display: inline-block;
+    height: 25px;
+    width: 25px;
+    background-color: #33afff;
+    border-radius: 200px;
+}
+
+.ingredient_add_field_and_button:hover {
+    transform: scale(1.03, 1.03);
+    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
+    transition-duration: .2s;
+    cursor: pointer;
+}
+
+.ingredient_add_field_and_button:active {
+    transform: scale(.95, .95);
+    transition-duration: -1s;
+}
+
+
+
 
 /******************************************************************************************
 * MAIN LAYOUT
@@ -15,7 +108,6 @@
 
 html, body {
     margin: 0;
-    height: 100%;
     font-family: Arial;
     height: 100%;
     width: 100%;
@@ -24,11 +116,9 @@ html, body {
 
 .app_title {
     background-color: #ff8333; /*Orange*/
-    height: 56px;
-    margin-left: 3px;
+    height: 60px;
     text-align: center;
-    vertical-align: middle;
-    line-height: 50px;
+    line-height: 60px;
     font-size: 2em;
     color: white;
     font-weight: bold;
@@ -38,12 +128,10 @@ html, body {
     width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding-right: 17px; /* Increase/decrease this value for cross-browser compatibility */
 }
 
 .calendar_panel {
     background-color: white;
-    height: 100%;
     width: 65%;
     float: left;
     position: relative;
@@ -52,7 +140,7 @@ html, body {
 .side_panel {
     background-color: red;
     width: 35%;
-    height: 100%;
+    /*height: 890px;*/
     float: left;
 }
 
@@ -65,116 +153,12 @@ html, body {
 }
 
 #meal_list_container {
-    height:60%;
+    height:45%;
 }
 
 #meal_editor_container {
-    height:40%;
+    height:55%;
 }
-
-.calendar_floating_remove_button {
-    display: inline-block;
-    height: 50px;
-    width: 50px;
-    background-color: #33afff;
-    border-radius: 200px;
-    position: fixed;
-    left: 60%;
-    bottom: 20px;
-}
-
-.meal_list_floating_button {
-    display: inline-block;
-    height: 50px;
-    width: 50px;
-    background-color: #33afff;
-    border-radius: 200px;
-    position: absolute;
-    bottom: 5%;
-    left: 85%;
-}
-
-.meal_list_floating_add_button {
-    display: inline-block;
-    height: 50px;
-    width: 50px;
-    background-color: #33afff;
-    border-radius: 200px;
-    position: absolute;
-    bottom: 5%;
-    left: 75%;
-}
-
-.meal_list_floating_confirm_button,
-.meal_list_floating_cancel_button{
-    display: inline-block;
-    height: 50px;
-    width: 50px;
-    border-radius: 200px;
-    position: absolute;
-    bottom: 10px;
-}
-
-.meal_list_floating_confirm_button {
-    background-color: #00e364;
-    right: 10px;
-}
-
-.meal_list_floating_cancel_button{
-    background-color: #FF4500;
-    right: 70px;
-}
-
-div.calendar_floating_remove_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.calendar_floating_remove_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
-div.meal_list_floating_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.meal_list_floating_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
-div.meal_list_floating_add_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.meal_list_floating_add_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
-.meal_list_floating_confirm_button:hover,
-.meal_list_floating_cancel_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-.meal_list_floating_confirm_button:active,
-.meal_list_floating_cancel_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
 
 /******************************************************************************************
 * CALENDAR
@@ -184,14 +168,14 @@ div.meal_list_floating_add_button:active {
 
 .calendar_title_pane {
     background-color: gray;
-    min-height: 50px;
+    height: 60px;
+    line-height: 60px;
     width: 100%;
     margin: 3px;
 }
 
 .flex_calendar_title_container {
-    padding: 0;
-    margin: 0;
+    margin: 5px;
     list-style: none;
     display: flex;
     flex-flow: row wrap;
@@ -200,63 +184,11 @@ div.meal_list_floating_add_button:active {
 
 .flex_calendar_title_item {
     background-color: gray;
-    padding: 5px;
     height: 50px;
     color: white;
     font-weight: bold;
     font-size: 2em;
 }
-
-.calendar_button {
-    border-radius: 200px;
-    width: 50px;
-    height: 50px;
-    background-color: #33afff;
-    transition-duration: .5s;
-}
-
-.title_button {
-    border-radius: 200px;
-    width: 50px;
-    height: 50px;
-    background-color: #33afff;
-    transition-duration: .5s;
-    float: right;
-    margin-right: 10px;
-    margin-top: 2px;
-}
-
-.button_image {
-    height: 30px;
-    width: 30px;
-    color: orange;
-    margin: 10px;
-}
-
-div.calendar_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.calendar_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
-div.title_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.title_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
-}
-
 
 /***************** CALENDAR BODY *****************/
 
@@ -278,8 +210,6 @@ div.title_button:active {
 }
 
 .calendar_body_container {
-    padding: 0;
-    margin: 0;
     list-style: none;
     justify-content: space-around;
     overflow: scroll;
@@ -289,9 +219,9 @@ div.title_button:active {
 
 .calendar_body_item {
     margin: 1px;
-    padding:0;
     border: 2px solid rgba(0,0,0,0.2);
     background-color: white;
+    cursor: pointer;
     font-weight: bold;
     font-size: 1.5em;
     max-width: 13.8%;
@@ -301,23 +231,8 @@ div.title_button:active {
     opacity: 0.8;
 }
 
-.half_day {
-    margin: inherit;
-    padding: 1px;
-    border: inherit;
-    background-color: inherit;
-    font-weight: inherit;
-    font-size: inherit;
-    width: inherit;
-    max-height: 75.5px;
-
-}
-
 .calendar {
-    margin: 0;
-    padding: 0;
     width: 100%;
-    height: 93.7%;
     background-color: white;
 }
 
@@ -401,6 +316,8 @@ li.flex-meal-item:active {
     color: white;
     font-size: 2em;
     margin: 3px;
+    height: 60px;
+    line-height: 60px;
 }
 
 .meal_editor_body {
@@ -440,29 +357,6 @@ li.flex-meal-item:active {
     float: left;
 }
 
-.remove_ingredient_button {
-    margin: 3px;
-    padding: 0;
-    background-color: white;
-    color: #ff8333;
-    font-size: 1em;
-    text-align:center;
-    border-radius: 200px;
-    width: 20px;
-    float: right;
-}
-
-.remove_ingredient_button:hover {
-    transform: scale(1.09, 1.09);
-    box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-.remove_ingredient_button:active {
-    transform: scale(.9, .9);
-}
-
 .meal_data_input {
     color: #ff8333;
     width: 50%;
@@ -478,32 +372,6 @@ li.flex-meal-item:active {
     width: 100%;
     color: #ff8333;
     font-size: 16px;
-}
-
-.ingredient_add_button_image {
-    height: 15px;
-    width: 15px;
-    margin: 5px;
-}
-
-.ingredient_add_field_and_button{
-    display: inline-block;
-    height: 25px;
-    width: 25px;
-    background-color: #33afff;
-    border-radius: 200px;
-}
-
-div.ingredient_add_field_and_button:hover {
-    transform: scale(1.03, 1.03);
-    box-shadow: 0px 0px 10px 0px rgba(25,25,25,.8);
-    transition-duration: .2s;
-    cursor: pointer;
-}
-
-div.ingredient_add_field_and_button:active {
-    transform: scale(.95, .95);
-    transition-duration: -1s;
 }
 
 

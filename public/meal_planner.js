@@ -178,6 +178,11 @@ function setup_app_controls() {
 * Initializes the app (after a successful log in) with controls, fields, data, etc.
 */
 function initialize_meal_planner_app() {
+    var app_title_pixel_height = 60;
+    var pixel_height = (window.innerHeight - app_title_pixel_height) + "px";
+    document.getElementById("calendar_panel").style.height = pixel_height;
+    document.getElementById("side_panel").style.height = pixel_height;
+
     setup_app_controls();
 
     // Set the user's meals from the database.
