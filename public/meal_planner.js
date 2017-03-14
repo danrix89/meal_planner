@@ -814,6 +814,7 @@ function drop_meal(event) {
         target_meal_plan_image_element.id = source_meal_plan_image_element.id;
 
         // Remove the image from the source parentElement
+        source_meal_plan_image_element.parentElement.style.backgroundColor = "";
         source_meal_plan_image_element.parentElement.removeChild(source_meal_plan_image_element);
 
         // Update the "day" in the database record
