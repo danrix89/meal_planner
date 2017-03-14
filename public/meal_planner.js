@@ -701,6 +701,12 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
 
         // Create a new meal calendar day element
         add_meal_element_to_calendar(new_mealPlan_record_ref.key, meal_object.image_path, day);
+
+        // Set the meal editor to the newly added meal
+        populate_meal_editor(current_meal);
+
+        // Highlight the newly added meal
+        highlight_current_meal(current_meal.id, false);
     }, function(errorObject) {
         console.log("The read failed: " + errorObject.code);
         console.log("The read failed: " + errorObject.message);
