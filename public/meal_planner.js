@@ -836,19 +836,23 @@ function overwrite_meal_plan_day(target_day, source_day) {
             for (var meal_plan_id in meal_plans) {
                 if (meal_plans.hasOwnProperty(meal_plan_id)) {
                     if ((meal_plans[meal_plan_id]).day == source_day) {
-                        // Set the source meal's day with the new target_day
-                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id + "/day").set(target_day);
+                        // Set the current_meal to the meal plan of the source day
                         var meal_object = {id: meal_plan_id, name: (meal_plans[meal_plan_id]).name, recipe: (meal_plans[meal_plan_id]).recipe, image_path: (meal_plans[meal_plan_id]).image_path, ingredients: (meal_plans[meal_plan_id]).ingredients};
                         current_meal = meal_object;
-                        highlight_current_meal(current_meal.id, false);
+                        // Set the source meal's day with the new target_day
+                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id + "/day").set(target_day);
                     }
 
                     if ((meal_plans[meal_plan_id]).day == target_day) {
+                        // Set the previous_meal to the meal plan of the target_day day
+                        var meal_object = {id: meal_plan_id, name: (meal_plans[meal_plan_id]).name, recipe: (meal_plans[meal_plan_id]).recipe, image_path: (meal_plans[meal_plan_id]).image_path, ingredients: (meal_plans[meal_plan_id]).ingredients};
+                        previous_meal = meal_object;
                         // Delete the meal that has the target_day
                         firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id).remove();
                     }
                 }
             }
+            highlight_current_meal(current_meal.id, false);
         });
     } else {
         // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
