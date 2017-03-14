@@ -807,15 +807,15 @@ function drop_meal(event) {
         var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
         var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
 
-        // Update the "day" in the database record
-        overwrite_meal_plan_day(target_day, source_day);
-
         // Replace the image in the target parentElement
         set_image_src(firebase_storage.ref().child(image_path), target_meal_plan_image_element);
         target_meal_plan_image_element.id = source_meal_plan_image_element.id;
 
         // Remove the image from the source parentElement
         source_meal_plan_image_element.parentElement.removeChild(source_meal_plan_image_element);
+
+        // Update the "day" in the database record
+        overwrite_meal_plan_day(target_day, source_day);
     }
 }
 
