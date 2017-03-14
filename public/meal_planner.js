@@ -650,6 +650,7 @@ function add_meal_element_to_calendar(id, image_path, day) {
     image_element.setAttribute('draggable', 'true');
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute('data-meal-id', id);
+    image_element.setAttribute('data-image-path', image_path);
     image_element.onclick = (function(a_id) { return function() { select_meal_in_calendar(a_id); } })(id);
     set_image_src(firebase_storage.ref().child(image_path), image_element);
 
