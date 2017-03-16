@@ -357,13 +357,13 @@ function create_new_user_data(firebase_user) {
 * password length.
 */
 function log_in() {
-    var test_mode = false;
+    var test_mode = true;
     if (test_mode) {
         ////////////////////////////////////////////////////////////////////////
         //////////////////////////// TEST LOG IN ///////////////////////////////
         ////////////////////////////////////////////////////////////////////////
         user = {};
-        user.uid = "ontlsfCfjpaHDnu5tpr0533Wvuo1";
+        user.uid = "1oRWD3Kw2ibbGJ69MsRysMsgjIe2";
         initialize_meal_planner_app();
         document.getElementById("sign_in_page").setAttribute("class", "hide");
         document.getElementById("main_box").classList.remove("hide");
@@ -583,16 +583,24 @@ function populate_calendar_days() {
 
             // Will the calendar_day_element will hold data?
             if (calendar_square_index >= first_day && day <= number_of_days) {
-                // Create and setup the data div that will hold meal data for that day
-                var calendar_day_data_div_element = document.createElement("div");
-                calendar_day_data_div_element.id = "calendar_day_div_" + day;
-                calendar_day_data_div_element.setAttribute("ondrop", "drop_meal(event)");
-                calendar_day_data_div_element.setAttribute("ondragover", "allow_meal_drop(event)")
-                calendar_day_data_div_element.setAttribute("data-day", day);
-                calendar_day_data_div_element.innerHTML = day;
+                // Create and setup the DOM elements that will hold meal data for that day
+                var calendar_day_number_element = document.createElement("div");
+                var calendar_day_data_container_element = document.createElement("div");
+
+                // Setup calendar_day_data_day_element
+                calendar_day_number_element.classList.add("calendar_day_number_element");
+                calendar_day_number_element.innerHTML = day;
+
+                // Setup calendar_day_data_container_element
+                calendar_day_data_container_element.id = "calendar_day_data_container_element_" + day;
+                calendar_day_data_container_element.classList.add("calendar_day_data_container_element");
+                calendar_day_data_container_element.setAttribute("ondrop", "drop_meal(event)");
+                calendar_day_data_container_element.setAttribute("ondragover", "allow_meal_drop(event)")
+                calendar_day_data_container_element.setAttribute("data-day", day);
 
                 // Add the data div to the element
-                calendar_day_element.appendChild(calendar_day_data_div_element);
+                calendar_day_element.appendChild(calendar_day_number_element);
+                calendar_day_element.appendChild(calendar_day_data_container_element);
 
                 // Increment the day
                 day++;
@@ -640,7 +648,7 @@ function populate_calendar_with_mealPlans_snapshot(meal_plans_snapshot) {
     for (var mealPlan_id in meal_plans_snapshot) {
         if (meal_plans_snapshot.hasOwnProperty(mealPlan_id)) {
             var meal_plan_object = meal_plans_snapshot[mealPlan_id];
-            add_meal_element_to_calendar(mealPlan_id, meal_plan_object.image_path, meal_plan_object.day);
+            add_meal_element_to_calendar(mealPlan_id, meal_plan_object.name, meal_plan_object.image_path, meal_plan_object.day);
         }
     }
 }
@@ -648,10 +656,14 @@ function populate_calendar_with_mealPlans_snapshot(meal_plans_snapshot) {
 /**
 *
 */
-function add_meal_element_to_calendar(id, image_path, day) {
-
+function add_meal_element_to_calendar(id, name, image_path, day) {
+    var calendar_day_element = document.getElementById('calendar_day_data_container_element_' + day);
     var image_element = document.createElement("img");
+    var name_element = document.createElement("div");
+
+    // Setup image_element
     image_element.id = 'drag_' + id + '_calendar';
+    image_element.classList.add("calendar_day_data_container_image_element");
     image_element.setAttribute('draggable', 'true');
     image_element.setAttribute('ondragstart', 'drag_meal(event)');
     image_element.setAttribute('data-meal-id', id);
@@ -659,8 +671,14 @@ function add_meal_element_to_calendar(id, image_path, day) {
     image_element.onclick = (function(a_id) { return function() { select_meal_in_calendar(a_id); } })(id);
     set_image_src(firebase_storage.ref().child(image_path), image_element);
 
-    var calendar_day_element = document.getElementById('calendar_day_div_' + day);
+    // Setup name_element
+    name_element.id = "calendar_day_data_container_name_element_" + id;
+    name_element.classList.add("calendar_day_data_container_name_element");
+    name_element.innerHTML = name;
+
+    // Add the elements to the container
     calendar_day_element.appendChild(image_element);
+    calendar_day_element.appendChild(name_element);
 }
 
 /**
@@ -705,7 +723,7 @@ function add_new_meal_to_meal_plan(day, meal_id, plannedMonth_id)
         current_meal = meal_object;
 
         // Create a new meal calendar day element
-        add_meal_element_to_calendar(new_mealPlan_record_ref.key, meal_object.image_path, day);
+        add_meal_element_to_calendar(new_mealPlan_record_ref.key, meal_object.name, meal_object.image_path, day);
 
         // Set the meal editor to the newly added meal
         populate_meal_editor(current_meal);
@@ -948,12 +966,17 @@ function drop_to_calendar_garbage(event)
 {
     event.preventDefault();
 
-    var data = event.dataTransfer.getData("text");
-    var meal_element_to_be_removed = document.getElementById(data);
-    var meal_id = meal_element_to_be_removed.getAttribute("data-meal-id");
+    var image_element_id = event.dataTransfer.getData("text");
+    var meal_image_element_to_be_removed = document.getElementById(image_element_id);
+    var meal_id = meal_image_element_to_be_removed.getAttribute("data-meal-id");
+    var meal_name_element_to_be_removed = document.getElementById("calendar_day_data_container_name_element_" + meal_id);
+    var meal_container_element = meal_image_element_to_be_removed.parentElement;
+
 
     // Remove that one item from the calendar in HTML
-    meal_element_to_be_removed.parentElement.removeChild(meal_element_to_be_removed);
+    meal_image_element_to_be_removed.parentElement.removeChild(meal_image_element_to_be_removed);
+    meal_name_element_to_be_removed.parentElement.removeChild(meal_name_element_to_be_removed);
+    meal_container_element.style.backgroundColor = "";
 
     // Delete the PlannedMonths_MealPlans record for that day
     if (current_plannedMonth.id != null && current_plannedMonth.formatted_date == formatted_date(calendar_date)) {
