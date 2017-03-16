@@ -357,7 +357,7 @@ function create_new_user_data(firebase_user) {
 * password length.
 */
 function log_in() {
-    var test_mode = true;
+    var test_mode = false;
     if (test_mode) {
         ////////////////////////////////////////////////////////////////////////
         //////////////////////////// TEST LOG IN ///////////////////////////////
@@ -597,6 +597,7 @@ function populate_calendar_days() {
                 calendar_day_data_container_element.setAttribute("ondrop", "drop_meal(event)");
                 calendar_day_data_container_element.setAttribute("ondragover", "allow_meal_drop(event)")
                 calendar_day_data_container_element.setAttribute("data-day", day);
+                calendar_day_data_container_element.setAttribute("data-is-container", true);
 
                 // Add the data div to the element
                 calendar_day_element.appendChild(calendar_day_number_element);
@@ -861,28 +862,35 @@ function drop_meal(event) {
     // Else, the data should be transfered/moved
     else
     {
-        // Copy the image over with onclick functionality
         var source_meal_plan_image_element = document.getElementById(data);
-        var target_meal_plan_image_element = event.target
         var source_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + source_meal_plan_image_element.dataset.mealId);
-        var target_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + target_meal_plan_image_element.dataset.mealId);
-        var target_day = event.target.parentElement.getAttribute("data-day");
         var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
+        var target_day = event.target.parentElement.getAttribute("data-day");
         var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
 
-        // Replace the image in the target parentElement
-        set_image_src(firebase_storage.ref().child(image_path), target_meal_plan_image_element);
-        target_meal_plan_image_element.setAttribute("data-image-path", image_path);
-        target_meal_plan_image_element.id = source_meal_plan_image_element.id;
-        target_meal_plan_name_element.innerHTML = source_meal_plan_name_element.innerHTML;
+        // Does the target day have a meal already there?
+        var is_meal_plan_container_element = event.target.getAttribute("data-is-container");
+        if (is_meal_plan_container_element) {
+            add_meal_element_to_calendar(source_meal_plan_image_element.getAttribute("data-meal-id"), source_meal_plan_name_element.innerHTML, image_path, day)
+        } else {
+            // Copy the image over
+            var target_meal_plan_image_element = event.target
+            var target_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + target_meal_plan_image_element.dataset.mealId);
+
+            // Replace the image/name in the target parentElement
+            set_image_src(firebase_storage.ref().child(image_path), target_meal_plan_image_element);
+            target_meal_plan_image_element.setAttribute("data-image-path", image_path);
+            target_meal_plan_image_element.id = source_meal_plan_image_element.id;
+            target_meal_plan_name_element.innerHTML = source_meal_plan_name_element.innerHTML;
+        }
+
+        // Update the "day" in the database record and delete the other target day's record (if any)
+        overwrite_meal_plan_day(target_day, source_day);
 
         // Remove the image from the source parentElement
         source_meal_plan_image_element.parentElement.style.backgroundColor = "";
         source_meal_plan_image_element.parentElement.removeChild(source_meal_plan_image_element);
         source_meal_plan_name_element.parentElement.removeChild(source_meal_plan_name_element);
-
-        // Update the "day" in the database record
-        overwrite_meal_plan_day(target_day, source_day);
     }
 }
 
@@ -898,6 +906,16 @@ function overwrite_meal_plan_day(target_day, source_day) {
         var db_plannedMonths_mealPlans_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id);
         db_plannedMonths_mealPlans_ref.once("value", function(db_snapshot) {
             var meal_plans = db_snapshot.val();
+            // Loop through and find the target day (if any) and remove that record
+            for (var meal_plan_id in meal_plans) {
+                if (meal_plans.hasOwnProperty(meal_plan_id)) {
+                    if ((meal_plans[meal_plan_id]).day == target_day) {
+                        // Delete the meal that has the target_day
+                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id).remove();
+                    }
+                }
+            }
+            // Loop through and find the source day and update it's "day" with the target_day
             for (var meal_plan_id in meal_plans) {
                 if (meal_plans.hasOwnProperty(meal_plan_id)) {
                     if ((meal_plans[meal_plan_id]).day == source_day) {
@@ -906,11 +924,6 @@ function overwrite_meal_plan_day(target_day, source_day) {
                         current_meal = meal_object;
                         // Set the source meal's day with the new target_day
                         firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id + "/day").set(target_day);
-                    }
-
-                    if ((meal_plans[meal_plan_id]).day == target_day) {
-                        // Delete the meal that has the target_day
-                        firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_plan_id).remove();
                     }
                 }
             }
