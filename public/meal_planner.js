@@ -865,6 +865,7 @@ function drop_meal(event) {
         var source_meal_plan_image_element = document.getElementById(data);
         var target_meal_plan_image_element = event.target
         var source_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + source_meal_plan_image_element.dataset.mealId);
+        var target_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + target_meal_plan_image_element.dataset.mealId);
         var target_day = event.target.parentElement.getAttribute("data-day");
         var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
         var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
@@ -873,11 +874,12 @@ function drop_meal(event) {
         set_image_src(firebase_storage.ref().child(image_path), target_meal_plan_image_element);
         target_meal_plan_image_element.setAttribute("data-image-path", image_path);
         target_meal_plan_image_element.id = source_meal_plan_image_element.id;
+        target_meal_plan_name_element.innerHTML = source_meal_plan_name_element.innerHTML;
 
         // Remove the image from the source parentElement
         source_meal_plan_image_element.parentElement.style.backgroundColor = "";
         source_meal_plan_image_element.parentElement.removeChild(source_meal_plan_image_element);
-        source_meal_plan_name_element.parentElement.removeChild(target_meal_plan_name_element);
+        source_meal_plan_name_element.parentElement.removeChild(source_meal_plan_name_element);
 
         // Update the "day" in the database record
         overwrite_meal_plan_day(target_day, source_day);
