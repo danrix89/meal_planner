@@ -834,6 +834,8 @@ function drop_meal(event) {
                                 // Remove the element from the calendar
                                 var meal_plan_image_element = document.getElementById('drag_' + meal_plan_id + '_calendar');
                                 meal_plan_image_element.parentElement.removeChild(meal_plan_image_element);
+                                var meal_plan_name_element = document.getElementById('calendar_day_data_container_name_element_' + meal_plan_id);
+                                meal_plan_name_element.parentElement.removeChild(meal_plan_name_element);
 
                                 // End the loop
                                 break;
@@ -862,6 +864,7 @@ function drop_meal(event) {
         // Copy the image over with onclick functionality
         var source_meal_plan_image_element = document.getElementById(data);
         var target_meal_plan_image_element = event.target
+        var target_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + target_meal_plan_image_element.dataset.mealId);
         var target_day = event.target.parentElement.getAttribute("data-day");
         var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
         var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
@@ -874,6 +877,7 @@ function drop_meal(event) {
         // Remove the image from the source parentElement
         source_meal_plan_image_element.parentElement.style.backgroundColor = "";
         source_meal_plan_image_element.parentElement.removeChild(source_meal_plan_image_element);
+        target_meal_plan_name_element.parentElement.removeChild(target_meal_plan_name_element);
 
         // Update the "day" in the database record
         overwrite_meal_plan_day(target_day, source_day);
