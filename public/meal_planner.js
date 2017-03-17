@@ -866,7 +866,7 @@ function drop_meal(event) {
 
         // Does the target day have a meal already there?
         var is_meal_plan_container_element = event.target.getAttribute("data-is-container");
-        if (!is_meal_plan_container_element) {
+        if (is_meal_plan_container_element) {
             add_meal_element_to_calendar(source_meal_plan_image_element.getAttribute("data-meal-id"), source_meal_plan_name_element.innerHTML, image_path, target_day);
         } else {
             // Copy the image over
