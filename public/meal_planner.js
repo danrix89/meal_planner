@@ -796,11 +796,11 @@ function drop_meal(event) {
     // Find the parent element of the dropped meal (where did we drag it from?)
     var parent_element = document.getElementById(data).parentElement;
 
-    var day = event.target.getAttribute("data-day");
-    if (day == null) {
-        day = event.target.parentElement.getAttribute("data-day");
-        if (day == null) {
-            day = -1;
+    var target_day = event.target.getAttribute("data-day");
+    if (target_day == null) {
+        target_day = event.target.parentElement.getAttribute("data-day");
+        if (target_day == null) {
+            target_day = -1;
         }
     }
 
@@ -828,7 +828,7 @@ function drop_meal(event) {
                     var meal_plans = db_snapshot.val();
                     if (meal_plans != null && meal_plans != undefined) {
                         for (var meal_plan_id in meal_plans) {
-                            if (meal_plans.hasOwnProperty(meal_plan_id) && meal_plans[meal_plan_id].day == day) {
+                            if (meal_plans.hasOwnProperty(meal_plan_id) && meal_plans[meal_plan_id].day == target_day) {
                                 // Delete the meal in the database
                                 firebase_database.ref('PlannedMonths_MealPlans/' + already_existing_plannedMonth_id + '/' + meal_plan_id).remove();
 
@@ -843,7 +843,7 @@ function drop_meal(event) {
                             }
                         }
                         // Create a new meal
-                        add_new_meal_to_meal_plan(day, meal_id, already_existing_plannedMonth_id);
+                        add_new_meal_to_meal_plan(target_day, meal_id, already_existing_plannedMonth_id);
                     }
                 })
             } else {
@@ -851,28 +851,22 @@ function drop_meal(event) {
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
                 var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
                 new_plannedMonths_record_ref.set(plannedMonth_object);
-                add_new_meal_to_meal_plan(day, meal_id, new_plannedMonths_record_ref.key);
+                add_new_meal_to_meal_plan(target_day, meal_id, new_plannedMonths_record_ref.key);
                 current_plannedMonth = { id: new_plannedMonths_record_ref.uid, formatted_date: formatted_date(calendar_date) };
             }
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
           console.log("The read failed: " + errorObject.message);
         });
-    }
-    // Else, the data should be transfered/moved
-    else
-    {
+    } else { // Else, the data should be transfered/moved
         var source_meal_plan_image_element = document.getElementById(data);
         var source_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + source_meal_plan_image_element.dataset.mealId);
         var source_day = source_meal_plan_image_element.parentElement.getAttribute("data-day");
-        var target_day = event.target.parentElement.getAttribute("data-day");
         var image_path = source_meal_plan_image_element.getAttribute("data-image-path");
 
         // Does the target day have a meal already there?
         var is_meal_plan_container_element = event.target.getAttribute("data-is-container");
-        if (is_meal_plan_container_element) {
-            add_meal_element_to_calendar(source_meal_plan_image_element.getAttribute("data-meal-id"), source_meal_plan_name_element.innerHTML, image_path, day)
-        } else {
+        if (!is_meal_plan_container_element) {
             // Copy the image over
             var target_meal_plan_image_element = event.target
             var target_meal_plan_name_element = document.getElementById("calendar_day_data_container_name_element_" + target_meal_plan_image_element.dataset.mealId);
