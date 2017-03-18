@@ -1679,15 +1679,25 @@ function handle_friend_request_accept_or_decline(is_accepted) {
     firebase_database.ref('Users_FriendRequests/' + user.uid + "/" + request_id).remove();
 
     if (is_accepted) {
-        // Add the friend with the id and email
-        var db_users_friends_ref = firebase_database.ref('User_Friends/' + user.uid);
-        var new_friend_record_ref = db_users_friends_ref.push();
-        var friend_object = { id: friend_id, email: friend_email};
-        new_friend_record_ref.set(friend_object);
+        // Add the friend record for the friend
+        create_friend_record(friend_id, user.uid, user.email);
+
+        // Add the friend record for the user
+        create_friend_record(user.uid, friend_id, friend_email);
     }
 
     // Remove the request from the selection list
     awaiting_friend_requests_selection_element.removeChild(selected_request);
+}
+
+/**
+*
+*/
+function create_friend_record(user_id, friend_id, friend_email) {
+    var db_users_friends_ref = firebase_database.ref('User_Friends/' + user_id);
+    var new_friend_record_ref = db_users_friends_ref.push();
+    var friend_object = { id: friend_id, email: friend_email};
+    new_friend_record_ref.set(friend_object);
 }
 
 
