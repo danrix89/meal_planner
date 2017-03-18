@@ -1620,6 +1620,7 @@ function populate_awaiting_friend_requests() {
                 request_option_element.value = request_id;
                 request_option_element.setAttribute("data-id", requests[request_id].id);
                 request_option_element.setAttribute("data-email", requests[request_id].email);
+                request_option_element.text = requests[request_id].email;
                 awaiting_friend_requests_selection_element.add(request_option_element);
             }
         }
