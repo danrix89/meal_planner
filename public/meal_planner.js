@@ -1671,8 +1671,16 @@ function send_friend_request() {
     // Query the database for user with the email and set up the callback
     firebase_database.ref('Users').orderByChild("email").equalTo(email).once("value", function(db_snapshot) {
         if (db_snapshot != null) {
-            var friend_id = db_snapshot.key;
-            var friend_email = db_snapshot.val()[email];
+            var users = db_snapshot.val();
+            var friend_id = "";
+            var friend_email = "";
+            for (var user_id in users) {
+                if (users.hasOwnProperty(user_id) && (users[user_id])[email] == email) {
+                    friend_id = user_id;
+                    friend_email = (users[user_id])[email];
+                    break;
+                }
+            }
 
             // Check if a friend request isn't already there
             firebase_database.ref('Users_FriendRequests/' + friend_id).once("value", function(db_requests_snapshot) {
