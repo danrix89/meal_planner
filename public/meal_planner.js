@@ -174,12 +174,10 @@ function setup_app_controls() {
 
     // Friend Request Dialog/Pop-up
     document.getElementById('friend_request_pop_up_background').onclick = hide_friend_request_dialog;
-    // document.getElementById('friend_request_list_container').classList.add('hide');
-    // document.getElementById('friend_request_controls_container').classList.add('hide');
-    document.getElementById('friend_request_no_requests_placeholder').classList.add('hide');
     document.getElementById('accept_friend_request_button').onclick = accept_friend_request;
     document.getElementById('decline_friend_request_button').onclick = decline_friend_request;
     document.getElementById('send_friend_request_button').onclick = send_friend_request;
+    populate_awaiting_friend_requests();
 }
 
 /**
@@ -1605,6 +1603,36 @@ function remove_ingredient(ingredient)
     }
 }
 
+/***************
+* Friend Request Functions
+***************/
+
+/**
+* Populates the awaiting friend request list with possible friend requests.
+*/
+function populate_awaiting_friend_requests() {
+    firebase_database.ref('Users_FriendRequests/' + user.uid).once("value", function(db_snapshot) {
+        var requests = db_snapshot.val();
+        var awaiting_friend_requests_selection_element = document.getElementById('friend_request_list');
+        for (var request_id in requests) {
+            if (requests.hasOwnProperty(request_id)) {
+                var request_option_element = document.createElement("option");
+                request_option_element.value = request_id;
+                request_option_element.setAttribute("data-id", requests[request_id].id);
+                request_option_element.setAttribute("data-email", requests[request_id].email);
+                awaiting_friend_requests_selection_element.appendChild(request_option_element);
+            }
+        }
+
+        if (requests != null) {
+            document.getElementById('friend_request_no_requests_placeholder').classList.add('hide');
+        } else {
+            document.getElementById('friend_request_list_container').classList.add('hide');
+            document.getElementById('friend_request_controls_container').classList.add('hide');
+        }
+    });
+}
+
 /**
 * Shows the friend request pop-up dialog window
 */
@@ -1642,17 +1670,18 @@ function decline_friend_request() {
 function handle_friend_request_accept_or_decline(is_accepted) {
     var awaiting_friend_requests_selection_element = document.getElementById('friend_request_list');
     var selected_request  = awaiting_friend_requests_selection_element.options[awaiting_friend_requests_selection_element.selectedIndex];
-    var id = selected_request.getAttribute('data-id');
-    var email = selected_request.getAttribute('data-email');
+    var request_id = selected_request.value;
+    var friend_id = selected_request.getAttribute('data-id');
+    var friend_email = selected_request.getAttribute('data-email');
 
     // Remove the friend request from the database
-    firebase_database.ref('Users_FriendRequests/' + user.uid + "/" + id).remove();
+    firebase_database.ref('Users_FriendRequests/' + user.uid + "/" + request_id).remove();
 
     if (is_accepted) {
         // Add the friend with the id and email
         var db_users_friends_ref = firebase_database.ref('User_Friends/' + user.uid);
         var new_friend_record_ref = db_users_friends_ref.push();
-        var friend_object = { id: id, email: email};
+        var friend_object = { id: friend_id, email: friend_email};
         new_friend_record_ref.set(friend_object);
     }
 
