@@ -151,6 +151,7 @@ function setup_sign_in_controls() {
 */
 function setup_app_controls() {
     // Menu bar controls
+    document.getElementById('friend_request_button').onclick = show_friend_request_dialog;
     document.getElementById('log_out_button').onclick = logout;
 
     // Calendar controls
@@ -171,6 +172,14 @@ function setup_app_controls() {
     document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
 
+    // Friend Request Dialog/Pop-up
+    document.getElementById('friend_request_pop_up_background').onclick = hide_friend_request_dialog;
+    // document.getElementById('friend_request_list_container').classList.add('hide');
+    // document.getElementById('friend_request_controls_container').classList.add('hide');
+    document.getElementById('friend_request_no_requests_placeholder').classList.add('hide');
+    document.getElementById('accept_friend_request_button').onclick = accept_friend_request;
+    document.getElementById('decline_friend_request_button').onclick = decline_friend_request;
+    document.getElementById('send_friend_request_button').onclick = send_friend_request;
 }
 
 /**
@@ -183,6 +192,7 @@ function initialize_meal_planner_app() {
     document.getElementById("calendar_panel").style.height = pixel_height;
     document.getElementById("side_panel").style.height = pixel_height;
 
+    // Setup app butons and other controls
     setup_app_controls();
 
     // Set the user's meals from the database.
@@ -357,7 +367,7 @@ function create_new_user_data(firebase_user) {
 * password length.
 */
 function log_in() {
-    var test_mode = false;
+    var test_mode = true;
     if (test_mode) {
         ////////////////////////////////////////////////////////////////////////
         //////////////////////////// TEST LOG IN ///////////////////////////////
@@ -1593,4 +1603,99 @@ function remove_ingredient(ingredient)
         var ingredient_list_element = document.getElementById(ingredient);
         ingredient_list_element.parentElement.removeChild(ingredient_list_element);
     }
+}
+
+/**
+* Shows the friend request pop-up dialog window
+*/
+function show_friend_request_dialog() {
+    document.getElementById('friend_request_pop_up_background').style.display = "block";
+}
+
+/**
+* When the user clicks anywhere outside of the dialog/pop-up, close it (make it disappear)
+*/
+function hide_friend_request_dialog(event) {
+    var modal = document.getElementById('friend_request_pop_up_background');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+/**
+* Accepts the friend request of the currently selected "option" in the selction box
+*/
+function accept_friend_request() {
+    handle_friend_request_accept_or_decline(true);
+}
+
+/**
+* Declines the friend request of the currently selected "option" in the selction box
+*/
+function decline_friend_request() {
+    handle_friend_request_accept_or_decline(false);
+}
+
+/**
+* Accepts the friend request of the currently selected "option" in the selction box
+*/
+function handle_friend_request_accept_or_decline(is_accepted) {
+    var awaiting_friend_requests_selection_element = document.getElementById('friend_request_list');
+    var selected_request  = awaiting_friend_requests_selection_element.options[awaiting_friend_requests_selection_element.selectedIndex];
+    var id = selected_request.getAttribute('data-id');
+    var email = selected_request.getAttribute('data-email');
+
+    // Remove the friend request from the database
+    firebase_database.ref('Users_FriendRequests/' + user.uid + "/" + id).remove();
+
+    if (is_accepted) {
+        // Add the friend with the id and email
+        var db_users_friends_ref = firebase_database.ref('User_Friends/' + user.uid);
+        var new_friend_record_ref = db_users_friends_ref.push();
+        var friend_object = { id: id, email: email};
+        new_friend_record_ref.set(friend_object);
+    }
+
+    // Remove the request from the selection list
+    awaiting_friend_requests_selection_element.removeChild(selected_request);
+}
+
+
+/**
+*
+*/
+function send_friend_request() {
+    // Get the email from the input field
+    var email = document.getElementById('send_friend_request_input').value;
+
+    // Query the database for user with the email and set up the callback
+    firebase_database.ref('Users').orderByChild("email").equalTo(email).once("value", function(db_snapshot) {
+        if (db_snapshot != null) {
+            var friend_id = db_snapshot.key;
+            var friend_email = db_snapshot.val()[email];
+
+            // Check if a friend request isn't already there
+            firebase_database.ref('Users_FriendRequests/' + friend_id).once("value", function(db_requests_snapshot) {
+                var is_already_requested = false;
+                var requests = db_requests_snapshot.val();
+                for (var request_id in requests) {
+                    if (requests.hasOwnProperty(request_id) && requests[request_id].email == email) {
+                        is_already_requested = true;
+                        alert("You've already sent a request to: " + friend_email);
+                        break;
+                    }
+                }
+
+                if (!is_already_requested) {
+                    // Create a new request for that user
+                    var new_friend_request_record_ref = firebase_database.ref('Users_FriendRequests/' + friend_id).push();
+                    var friend_request_object = {id: user.uid, email: user.email};
+                    new_friend_request_record_ref.set(friend_request_object);
+                    alert("Friend request sent to: " + friend_email);
+                }
+            });
+        }
+    });
+
+    document.getElementById('send_friend_request_input').value = "";
 }

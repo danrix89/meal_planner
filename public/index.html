@@ -14,6 +14,7 @@
 </head>
 <body onload="on_page_load(event)">
 
+    <!-- Sign-In Page -->
     <div id="sign_in_page" class="sign_in_page">
         <div id="logo_container" class="logo_container">
             <img id="logo" class="logo" src="images/controls/logo_slogan.png">
@@ -41,16 +42,52 @@
         <div class="icon_recognition">Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
     </div>
 
-    <div id="main_box" class="main_box hide">
+    <!-- The Friend Request Dialog -->
+    <div id="friend_request_pop_up_background" class="friend_request_pop_up_background">
+        <!-- Actual Dialog Content -->
+        <div class="friend_request_pop_up_content">
+            <div class="friend_request_pop_up_header">
+                <h1 id="friend_request_pop_up_title" class="friend_request_pop_up__title">Friend Requests</h1>
+            </div>
+            <div class="friend_request_pop_up_body">
+                <div id="awaiting_friend_requests_container">
+                    <div class="friend_request_title">Awaiting Requests</div>
+                    <div id="friend_request_no_requests_placeholder" class="friend_request_no_requests_placeholder">No pending request</div>
+                    <div id="friend_request_list_container" class="friend_request_list_container">
+                        <select id="friend_request_list" class="friend_request_list" size="3">
+                            <!-- Filled Dynamically -->
+                            <option data-id="12345" data-email="jessicarix@gmail.com">jessicarix@gmail.com</option>
+                            <option data-id="67890" data-email="danrix89@gmail.com">danrix89@gmail.com</option>
+                        </select>
+                    </div>
+                    <div id="friend_request_controls_container" class="friend_request_controls_container">
+                        <button id="accept_friend_request_button" class="friend_request_button accept_friend_request_button">Accept</button>
+                        <button id="decline_friend_request_button" class="friend_request_button decline_friend_request_button">Decline</button>
+                    </div>
+                </div>
+                <div class="send_friend_request_container">
+                    <div class="send_friend_request_title">Send A Friend Request</div>
+                    <input id="send_friend_request_input" type="text" class="send_friend_request_input" name="send_friend_request_input" placeholder="friend@example.com">
+                    <div id="friend_request_input_and_controls_container" class="friend_request_input_and_controls_container">
+                        <button id="send_friend_request_button" class="friend_request_button">Send Request</button>
+                    </div>
+                </div>
+            </div>
+            <div class="friend_request_pop_up_footer">
+            </div>
+        </div>
+    </div>
 
+    <!-- The Application Page -->
+    <div id="main_box" class="main_box hide">
+        <!-- The Title Bar -->
         <div id="app_title" class="app_title">
             <div class="meal_planner_button" id="log_out_button"><img class="button_image" src="images\controls\log_out_2.png" /></div>
-            <div class="meal_planner_button" id="add_friend_button"><img class="button_image" src="images\controls\add_friend.png" /></div>
+            <div class="meal_planner_button" id="friend_request_button"><img class="button_image" src="images\controls\add_friend.png" /></div>
             <div class="meal_planner_button" id="share_meal_button"><img class="button_image" src="images\controls\share.png" /></div>
             myMealPlanner
         </div>
-
-        <!-- The Application -->
+        <!-- The Calendar -->
         <div id="calendar_panel" class="calendar_panel">
             <div class="calendar_title_pane">
                 <div class="meal_planner_button" ondrop="drop_to_calendar_garbage(event)" ondragover="allow_meal_drop(event)"><img class="button_image" src="images\controls\garbage.png" /></div>
@@ -85,6 +122,7 @@
                 </div>
             </div>
         </div>
+        <!-- The Meal List & Meal Editor Panes -->
         <div id="side_panel" class="side_panel">
             <div class="side_panel_container" id="meal_list_container">
                 <div class="meal_list">
