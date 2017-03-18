@@ -1675,9 +1675,9 @@ function send_friend_request() {
             var friend_id = "";
             var friend_email = "";
             for (var user_id in users) {
-                if (users.hasOwnProperty(user_id) && (users[user_id])[email] == email) {
+                if (users.hasOwnProperty(user_id) && (users[user_id]).email == email) {
                     friend_id = user_id;
-                    friend_email = (users[user_id])[email];
+                    friend_email = (users[user_id]).email;
                     break;
                 }
             }
