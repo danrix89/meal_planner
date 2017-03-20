@@ -1703,7 +1703,7 @@ function handle_friend_request_accept_or_decline(is_accepted) {
 *
 */
 function create_friend_record(user_id, friend_id, friend_email) {
-    var db_users_friends_ref = firebase_database.ref('User_Friends/' + user_id);
+    var db_users_friends_ref = firebase_database.ref('Users_Friends/' + user_id);
     var new_friend_record_ref = db_users_friends_ref.push();
     var friend_object = { id: friend_id, email: friend_email};
     new_friend_record_ref.set(friend_object);
@@ -1819,9 +1819,9 @@ function populate_friend_list() {
         if (friends != null) {
             //
             friend_selection_element.selectedIndex = 0;
-            share_button.disabled = true;
-        } else {
             share_button.disabled = false;
+        } else {
+            share_button.disabled = true;
         }
     });
 }
