@@ -1861,11 +1861,13 @@ function decline_meal_share() {
 * Accepts the friend request of the currently selected "option" in the selction box
 */
 function handle_meal_share_accept_or_decline(is_accepted) {
-    var awaiting_meal_shares_selection_element = document.getElementById('friend_request_list');
+    var awaiting_meal_shares_selection_element = document.getElementById('awaiting_meal_shares_list');
     var selected_meal_share  = awaiting_meal_shares_selection_element.options[awaiting_meal_shares_selection_element.selectedIndex];
     var meal_share_id = selected_meal_share.value;
     var meal_name = selected_meal_share.getAttribute('data-meal-name');
     var meal_database_path = selected_meal_share.getAttribute('data-meal-database-path');
+    var friend_id = selected_meal_share.getAttribute('data-friend-id');
+    var friend_email = selected_meal_share.getAttribute('data-friend-email');
 
     // Remove the friend request from the database
     firebase_database.ref('Users_MealShares/' + user.uid + "/" + meal_share_id).remove();
@@ -1910,7 +1912,7 @@ function share_meal_with_friend() {
         // friend can accept/decline it later.
         var db_users_mealShares_friend_ref = firebase_database.ref('Users_MealShares/' + friend_id);
         var new_mealShares_friend_record_ref = db_users_mealShares_friend_ref.push();
-        var meal_share_object = { friend_id: friend_id, friend_email: friend_email, meal_name: meal_name, meal_path: meal_path };
+        var meal_share_object = { friend_id: user.uid, friend_email: user.email, meal_name: meal_name, meal_path: meal_path };
         new_mealShares_friend_record_ref.set(meal_share_object);
 
         alert(current_meal.name + " shared with " + friend_email + ".");
