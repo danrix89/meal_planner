@@ -158,6 +158,7 @@ function setup_app_controls() {
     setup_calendar_title_and_nav_buttons();
 
     // Meal List controls
+    document.getElementById('share_meal_button').onclick = show_meal_share_dialog;
     document.getElementById('add_button').onclick = setup_for_adding_new_meal;
 
     // Editor controls
@@ -178,6 +179,14 @@ function setup_app_controls() {
     document.getElementById('decline_friend_request_button').onclick = decline_friend_request;
     document.getElementById('send_friend_request_button').onclick = send_friend_request;
     populate_awaiting_friend_requests();
+
+    // Meal Sharing Dialog/Pop-up
+    document.getElementById('share_meal_pop_up_background').onclick = hide_meal_share_dialog;
+    document.getElementById('accept_awaiting_meal_shares_button').onclick = accept_meal_share;
+    document.getElementById('decline_awaiting_meal_shares_button').onclick = decline_meal_share;
+    document.getElementById('share_meal_with_friend_button').onclick = share_meal_with_friend;
+    populate_awaiting_meal_shares();
+    populate_friend_list();
 }
 
 /**
@@ -1708,42 +1717,202 @@ function send_friend_request() {
     // Get the email from the input field
     var email = document.getElementById('send_friend_request_input').value;
 
-    // Query the database for user with the email and set up the callback
-    firebase_database.ref('Users').orderByChild("email").equalTo(email).once("value", function(db_snapshot) {
-        if (db_snapshot != null) {
-            var users = db_snapshot.val();
-            var friend_id = "";
-            var friend_email = "";
-            for (var user_id in users) {
-                if (users.hasOwnProperty(user_id) && (users[user_id]).email == email) {
-                    friend_id = user_id;
-                    friend_email = (users[user_id]).email;
-                    break;
-                }
-            }
-
-            // Check if a friend request isn't already there
-            firebase_database.ref('Users_FriendRequests/' + friend_id).once("value", function(db_requests_snapshot) {
-                var is_already_requested = false;
-                var requests = db_requests_snapshot.val();
-                for (var request_id in requests) {
-                    if (requests.hasOwnProperty(request_id) && requests[request_id].email == email) {
-                        is_already_requested = true;
-                        alert("You've already sent a request to: " + friend_email);
+    if (email != "" && email != null) {
+        // Query the database for user with the email and set up the callback
+        firebase_database.ref('Users').orderByChild("email").equalTo(email).once("value", function(db_snapshot) {
+            if (db_snapshot != null) {
+                var users = db_snapshot.val();
+                var friend_id = "";
+                var friend_email = "";
+                for (var user_id in users) {
+                    if (users.hasOwnProperty(user_id) && (users[user_id]).email == email) {
+                        friend_id = user_id;
+                        friend_email = (users[user_id]).email;
                         break;
                     }
                 }
 
-                if (!is_already_requested) {
-                    // Create a new request for that user
-                    var new_friend_request_record_ref = firebase_database.ref('Users_FriendRequests/' + friend_id).push();
-                    var friend_request_object = {id: user.uid, email: user.email};
-                    new_friend_request_record_ref.set(friend_request_object);
-                    alert("Friend request sent to: " + friend_email);
-                }
-            });
+                // Check if a friend request isn't already there
+                firebase_database.ref('Users_FriendRequests/' + friend_id).once("value", function(db_requests_snapshot) {
+                    var is_already_requested = false;
+                    var requests = db_requests_snapshot.val();
+                    for (var request_id in requests) {
+                        if (requests.hasOwnProperty(request_id) && requests[request_id].email == email) {
+                            is_already_requested = true;
+                            alert("You've already sent a request to: " + friend_email);
+                            break;
+                        }
+                    }
+
+                    if (!is_already_requested) {
+                        // Create a new request for that user
+                        var new_friend_request_record_ref = firebase_database.ref('Users_FriendRequests/' + friend_id).push();
+                        var friend_request_object = {id: user.uid, email: user.email};
+                        new_friend_request_record_ref.set(friend_request_object);
+                        alert("Friend request sent to: " + friend_email);
+                    }
+                });
+            }
+        });
+    }
+
+    // Clear the field
+    document.getElementById('send_friend_request_input').value = "";
+}
+
+
+
+/***************
+* Meal Sharing Functions
+***************/
+
+/**
+* Populates the awaiting meal shares list with possible shared meals from friends.
+*/
+function populate_awaiting_meal_shares() {
+    firebase_database.ref('Users_MealShares/' + user.uid).once("value", function(db_snapshot) {
+        var meal_shares = db_snapshot.val();
+        var awaiting_meal_share_selection_element = document.getElementById('awaiting_meal_shares_list');
+        for (var meal_share_id in meal_shares) {
+            if (meal_shares.hasOwnProperty(meal_share_id)) {
+                var meal_share_option_element = document.createElement("option");
+                meal_share_option_element.value = meal_share_id;
+                meal_share_option_element.setAttribute("data-friend-id", meal_shares[meal_share_id].friend_id);
+                meal_share_option_element.setAttribute("data-friend-email", meal_shares[meal_share_id].friend_email);
+                meal_share_option_element.setAttribute("data-meal-name", meal_shares[meal_share_id].meal_name);
+                meal_share_option_element.setAttribute("data-meal-database-path", meal_shares[meal_share_id].meal_path);
+                meal_share_option_element.text = meal_shares[meal_share_id].meal_name + " From: " + meal_shares[meal_share_id].friend_email;
+                awaiting_meal_share_selection_element.add(meal_share_option_element);
+            }
+        }
+
+        if (meal_shares != null) {
+            document.getElementById('no_awaiting_meal_shares_placeholder').classList.add('hide');
+            awaiting_meal_share_selection_element.selectedIndex = 0;
+        } else {
+            document.getElementById('awaiting_meal_shares_list_container').classList.add('hide');
+            document.getElementById('awaiting_meal_shares_controls_container').classList.add('hide');
         }
     });
+}
 
-    document.getElementById('send_friend_request_input').value = "";
+/**
+* Populates the friend list in the pop-up that the user can share meals with
+*/
+function populate_friend_list() {
+    firebase_database.ref('Users_Friends/' + user.uid).once("value", function(db_snapshot) {
+        var friends = db_snapshot.val();
+        var friend_selection_element = document.getElementById('share_meal_with_friend_list');
+        for (var friend_record_id in friends) {
+            if (friends.hasOwnProperty(friend_record_id)) {
+                var friend_option_element = document.createElement("option");
+                friend_option_element.value = friend_record_id;
+                friend_option_element.setAttribute("data-id", friends[friend_record_id].id);
+                friend_option_element.setAttribute("data-email", friends[friend_record_id].email);
+                friend_option_element.text = friends[friend_record_id].email;
+                friend_selection_element.add(friend_option_element);
+            }
+        }
+
+        // Handle if the user has friends or not.
+        var share_button = document.getElementById("share_meal_with_friend_button");
+        if (friends != null) {
+            //
+            friend_selection_element.selectedIndex = 0;
+            share_button.disabled = true;
+        } else {
+            share_button.disabled = false;
+        }
+    });
+}
+
+/**
+* Shows the friend request pop-up dialog window
+*/
+function show_meal_share_dialog() {
+    document.getElementById('share_meal_pop_up_background').style.display = "block";
+}
+
+/**
+*
+*/
+function hide_meal_share_dialog() {
+    var modal = document.getElementById('share_meal_pop_up_background');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+/**
+*
+*/
+function accept_meal_share() {
+    handle_meal_share_accept_or_decline(true);
+}
+
+/**
+*
+*/
+function decline_meal_share() {
+    handle_meal_share_accept_or_decline(false);
+}
+
+/**
+* Accepts the friend request of the currently selected "option" in the selction box
+*/
+function handle_meal_share_accept_or_decline(is_accepted) {
+    var awaiting_meal_shares_selection_element = document.getElementById('friend_request_list');
+    var selected_meal_share  = awaiting_meal_shares_selection_element.options[awaiting_meal_shares_selection_element.selectedIndex];
+    var meal_share_id = selected_meal_share.value;
+    var meal_name = selected_meal_share.getAttribute('data-meal-name');
+    var meal_database_path = selected_meal_share.getAttribute('data-meal-database-path');
+
+    // Remove the friend request from the database
+    firebase_database.ref('Users_MealShares/' + user.uid + "/" + meal_share_id).remove();
+
+    if (is_accepted) {
+        // Get the meal from the friend's meals
+        firebase_database.ref(meal_database_path).orderByChild('name').equalTo(meal_name).once("value", function(db_snapshot) {
+            var meals = db_snapshot.val();
+            for (var meal_id in meals) {
+                if (meals.hasOwnProperty(meal_id) && (meals[meal_id]).name == meal_name) {
+                    // Add the meal to the user's meals
+                    var new_user_meal_record_ref = firebase_database.ref('Users_Meals/' + user.uid).push();
+                    var meal_object = (meals[meal_id]);
+                    new_user_meal_record_ref.set(meal_object);
+
+                    // TODO: Update the meal list
+
+                    // Break the loop because we're done (there should only be on meal result anyway)
+                    break;
+                }
+            }
+        });
+    }
+
+    // Remove the request from the selection list
+    awaiting_meal_shares_selection_element.removeChild(selected_request);
+}
+
+/**
+*
+*/
+function share_meal_with_friend() {
+    var friends_selection_element = document.getElementById('share_meal_with_friend_list');
+    var selected_friend  = friends_selection_element.options[friends_selection_element.selectedIndex];
+    var friend_id = selected_friend.value;
+    var friend_email = selected_friend.getAttribute("data-friend-email");
+    var meal_name = current_meal.name;
+    var meal_path = "Users_Meals/" + user.uid + "/" + current_meal.id;
+
+    if (confirm("Do you want to share " + current_meal.name + " with " + friend_email + "?")) {
+        // Add a meal share record for the friend with the friend_id so that the
+        // friend can accept/decline it later.
+        var db_users_mealShares_friend_ref = firebase_database.ref('Users_MealShares/' + friend_id);
+        var new_mealShares_friend_record_ref = db_users_mealShares_friend_ref.push();
+        var meal_share_object = { friend_id: friend_id, friend_email: friend_email, meal_name: meal_name, meal_path: meal_path };
+        new_mealShares_friend_record_ref.set(meal_share_object);
+
+        alert(current_meal.name + " shared with " + friend_email + ".");
+    }
 }

@@ -43,37 +43,73 @@
     </div>
 
     <!-- The Friend Request Dialog -->
-    <div id="friend_request_pop_up_background" class="friend_request_pop_up_background">
+    <div id="friend_request_pop_up_background" class="pop_up_background">
         <!-- Actual Dialog Content -->
-        <div class="friend_request_pop_up_content">
-            <div class="friend_request_pop_up_header">
-                <h1 id="friend_request_pop_up_title" class="friend_request_pop_up__title">Friend Requests</h1>
+        <div class="pop_up_content">
+            <div class="pop_up_header">
+                <h1 id="friend_request_pop_up_title" class="pop_up_title">Friend Requests</h1>
             </div>
-            <div class="friend_request_pop_up_body">
+            <div class="pop_up_body">
                 <div id="awaiting_friend_requests_container">
-                    <div class="friend_request_title">Awaiting Requests</div>
-                    <div id="friend_request_no_requests_placeholder" class="friend_request_no_requests_placeholder">No pending request</div>
-                    <div id="friend_request_list_container" class="friend_request_list_container">
-                        <select id="friend_request_list" class="friend_request_list" size="3">
+                    <div class="popup_section_title">Awaiting Requests</div>
+                    <div id="friend_request_no_requests_placeholder" class="pop_up_missing_content_placeholder">No pending request</div>
+                    <div id="friend_request_list_container" class="pop_up_list_container">
+                        <select id="friend_request_list" class="pop_up_list" size="3">
                             <!-- Filled Dynamically -->
-                            <!-- <option data-id="12345" data-email="jessicarix@gmail.com">jessicarix@gmail.com</option> -->
-                            <!-- <option data-id="67890" data-email="danrix89@gmail.com">danrix89@gmail.com</option> -->
                         </select>
                     </div>
-                    <div id="friend_request_controls_container" class="friend_request_controls_container">
-                        <button id="accept_friend_request_button" class="friend_request_button accept_friend_request_button">Accept</button>
-                        <button id="decline_friend_request_button" class="friend_request_button decline_friend_request_button">Decline</button>
+                    <div id="friend_request_controls_container" class="pop_up_controls_container">
+                        <button id="accept_friend_request_button" class="pop_up_button pop_up_accept_button">Accept</button>
+                        <button id="decline_friend_request_button" class="pop_up_button pop_up_decline_button">Decline</button>
                     </div>
                 </div>
                 <div class="send_friend_request_container">
-                    <div class="send_friend_request_title">Send A Friend Request</div>
-                    <input id="send_friend_request_input" type="text" class="send_friend_request_input" name="send_friend_request_input" placeholder="friend@example.com">
-                    <div id="friend_request_input_and_controls_container" class="friend_request_input_and_controls_container">
-                        <button id="send_friend_request_button" class="friend_request_button">Send Request</button>
+                    <div class="popup_section_title">Send A Friend Request</div>
+                    <input id="send_friend_request_input" type="text" class="pop_up_input" name="send_friend_request_input" placeholder="friend@example.com">
+                    <div id="friend_request_input_and_controls_container" class="pop_up_controls_container">
+                        <button id="send_friend_request_button" class="pop_up_button">Send Request</button>
                     </div>
                 </div>
             </div>
-            <div class="friend_request_pop_up_footer">
+            <div class="pop_up_footer">
+            </div>
+        </div>
+    </div>
+
+    <!-- The Share Meal Dialog -->
+    <div id="share_meal_pop_up_background" class="pop_up_background">
+        <!-- Actual Dialog Content -->
+        <div class="pop_up_content">
+            <div class="pop_up_header">
+                <h1 id="share_meal_pop_up_title" class="pop_up_title">Meal Sharing</h1>
+            </div>
+            <div class="pop_up_body">
+                <div id="awaiting_meal_shares_container">
+                    <div class="popup_section_title">Awaiting Shared Meals</div>
+                    <div id="no_awaiting_meal_shares_placeholder" class="pop_up_missing_content_placeholder">No pending shared meals</div>
+                    <div id="awaiting_meal_shares_list_container" class="pop_up_list_container">
+                        <select id="awaiting_meal_shares_list" class="pop_up_list" size="3">
+                            <!-- Filled Dynamically -->
+                        </select>
+                    </div>
+                    <div id="awaiting_meal_shares_controls_container" class="pop_up_controls_container">
+                        <button id="accept_awaiting_meal_shares_button" class="pop_up_button pop_up_accept_button">Accept</button>
+                        <button id="decline_awaiting_meal_shares_button" class="pop_up_button pop_up_decline_button">Decline</button>
+                    </div>
+                </div>
+                <div id="share_meal_with_friend_container">
+                    <div class="popup_section_title">Share with a Friend</div>
+                    <div id="share_meal_with_friend_list_container" class="pop_up_list_container">
+                        <select id="share_meal_with_friend_list" class="pop_up_list" size="3">
+                            <!-- Filled Dynamically -->
+                        </select>
+                    </div>
+                    <div id="share_meal_with_friend_controls_container" class="pop_up_controls_container">
+                        <button id="share_meal_with_friend_button" class="pop_up_button">Send Request</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pop_up_footer">
             </div>
         </div>
     </div>
@@ -84,7 +120,6 @@
         <div id="app_title" class="app_title">
             <div class="meal_planner_button" id="log_out_button"><img class="button_image" src="images\controls\log_out_2.png" /></div>
             <div class="meal_planner_button" id="friend_request_button"><img class="button_image" src="images\controls\add_friend.png" /></div>
-            <div class="meal_planner_button" id="share_meal_button"><img class="button_image" src="images\controls\share.png" /></div>
             myMealPlanner
         </div>
         <!-- The Calendar -->
@@ -128,8 +163,9 @@
                 <div class="meal_list">
                     <div class="meal_editor_and_list_title">
                         Meals
-                        <div class="meal_planner_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img id="add_button" class="button_image" src="images\controls\add.png" /></div>
                         <div class="meal_planner_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img class="button_image" src="images\controls\garbage.png" /></div>
+                        <div class="meal_planner_button" ondrop="drop_to_meal_list_garbage(event)" ondragover="allow_meal_drop(event)"><img id="add_button" class="button_image" src="images\controls\add.png" /></div>
+                        <div class="meal_planner_button" id="share_meal_button"><img class="button_image" src="images\controls\share.png" /></div>
                     </div>
                     <div class="meal_list_body">
                         <ul class="flex-meal-container" id="meal_unordered_list">
