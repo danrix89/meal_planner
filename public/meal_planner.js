@@ -1869,12 +1869,9 @@ function handle_meal_share_accept_or_decline(is_accepted) {
     var friend_id = selected_meal_share.getAttribute('data-friend-id');
     var friend_email = selected_meal_share.getAttribute('data-friend-email');
 
-    // Remove the friend request from the database
-    firebase_database.ref('Users_MealShares/' + user.uid + "/" + meal_share_id).remove();
-
     if (is_accepted) {
         // Get the meal from the friend's meals
-        firebase_database.ref(meal_database_path).orderByChild('name').equalTo(meal_name).once("value", function(db_snapshot) {
+        firebase_database.ref(meal_database_path).once("value", function(db_snapshot) {
             var meals = db_snapshot.val();
             for (var meal_id in meals) {
                 if (meals.hasOwnProperty(meal_id) && (meals[meal_id]).name == meal_name) {
@@ -1884,6 +1881,7 @@ function handle_meal_share_accept_or_decline(is_accepted) {
                     new_user_meal_record_ref.set(meal_object);
 
                     // TODO: Update the meal list
+                    add_meal_list_element();
 
                     // Break the loop because we're done (there should only be on meal result anyway)
                     break;
@@ -1892,8 +1890,11 @@ function handle_meal_share_accept_or_decline(is_accepted) {
         });
     }
 
+    // Remove the friend request from the database
+    firebase_database.ref('Users_MealShares/' + user.uid + "/" + meal_share_id).remove();
+
     // Remove the request from the selection list
-    awaiting_meal_shares_selection_element.removeChild(selected_request);
+    awaiting_meal_shares_selection_element.removeChild(selected_meal_share);
 }
 
 /**
@@ -1905,6 +1906,7 @@ function share_meal_with_friend() {
     var friend_id = selected_friend.getAttribute("data-friend-id");
     var friend_email = selected_friend.getAttribute("data-friend-email");
     var meal_name = current_meal.name;
+    //"Users_Meals/1oRWD3Kw2ibbGJ69MsRysMsgjIe2/-KfCQM8K1P87joCo5iC-"
     var meal_path = "Users_Meals/" + user.uid + "/" + current_meal.id;
 
     if (confirm("Do you want to share " + current_meal.name + " with " + friend_email + "?")) {
