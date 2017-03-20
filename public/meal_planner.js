@@ -1807,8 +1807,8 @@ function populate_friend_list() {
             if (friends.hasOwnProperty(friend_record_id)) {
                 var friend_option_element = document.createElement("option");
                 friend_option_element.value = friend_record_id;
-                friend_option_element.setAttribute("data-id", friends[friend_record_id].id);
-                friend_option_element.setAttribute("data-email", friends[friend_record_id].email);
+                friend_option_element.setAttribute("data-friend-id", friends[friend_record_id].id);
+                friend_option_element.setAttribute("data-friend-email", friends[friend_record_id].email);
                 friend_option_element.text = friends[friend_record_id].email;
                 friend_selection_element.add(friend_option_element);
             }
@@ -1900,7 +1900,7 @@ function handle_meal_share_accept_or_decline(is_accepted) {
 function share_meal_with_friend() {
     var friends_selection_element = document.getElementById('share_meal_with_friend_list');
     var selected_friend  = friends_selection_element.options[friends_selection_element.selectedIndex];
-    var friend_id = selected_friend.value;
+    var friend_id = selected_friend.getAttribute("data-friend-id");
     var friend_email = selected_friend.getAttribute("data-friend-email");
     var meal_name = current_meal.name;
     var meal_path = "Users_Meals/" + user.uid + "/" + current_meal.id;
