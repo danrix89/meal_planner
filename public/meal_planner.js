@@ -167,7 +167,7 @@ function setup_app_controls() {
     document.getElementById("edit_button").onclick = edit_current_meal;
     document.getElementById("confirm_button").onclick = confirm_changes;
     document.getElementById("cancel_button").onclick = cancel_changes;
-    document.getElementById("meal_image_upload").addEventListener('change,' upload_meal_image_to_storage);
+    document.getElementById("meal_image_upload").addEventListener('change', upload_meal_image_to_storage);
     document.getElementById("confirm_button").classList.add("hide");
     document.getElementById("cancel_button").classList.add("hide");
     document.getElementById('meal_name_input').readOnly = true;
