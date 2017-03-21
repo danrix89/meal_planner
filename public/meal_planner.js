@@ -167,6 +167,7 @@ function setup_app_controls() {
     document.getElementById("edit_button").onclick = edit_current_meal;
     document.getElementById("confirm_button").onclick = confirm_changes;
     document.getElementById("cancel_button").onclick = cancel_changes;
+    document.getElementById("meal_image_upload").onclick = upload_meal_image_to_storage;
     document.getElementById("confirm_button").classList.add("hide");
     document.getElementById("cancel_button").classList.add("hide");
     document.getElementById('meal_name_input').readOnly = true;
@@ -1348,6 +1349,32 @@ function edit_current_meal()
     // Show the edit mode controls in the meal editor pane.
     show_edit_mode_controls();
     setup_input_onkeypress_function();
+}
+
+function upload_meal_image_to_storage(event) {
+    // Get the file
+    var file = event.target.files[0];
+
+    // Create a storage ref
+    var storage_ref = firebase_storage.ref('meal_images/user_images/' + user.uid + "/" + file.name);
+
+    // Upload the image
+    var upload_task = storage_ref.put(file);
+
+    // Update the progress bar
+    upload_task.on("state_changed",
+        function handl_progress(snapshot) {
+            var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            var progress_bar = document.getElementById('meal_image_upload_progress');
+            progress_bar.value = percentage;
+        },
+        function handle_errors(error) {
+            console.log("ERROR: " + error.message);
+        },
+        function handle_completion() {
+            // Do something right here?
+        },
+    );
 }
 
 /**
