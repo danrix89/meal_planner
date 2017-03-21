@@ -1883,7 +1883,7 @@ function handle_meal_share_accept_or_decline(is_accepted) {
             new_user_meal_record_ref.set(meal_object);
 
             // TODO: Update the meal list
-            add_meal_list_element();
+            add_meal_list_element(new_user_meal_record_ref.key, meal_object.name, meal_object.image_path);
 
         });
     }
