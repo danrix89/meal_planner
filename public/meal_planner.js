@@ -1283,7 +1283,7 @@ function add_ingredient()
     if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
     {
         var ingredient = document.getElementById('meal_ingredient_input').value;
-        if (current_meal.ingredients = null && current_meal.ingredients != undefined && current_meal != "") {
+        if (current_meal.ingredients != null && current_meal.ingredients != undefined && current_meal != "") {
             current_meal.ingredients[ingredient] = ingredient;
         } else {
             current_meal.ingredients = {};
