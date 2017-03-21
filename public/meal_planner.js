@@ -1333,6 +1333,7 @@ function edit_current_meal()
 
     // Show the edit mode controls in the meal editor pane.
     show_edit_mode_controls();
+    setup_input_onkeypress_function();
 }
 
 /**
