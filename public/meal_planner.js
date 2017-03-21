@@ -1197,15 +1197,11 @@ function update_meal_name_with_field_value(keyboard_event)
             break;
         default:
             // Set the current meal's name to the value from the field
-            if (keyboard_event.key.length == 1 ) {
+            if (keyboard_event.key.length == 1) {
                 current_meal.name = document.getElementById('meal_name_input').value + keyboard_event.key;
             }
             break;
         }
-
-// Cancel the default action to avoid it being handled twice
-keyboard_event.preventDefault();
-
 }
 
 /**
@@ -1216,7 +1212,7 @@ keyboard_event.preventDefault();
 function update_meal_recipe_instructions_with_text_area_value(keyboard_event)
 {
     // Set the current meal's name to the value from the text area
-    if (keyboard_event.key.length == 1 ) {
+    if (keyboard_event.key.length == 1) {
         current_meal.recipe = document.getElementById('recipe_text_area').value + keyboard_event.key;
     }
 }
