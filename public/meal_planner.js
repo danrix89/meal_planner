@@ -1283,7 +1283,12 @@ function add_ingredient()
     if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
     {
         var ingredient = document.getElementById('meal_ingredient_input').value;
-        current_meal.ingredients[ingredient] = ingredient;
+        if (current_meal.ingredients = null && current_meal.ingredients != undefined && current_meal != "") {
+            current_meal.ingredients[ingredient] = ingredient;
+        } else {
+            current_meal.ingredients = {};
+            current_meal.ingredients[ingredient] = ingredient;
+        }
         document.getElementById('meal_ingredient_input').value = '';
         populate_meal_editor(current_meal);
     }
@@ -1872,21 +1877,14 @@ function handle_meal_share_accept_or_decline(is_accepted) {
     if (is_accepted) {
         // Get the meal from the friend's meals
         firebase_database.ref(meal_database_path).once("value", function(db_snapshot) {
-            var meals = db_snapshot.val();
-            for (var meal_id in meals) {
-                if (meals.hasOwnProperty(meal_id) && (meals[meal_id]).name == meal_name) {
-                    // Add the meal to the user's meals
-                    var new_user_meal_record_ref = firebase_database.ref('Users_Meals/' + user.uid).push();
-                    var meal_object = (meals[meal_id]);
-                    new_user_meal_record_ref.set(meal_object);
+            // Add the meal to the user's meals
+            var new_user_meal_record_ref = firebase_database.ref('Users_Meals/' + user.uid).push();
+            var meal_object = db_snapshot.val();
+            new_user_meal_record_ref.set(meal_object);
 
-                    // TODO: Update the meal list
-                    add_meal_list_element();
+            // TODO: Update the meal list
+            add_meal_list_element();
 
-                    // Break the loop because we're done (there should only be on meal result anyway)
-                    break;
-                }
-            }
         });
     }
 
