@@ -1120,7 +1120,6 @@ function show_hide_ingredeint_remove_buttons(isShow)
 function setup_input_onkeypress_function()
 {
     document.getElementById('meal_name_input').onkeypress = update_meal_name_with_field_value;
-    document.getElementById('meal_name_input').onkeydown = update_meal_name_with_field_value;
     document.getElementById('recipe_text_area').onkeypress = update_meal_recipe_instructions_with_text_area_value;
 }
 
@@ -1190,10 +1189,23 @@ function select_meal_in_calendar(meal_id) {
 * UPDATE_MEAL_NAME_WITH_FIELD_VALUE
 * Update the current meal's name with the text in the meal name text field.
 */
-function update_meal_name_with_field_value()
+function update_meal_name_with_field_value(keyboard_event)
 {
-    // Set the current meal's name to the value fo the field
-    current_meal.name = document.getElementById('meal_name_input').value;
+    switch (keyboard_event.key) {
+        case "Enter":
+            // Do something for "enter" or "return" key press.
+            break;
+        default:
+            // Set the current meal's name to the value from the field
+            if (keyboard_event.key.length == 1 ) {
+                current_meal.name = document.getElementById('meal_name_input').value + keyboard_event.key;
+            }
+            break;
+        }
+
+// Cancel the default action to avoid it being handled twice
+keyboard_event.preventDefault();
+
 }
 
 /**
@@ -1201,10 +1213,12 @@ function update_meal_name_with_field_value()
 * Update the current meal's recipe instructions with the text in the
 * instructions text area.
 */
-function update_meal_recipe_instructions_with_text_area_value()
+function update_meal_recipe_instructions_with_text_area_value(keyboard_event)
 {
-    // Set the current meal's name to the value fo the text area
-    current_meal.recipe = document.getElementById('recipe_text_area').value;
+    // Set the current meal's name to the value from the text area
+    if (keyboard_event.key.length == 1 ) {
+        current_meal.recipe = document.getElementById('recipe_text_area').value + keyboard_event.key;
+    }
 }
 
 /**
