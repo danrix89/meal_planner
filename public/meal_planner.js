@@ -1373,7 +1373,7 @@ function upload_meal_image_to_storage(event) {
         },
         function handle_completion() {
             // Do something right here?
-        },
+        }
     );
 }
 
