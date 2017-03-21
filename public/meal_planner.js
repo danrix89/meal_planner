@@ -1261,11 +1261,16 @@ function setup_meal_editor_for_adding_new_meal()
 * Adds a new meal list element to the meal list using the db snapshot of the newly added meal
 */
 function add_meal_list_item_from_db_snapshot(db_snapshot) {
+    // Add the meal to "meals"
+    var meal_object = db_snapshot.val();
+    meal_object.id = db_snapshot.key;
+    meals.push(meal_object);
+
     // Add the meal to the meal list from the snapshot
-    add_meal_list_element(db_snapshot.key, (db_snapshot.val())["name"], (db_snapshot.val())["image_path"])
+    add_meal_list_element(meal_object.id, meal_object.name, meal_object.image_path);
 
     // Select the newly added meal (this should populate the meal editor)
-    select_meal_in_meal_list(db_snapshot.key)
+    select_meal_in_meal_list(meal_object.id);
 }
 
 /**
@@ -1371,6 +1376,7 @@ function confirm_changes()
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.key;
 
+        // Add the meal to the meals object
         firebase_database.ref("Users_Meals/" + user.uid + "/" + new_users_meals_record_ref.key).once("value", add_meal_list_item_from_db_snapshot);
     } else {
         if (is_selected_meal_from_meal_list) {
