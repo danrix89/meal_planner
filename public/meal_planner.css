@@ -140,7 +140,6 @@ html, body {
 .side_panel {
     background-color: red;
     width: 35%;
-    /*height: 890px;*/
     float: left;
 }
 
@@ -408,16 +407,24 @@ li.flex-meal-item:active {
     width: 100%;
     color: #ff8333;
     font-size: 16px;
+    font-family: arial;
 }
 
 .meal_image_upload {
-
+    appearance: none;
+    background-color: #ff8333;
+    color: white;
+    width: 95%;
 }
 
-.meal_image_upload_progress {
+.meal_save_progress {
     -webkit-appearance: none;
     appearance: none;
-    width: 50%;
+    width: 99%;
+    height: 5px;
+    margin-left: 3px;
+    background-color: #33afff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
 }
 
 
@@ -430,7 +437,6 @@ li.flex-meal-item:active {
     to {top:0; opacity:1}
 }
 
-/* The Modal (background) */
 .pop_up_background {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
@@ -446,7 +452,6 @@ li.flex-meal-item:active {
     text-align: center;
 }
 
-/* Modal Content */
 .pop_up_content {
     position: relative;
     background-color: #fefefe;

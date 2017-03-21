@@ -182,12 +182,12 @@
                         <div id="confirm_button" class="meal_planner_button meal_editor_confirm_button"><img class="button_image" src="images\controls\check.png" /></div>
                         <div id="cancel_button" class="meal_planner_button meal_editor_cancel_button"><img class="button_image" src="images\controls\cancel.png" /></div>
                     </div>
+                    <progress id="meal_save_progress" class="meal_save_progress" value="0" max="100">0%</progress>
                     <div class="meal_editor_body">
                         <p class="meal_editor_form_header">Meal Name:</p>
                         <input class="meal_data_input" id="meal_name_input" type="text">
                         <p class="meal_editor_form_header">Meal Image:</p>
-                        <progress id="meal_image_upload_progress" class="meal_image_upload_progress" value="0" max="100">0%</progress>
-                        <input id="meal_image_upload" class="meal_image_upload" type="file" value="upload">
+                        <input id="meal_image_upload" class="meal_image_upload" type="file" value="upload" accept="image/*">
                         <p class="meal_editor_form_header">Ingredients:</p>
                         <div class="ingredient_list">
                             <ul class="flex-ingredient-container" id="ingredients_unordered_list">

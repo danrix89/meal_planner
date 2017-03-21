@@ -1365,7 +1365,7 @@ function upload_meal_image_to_storage(event) {
     upload_task.on("state_changed",
         function handl_progress(snapshot) {
             var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            var progress_bar = document.getElementById('meal_image_upload_progress');
+            var progress_bar = document.getElementById('meal_save_progress');
             progress_bar.value = percentage;
         },
         function handle_errors(error) {
