@@ -1896,12 +1896,9 @@ function handle_meal_share_accept_or_decline(is_accepted) {
         firebase_database.ref(meal_database_path).once("value", function(db_snapshot) {
             // Add the meal to the user's meals
             var new_user_meal_record_ref = firebase_database.ref('Users_Meals/' + user.uid).push();
-            var meal_object = db_snapshot.val();
-            new_user_meal_record_ref.set(meal_object);
+            new_user_meal_record_ref.set(db_snapshot.val());
 
-            // TODO: Update the meal list
-            add_meal_list_element(new_user_meal_record_ref.key, meal_object.name, meal_object.image_path);
-
+            add_meal_list_item_from_db_snapshot(db_snapshot);
         });
     }
 
