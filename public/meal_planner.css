@@ -427,6 +427,10 @@ li.flex-meal-item:active {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
 }
 
+.meal_save_progress::-webkit-progress-value {
+    background: #33afff;
+}
+
 
 /******************************************************************************************
 * FRIEND REQUEST POP-UP
