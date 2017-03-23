@@ -1,3 +1,7 @@
+body {
+    overflow-y: auto;
+}
+
 .hide {
     display: none;
 }
@@ -10,14 +14,14 @@
     background-color: #ff8333;;
     align-items: center;
     justify-content: center;
-
 }
 
 .logo_container {
-    margin-bottom: 50px;
+    margin-bottom: 20px;
 }
 
 .main_controls_container {
+    min-height: 360px;
     display: flex;
     flex-direction: column;
     background-color: #33afff;
@@ -35,7 +39,6 @@
 .sign_in_fields_container {
     display: flex;
     flex-direction: column;
-    /*justify-content: space-around;*/
 }
 
 .sign_in_input {
@@ -46,7 +49,6 @@
     font-size: 1.2em;
     border-radius: 10px;
     border: none;
-    /*border: 1px solid #33afff;*/
 }
 
 .sign_in_button {
@@ -67,7 +69,7 @@
 }
 
 .sign_in_provider_title_container {
-    padding-top: 20px;
+    padding-top: 10px;
     color: white;
     font-weight: bold;
 }
@@ -80,5 +82,6 @@
 }
 
 .icon_recognition {
-    margin-top: 50px;
+    position: absolute;
+    bottom: 10px;
 }
