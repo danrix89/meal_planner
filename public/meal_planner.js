@@ -199,7 +199,10 @@ function setup_app_controls() {
     document.getElementById('confirm_meal_image_pick_button').onclick = confirm_meal_image_pick;
     document.getElementById('image_category_list_item_my_images').onclick = populate_meal_image_picker_list_with_user_images;
     document.getElementById('image_category_list_item_default_images').onclick = populate_meal_image_picker_list_with_default_images;
-    //populate_meal_image_picker_list();
+    document.getElementById('meal_image_upload_button').onclick = on_upload_images_button_click;
+    document.getElementById('meal_upload_progress').classList.add('hide');
+    setup_meal_image_file_uploader_change_actions();
+    populate_meal_image_picker_list_with_user_images();
 }
 
 /**
@@ -1295,13 +1298,27 @@ function add_meal_list_item_from_db_snapshot(db_snapshot) {
 function update_meal_list_item_with_changes_from_db_snapshot(db_snapshot) {
     // Update the meal list item to reflect what's in the database
     var id = db_snapshot.key;
-    // var meal_list_element = document.getElementById("meal_list_item_" + db_snapshot.key);
 
     set_image_src(firebase_storage.ref().child((db_snapshot.val())["image_path"]), document.getElementById("drag_" + id));
     document.getElementById("meal_list_name_" + id).innerHTML = (db_snapshot.val())["name"];
 
     // Select the newly edited meal (this should populate the meal editor)
     select_meal_in_meal_list(id)
+}
+
+/**
+* Updates meal list item from db snapshot
+* Updates meal list element in the meal list using the db snapshot of the edited meal
+*/
+function update_calendar_item_with_changes_from_db_snapshot(db_snapshot) {
+    // Update the meal list item to reflect what's in the database
+    var id = db_snapshot.key;
+
+    set_image_src(firebase_storage.ref().child((db_snapshot.val())["image_path"]), document.getElementById('drag_' + id + '_calendar'));
+    document.getElementById("calendar_day_data_container_name_element_" + id).innerHTML = (db_snapshot.val())["name"];
+
+    // Select the newly edited meal (this should populate the meal editor)
+    select_meal_in_calendar(id);
 }
 
 /**
@@ -1333,6 +1350,7 @@ function show_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "visible";
     document.getElementById('cancel_button').classList.remove("hide");
     document.getElementById('confirm_button').classList.remove("hide");
+    document.getElementById('change_image_button').classList.remove("hide");
     show_hide_ingredeint_remove_buttons(true);
 }
 
@@ -1345,6 +1363,7 @@ function hide_edit_mode_controls() {
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
     document.getElementById('cancel_button').classList.add("hide");
     document.getElementById('confirm_button').classList.add("hide");
+    document.getElementById('change_image_button').classList.add("hide");
     show_hide_ingredeint_remove_buttons(false);
 }
 
@@ -1379,6 +1398,14 @@ function confirm_changes()
     current_meal.name = document.getElementById('meal_name_input').value;
     current_meal.recipe = document.getElementById('recipe_text_area').value;
 
+    // Handle the image_path
+    var image_path_input_element = document.getElementById('meal_image_input');
+    current_meal.image_path = image_path_input_element.value;
+    if (current_meal.image_path == "") {
+        image_path_input_element.value = "meal_images/default_images/default_image.jpg";
+        current_meal.image_path = image_path_input_element.value
+    }
+
     // If we were adding then set the flag so we know we aren't in adding meal mode
     if (is_adding_new_meal)
     {
@@ -1386,7 +1413,7 @@ function confirm_changes()
 
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
-        var meal_object = { name: current_meal.name, image_path: image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+        var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.key;
@@ -1397,7 +1424,7 @@ function confirm_changes()
         if (is_selected_meal_from_meal_list) {
             // Save the changes to the database
             var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
-            var meal_object = { name: current_meal.name, image_path: image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+            var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
             db_users_meals_meal_ref.set(meal_object);
 
             // Refresh the meal list with those changes
@@ -1461,6 +1488,9 @@ function update_calendar_meal(id) {
         db_plannedMonths_mealPlans_meal_ref.once("value", function(db_snapshot) {
             var meal_object = {day: (db_snapshot.val()).day, name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
             db_plannedMonths_mealPlans_meal_ref.set(meal_object);
+            db_plannedMonths_mealPlans_meal_ref.once("value", function(db_snapshot_new) {
+                update_calendar_item_with_changes_from_db_snapshot(db_snapshot_new);
+            });
         });
     } else {
         // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
@@ -1593,11 +1623,13 @@ function set_current_meal(meal_id)
 */
 function populate_meal_editor(meal)
 {
-    // Set the meal name input field and instructions text area
-    var meal_instructions_text_area = document.getElementById('recipe_text_area');
-    meal_instructions_text_area.value = meal.recipe;
+    // Set the meal name, image path, and recipe fields/text areas
     var meal_name_iput = document.getElementById('meal_name_input');
     meal_name_iput.value = meal.name;
+    var meal_image_path_input = document.getElementById('meal_image_input');
+    meal_image_path_input.value = meal.image_path;
+    var meal_instructions_text_area = document.getElementById('recipe_text_area');
+    meal_instructions_text_area.value = meal.recipe;
 
     // Clear the current ingredient list and then populate it with the ingredients
     document.getElementById('ingredients_unordered_list').innerHTML = "";
@@ -1973,7 +2005,6 @@ function share_meal_with_friend() {
     var friend_id = selected_friend.getAttribute("data-friend-id");
     var friend_email = selected_friend.getAttribute("data-friend-email");
     var meal_name = current_meal.name;
-    //"Users_Meals/1oRWD3Kw2ibbGJ69MsRysMsgjIe2/-KfCQM8K1P87joCo5iC-"
     var meal_path = "Users_Meals/" + user.uid + "/" + current_meal.id;
 
     if (confirm("Do you want to share " + current_meal.name + " with " + friend_email + "?")) {
@@ -1996,37 +2027,24 @@ function share_meal_with_friend() {
 * Populates the image picker list with user images
 */
 function populate_meal_image_picker_list_with_user_images() {
-    //
+    toggle_image_category_label_selected(false);
+
     var meal_image_picker_list = document.getElementById('meal_image_picker_list');
     meal_image_picker_list.innerHTML = "";
 
     firebase.database().ref("Users_Images/" + user.uid).on("value", function(snapshot) {
         var filename_records = snapshot.val()
 
-        // Loop through each file name record and add them to the list
+
+        // Loop through each file record and add the name to the array
+        var filenames = [];
         for (var id in filename_records) {
             if (filename_records.hasOwnProperty(id)) {
-                firebase_storage.ref("meal_images/user_images/" + user.uid + "/" + filename_records[id].filename).getDownloadURL()
-                    .then(function(url) {
-                        // Setup list_item
-                        var list_item = document.createElement("li");
-
-                        // Setup image_element
-                        var image_element = document.createElement("img");
-                        image_element.id = id;
-                        image_element.src = url;
-                        image_element.classList.add("image_picker_image");
-                        image_element.onclick = select_meal_image;
-
-                        // Append the image an list item
-                        list_item.appendChild(image_element);
-                        meal_image_picker_list.appendChild(list_item);
-                    })
-                    .catch(function(error){
-                        console.log(error.message);
-                    })
+                filenames.push(filename_records[id].filename);
             }
         }
+        var storage_reference_path_prefix = "meal_images/user_images/" + user.uid + "/";
+        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix);
     })
 }
 
@@ -2034,39 +2052,69 @@ function populate_meal_image_picker_list_with_user_images() {
 * Populates the image picker list with default images
 */
 function populate_meal_image_picker_list_with_default_images() {
-    //
+    toggle_image_category_label_selected(true);
+
     var meal_image_picker_list = document.getElementById('meal_image_picker_list');
     meal_image_picker_list.innerHTML = "";
 
     firebase.database().ref("DefaultMealImages").on("value", function(snapshot) {
         var filename_records = snapshot.val();
 
-        // Loop through each file name record and add them to the list
+        // Loop through each file record and add the name to the array
+        var filenames = [];
         for (var id in filename_records) {
             if (filename_records.hasOwnProperty(id)) {
-                firebase_storage.ref("meal_images/default_images/" + filename_records[id]).getDownloadURL()
-                    .then(function(url) {
-                        // Setup list_item
-                        var list_item = document.createElement("li");
-                        list_item.classList.add("meal_image_picker_list_item");
-
-                        // Setup image_element
-                        var image_element = document.createElement("img");
-                        image_element.id = url;
-                        image_element.src = url;
-                        image_element.classList.add("image_picker_image");
-                        image_element.onclick = select_meal_image;
-
-                        // Append the image an list item
-                        list_item.appendChild(image_element);
-                        meal_image_picker_list.appendChild(list_item);
-                    })
-                    .catch(function(error){
-                        console.log(error.message);
-                    })
+                filenames.push(filename_records[id]);
             }
         }
+        var storage_reference_path_prefix = "meal_images/default_images/";
+        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix);
     })
+}
+
+function populate_meal_image_picker_list(filenames, index, storage_reference_path_prefix) {
+    if (index >= filenames.length) {
+        return;
+    } else {
+        // firebase_storage.ref("meal_images/default_images/" + filename_records[id]).getDownloadURL()
+        firebase_storage.ref(storage_reference_path_prefix + filenames[index]).getDownloadURL()
+            .then(function(url) {
+                // Setup list_item
+                var list_item = document.createElement("li");
+                list_item.classList.add("meal_image_picker_list_item");
+
+                // Setup image_element
+                var image_element = document.createElement("img");
+                image_element.id = storage_reference_path_prefix + filenames[index];
+                image_element.src = url;
+                image_element.classList.add("image_picker_image");
+                image_element.onclick = select_meal_image;
+
+                // Append the image an list item
+                list_item.appendChild(image_element);
+                meal_image_picker_list.appendChild(list_item);
+
+                // Recursively call this function to go through all file names
+                populate_meal_image_picker_list(filenames, ++index, storage_reference_path_prefix);
+            })
+            .catch(function(error){
+                console.log(error.message);
+            })
+    }
+}
+
+function toggle_image_category_label_selected(is_default_selected) {
+    var user_images_category_label = document.getElementById("image_category_list_item_my_images");
+    var default_images_category_label = document.getElementById("image_category_list_item_default_images");
+
+    if (is_default_selected) {
+        user_images_category_label.classList.remove("image_category_list_item_chosen");
+        default_images_category_label.classList.add("image_category_list_item_chosen");
+    } else {
+        user_images_category_label.classList.add("image_category_list_item_chosen");
+        default_images_category_label.classList.remove("image_category_list_item_chosen");
+    }
+
 }
 
 /**
@@ -2103,46 +2151,86 @@ function select_meal_image(event) {
     meal_image_picker_list.setAttribute("data-current-image-id", currently_selected_image.id);
 }
 
-/**
-*
-*/
-function confirm_meal_image_pick() {
-    // Get the image path
-    var image_path = current_meal.image_path;
-    if (is_adding_new_meal) {
-        image_path = "meal_images/default_images/default_image.jpg";
+function setup_meal_image_file_uploader_change_actions() {
+    var meal_image_upload_element = document.getElementById('meal_image_upload');
+    var meal_image_upload_label_element = document.getElementById('meal_image_upload_label');
+	meal_image_upload_element.addEventListener('change', function(event) {
+		var fileName = '';
+
+		if(this.files && this.files.length > 1) {
+            fileName = (this.getAttribute('data-multiple-caption') || '').replace( '{count}', this.files.length );
+        } else if (this.files && this.files.length == 1) {
+            fileName = event.target.value.split( '\\' ).pop();
+        } else {
+            fileName = "Choose an Image"
+        }
+
+		meal_image_upload_label_element.innerHTML = fileName;
+	});
+}
+
+function on_upload_images_button_click() {
+    // Get the files
+    var files = document.getElementById('meal_image_upload').files;
+
+    if (files.length > 0) {
+        // show the progress bar
+        document.getElementById('meal_upload_progress').classList.remove("hide");
+        // Upload the images using recursion
+        upload_images_from_files(files, 0);
     }
+}
 
-    // Get the file
-    var file = document.getElementById('meal_image_upload').files[0];
+function upload_images_from_files(files, index) {
 
-    if (file != null && file != "" && file != undefined) {
-        // Create a storage ref
-        var image_path = 'meal_images/user_images/' + user.uid + "/" + file.name;
+    if (index >= files.length) {
+        return;
+    } else {
+        var progress_bar = document.getElementById('meal_upload_progress');
+        var progress_label = document.getElementById('meal_upload_progress_label');
+
+        // Make a storage reference
+        var image_path = 'meal_images/user_images/' + user.uid + "/" + files[index].name;
         var storage_ref = firebase_storage.ref(image_path);
 
         // Upload the image
-        var upload_task = storage_ref.put(file);
+        var upload_task = storage_ref.put(files[index]);
 
         // Update the progress bar
         upload_task.on("state_changed",
             function handl_progress(snapshot) {
                 var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                var progress_bar = document.getElementById('meal_save_progress');
                 progress_bar.value = percentage;
+                progress_label.innerHTML = "Downloading " + (index + 1) + " out of " + files.length;
             },
             function handle_errors(error) {
                 console.log("ERROR: " + error.message);
             },
             function handle_completion() {
-                document.getElementById('meal_image_upload').value = null;
+                // Make a new database record for the uploaded file
+                var new_user_image_record_ref = firebase_database.ref('Users_Images/' + user.uid).push();
+                new_user_image_record_ref.set({filename: files[index].name});
 
-                // Continue with changes
-                finish_saving_and_updating_changes(image_path);
+                // Recursively upload
+                upload_images_from_files(files, ++index);
+
+                // Populates the list
+                if (index >= files.length) {
+                    populate_meal_image_picker_list_with_user_images();
+                    progress_bar.value = 0;
+                    progress_bar.classList.add("hide");
+                    progress_label.classList.add("hide");
+                }
             }
         );
-    } else {
-        // Continue with changes
-        finish_saving_and_updating_changes(image_path);
     }
+}
+
+/**
+*
+*/
+function confirm_meal_image_pick() {
+    var image_path = document.getElementById('meal_image_picker_list').getAttribute("data-current-image-id");
+    document.getElementById('meal_image_input').value = image_path;
+    document.getElementById('meal_image_picker_pop_up_background').style.display = "none";
 }

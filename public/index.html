@@ -100,8 +100,22 @@
                 </div>
                 <div id="meal_image_upload_container" class="pop_up_controls_container">
                     <div class="popup_section_title">Upload an image</div>
-                    <progress id="meal_save_progress" class="meal_save_progress" value="0" max="100">0%</progress>
-                    <input id="meal_image_upload" class="meal_image_upload" type="file" value="upload" accept="image/*">
+                    <!--
+                        IMPORTANT!!!!!!
+
+                        For the file chooser and its label I used the styling and implementation guided found at:
+                        https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/#comments
+
+                        Please read the article to understand the decisions I made in styling and implementing the
+                        two elements below.
+                    -->
+                    <div id="meal_image_upload_controls_container" class="meal_image_upload_controls_container">
+                        <input id="meal_image_upload" class="meal_image_upload" type="file" name="meal_image_upload" data-multiple-caption="{count} images selected" value="upload" accept="image/*" multiple>
+                        <label id="meal_image_upload_label" class="meal_image_upload_label" for="meal_image_upload">Choose an image</label>
+                        <button id="meal_image_upload_button" class="pop_up_button meal_image_upload_button">Upload</button>
+                    </div>
+                    <p id="meal_upload_progress_label" class="meal_upload_progress_label"></p>
+                    <progress id="meal_upload_progress" class="meal_upload_progress" value="0" max="100">0%</progress>
                 </div>
             </div>
             <!-- <div class="pop_up_footer">
@@ -219,7 +233,8 @@
                         <p class="meal_editor_form_header">Meal Name:</p>
                         <input class="meal_data_input" id="meal_name_input" type="text">
                         <p class="meal_editor_form_header">Meal Image:</p>
-                        <input class"meal_data_input" id="meal_image_input"  readonly="true" type="text"><button id="change_image_button" class="change_image_button" type="button">Change Image</button>
+                        <input class="meal_data_input" id="meal_image_input" type="text">
+                        <button id="change_image_button" class="change_image_button" type="button">Change</button>
                         <p class="meal_editor_form_header">Ingredients:</p>
                         <div class="ingredient_list">
                             <ul class="flex-ingredient-container" id="ingredients_unordered_list">
@@ -228,7 +243,7 @@
                             <br />
                             <div class="ingredient_edit_mode_fields">
                                 <input class="meal_data_input" id="meal_ingredient_input" type="text">
-                                <div id="ingredient_add_button" class="ingredient_add_field_and_button"><img class="ingredient_add_button_image" src="images\controls\check.png" /></div>
+                                <button id="ingredient_add_button" class="ingredient_add_field_and_button"><img class="ingredient_add_button_image" src="images\controls\check.png" /></button>
                             </div>
                         </div>
                         <p class="meal_editor_form_header">Instructions:</p>

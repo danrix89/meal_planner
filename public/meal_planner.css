@@ -83,7 +83,6 @@
 .ingredient_add_button_image {
     height: 15px;
     width: 15px;
-    margin: 5px;
 }
 
 .ingredient_add_field_and_button{
@@ -92,6 +91,9 @@
     width: 25px;
     background-color: #33afff;
     border-radius: 200px;
+    border: none;
+    outline: none;
+    cursor: pointer;
 }
 
 .ingredient_add_field_and_button:hover {
@@ -370,6 +372,19 @@ li.flex-meal-item:active {
     padding: 10px;
 }
 
+.change_image_button {
+    appearance: none;
+    border: none;
+    outline: none;
+    background-color: #33afff;
+    width: 100px;
+    font-size: 16px;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 2px;
+}
+
 .ingredient_list {
     background-color: white;
     min-height: 100px;
@@ -405,7 +420,7 @@ li.flex-meal-item:active {
 
 .meal_data_input {
     color: #ff8333;
-    width: 50%;
+    width: 75%;
     font-size: 16px;
 }
 
@@ -573,6 +588,7 @@ li.flex-meal-item:active {
 .image_category_list_item {
     color: gray;
     cursor: pointer;
+    font-weight: bold;
 }
 
 .image_category_list_item_chosen {
@@ -589,11 +605,12 @@ li.flex-meal-item:active {
     list-style: none;
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-around;
+    /*justify-content: space-around;*/
     overflow-y: auto;
     min-height: 300px;
     max-height: 300px;
     margin: 0 auto;
+    border: 1px gray solid;
 }
 
 .image_picker_image {
@@ -612,15 +629,30 @@ li.flex-meal-item:active {
 }
 
 .meal_image_upload {
-    padding: 0;
-    margin: 0 auto;
-    appearance: none;
-    background-color: #ff8333;
-    color: white;
-    width: 100%;
+    width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
 }
 
-.meal_save_progress {
+.meal_image_upload_label {
+    padding: 10px;
+    min-height: 60px;
+    line-height: 60px;
+    border-radius: 5px;
+    color: white;
+    background-color: #ff8333;
+}
+
+.meal_image_upload_button {
+    float: none;
+}
+
+.meal_upload_progress {
+    position: relative;
+    bottom: 10px;
     padding: 0;
     margin: 0 auto;
     appearance: none;
@@ -630,6 +662,11 @@ li.flex-meal-item:active {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
 }
 
-.meal_save_progress::-webkit-progress-value {
+.meal_upload_progress::-webkit-progress-value {
     background: #33afff;
+}
+
+.meal_upload_progress_label {
+    color: #33afff;
+    font-size: .5em;
 }
