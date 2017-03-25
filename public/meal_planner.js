@@ -201,6 +201,7 @@ function setup_app_controls() {
     document.getElementById('image_category_list_item_default_images').onclick = populate_meal_image_picker_list_with_default_images;
     document.getElementById('meal_image_upload_button').onclick = on_upload_images_button_click;
     document.getElementById('meal_upload_progress').classList.add('hide');
+    document.getElementById('meal_upload_progress_label').classList.add('hide');
     setup_meal_image_file_uploader_change_actions();
     populate_meal_image_picker_list_with_user_images();
 }
@@ -2026,6 +2027,8 @@ function share_meal_with_friend() {
 /**
 * Populates the image picker list with user images
 */
+//meal_images/user_images/1oRWD3Kw2ibbGJ69MsRysMsgjIe2
+//meal_images/user_images/1oRWD3Kw2ibbGJ69MsRysMsgjIe2/family_jan_2016.jpg
 function populate_meal_image_picker_list_with_user_images() {
     toggle_image_category_label_selected(false);
 
@@ -2044,7 +2047,8 @@ function populate_meal_image_picker_list_with_user_images() {
             }
         }
         var storage_reference_path_prefix = "meal_images/user_images/" + user.uid + "/";
-        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix);
+        var list_elements = [];
+        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix, list_elements);
     })
 }
 
@@ -2068,12 +2072,17 @@ function populate_meal_image_picker_list_with_default_images() {
             }
         }
         var storage_reference_path_prefix = "meal_images/default_images/";
-        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix);
+        var list_elements = [];
+        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix, list_elements);
     })
 }
 
-function populate_meal_image_picker_list(filenames, index, storage_reference_path_prefix) {
+function populate_meal_image_picker_list(filenames, index, storage_reference_path_prefix, list_elements) {
     if (index >= filenames.length) {
+        var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+        for (var i = 0; i < list_elements.length; i++) {
+            meal_image_picker_list.appendChild(list_elements[i]);
+        }
         return;
     } else {
         // firebase_storage.ref("meal_images/default_images/" + filename_records[id]).getDownloadURL()
@@ -2092,10 +2101,11 @@ function populate_meal_image_picker_list(filenames, index, storage_reference_pat
 
                 // Append the image an list item
                 list_item.appendChild(image_element);
-                meal_image_picker_list.appendChild(list_item);
+
+                list_elements.push(list_item);
 
                 // Recursively call this function to go through all file names
-                populate_meal_image_picker_list(filenames, ++index, storage_reference_path_prefix);
+                populate_meal_image_picker_list(filenames, ++index, storage_reference_path_prefix, list_elements);
             })
             .catch(function(error){
                 console.log(error.message);
@@ -2176,6 +2186,7 @@ function on_upload_images_button_click() {
     if (files.length > 0) {
         // show the progress bar
         document.getElementById('meal_upload_progress').classList.remove("hide");
+
         // Upload the images using recursion
         upload_images_from_files(files, 0);
     }
@@ -2202,6 +2213,7 @@ function upload_images_from_files(files, index) {
                 var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 progress_bar.value = percentage;
                 progress_label.innerHTML = "Downloading " + (index + 1) + " out of " + files.length;
+                progress_label.classList.remove("hide");
             },
             function handle_errors(error) {
                 console.log("ERROR: " + error.message);

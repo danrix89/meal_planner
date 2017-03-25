@@ -7,10 +7,9 @@
     <link rel="shortcut icon" href="images/controls/title_tab_image.jpg" />
     <link rel="stylesheet" type="text/css" href="meal_planner.css">
     <link rel="stylesheet" type="text/css" href="sign_in.css">
-    <link type="text/css" rel="stylesheet" href="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.css" />
-    <script src="https://cdn.firebase.com/libs/firebaseui/1.0.0/firebaseui.js"></script>
     <script src="https://www.gstatic.com/firebasejs/3.6.6/firebase.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 </head>
 <body onload="on_page_load(event)">
 
@@ -114,8 +113,11 @@
                         <label id="meal_image_upload_label" class="meal_image_upload_label" for="meal_image_upload">Choose an image</label>
                         <button id="meal_image_upload_button" class="pop_up_button meal_image_upload_button">Upload</button>
                     </div>
-                    <p id="meal_upload_progress_label" class="meal_upload_progress_label"></p>
                     <progress id="meal_upload_progress" class="meal_upload_progress" value="0" max="100">0%</progress>
+                    <p id="meal_upload_progress_label" class="meal_upload_progress_label">No Items Downloading</p>
+                    <!-- <div class="progress">
+                        <div id="meal_upload_progress" class="progress-bar sr-only meal_upload_progress" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="width:70%">0%</div>
+                    </div> -->
                 </div>
             </div>
             <!-- <div class="pop_up_footer">
