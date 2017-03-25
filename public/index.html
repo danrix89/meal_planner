@@ -39,7 +39,6 @@
                 <a id="linkCreateAccount" class="linkCreateAccount" href="#txtEmail">Create account</a>
             </div>
         </div>
-        <div class="icon_recognition">Icons made by <a href="http://www.freepik.com" title="Freepik">Freepik</a> from <a href="http://www.flaticon.com" title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
     </div>
 
     <!-- The Friend Request Dialog -->
@@ -71,8 +70,42 @@
                     </div>
                 </div>
             </div>
-            <div class="pop_up_footer">
+            <!-- <div class="pop_up_footer">
+            </div> -->
+        </div>
+    </div>
+
+    <!-- The Meal Image Picker Dialog -->
+    <div id="meal_image_picker_pop_up_background" class="pop_up_background">
+        <!-- Actual Dialog Content -->
+        <div class="pop_up_content pop_up_content_big">
+            <div class="pop_up_header">
+                <h1 id="friend_request_pop_up_title" class="pop_up_title">Meal Images</h1>
             </div>
+            <div class="pop_up_body">
+                <div id="meal_image_picker_container" class="meal_image_picker_container">
+                    <div class="popup_section_title">Select an image</div>
+                    <ul id="image_category_list" class="image_category_list">
+                        <li id="image_category_list_item_my_images" class="image_category_list_item">My Images</li>
+                        <li id="image_category_list_item_default_images" class="image_category_list_item">Default Images</li>
+                    </ul>
+                    <div id="meal_image_picker_list_container" class="pop_up_list_container">
+                        <ul class="meal_image_picker_list" id="meal_image_picker_list">
+                            <!-- Populated by Json Meal Data -->
+                        </ul>
+                    </div>
+                    <div id="meal_image_picker_controls_container" class="pop_up_controls_container">
+                        <button id="confirm_meal_image_pick_button" class="pop_up_button">Select</button>
+                    </div>
+                </div>
+                <div id="meal_image_upload_container" class="pop_up_controls_container">
+                    <div class="popup_section_title">Upload an image</div>
+                    <progress id="meal_save_progress" class="meal_save_progress" value="0" max="100">0%</progress>
+                    <input id="meal_image_upload" class="meal_image_upload" type="file" value="upload" accept="image/*">
+                </div>
+            </div>
+            <!-- <div class="pop_up_footer">
+            </div> -->
         </div>
     </div>
 
@@ -109,8 +142,8 @@
                     </div>
                 </div>
             </div>
-            <div class="pop_up_footer">
-            </div>
+            <!-- <div class="pop_up_footer">
+            </div> -->
         </div>
     </div>
 
@@ -118,23 +151,23 @@
     <div id="main_box" class="main_box hide">
         <!-- The Title Bar -->
         <div id="app_title" class="app_title">
-            <div class="meal_planner_button" id="log_out_button"><img class="button_image" src="images\controls\log_out_2.png" /></div>
-            <div class="meal_planner_button" id="friend_request_button"><img class="button_image" src="images\controls\add_friend.png" /></div>
-            myMealPlanner
+            <button class="meal_planner_button" id="log_out_button"><img class="button_image" src="images\controls\log_out.png" /></button>
+            <button class="meal_planner_button" id="friend_request_button"><img class="button_image" src="images\controls\add_friend.png" /></button>
+            <img id="title_logo" class="title_logo" src="images/controls/logo.png">
         </div>
         <!-- The Calendar -->
         <div id="calendar_panel" class="calendar_panel">
             <div class="calendar_title_pane">
-                <div id="calendar_garbage_button" class="meal_planner_button"><img class="button_image" src="images\controls\garbage.png" /></div>
+                <button id="calendar_garbage_button" class="meal_planner_button"><img class="button_image" src="images\controls\garbage.png" /></button>
                 <ul class="flex_calendar_title_container">
                     <li class="flex_calendar_title_item">
-                        <div id="previous_month" class="meal_planner_button"><img class="button_image" src="images\controls\left-arrow.png" /></div>
+                        <button id="previous_month" class="meal_planner_button"><img class="button_image" src="images\controls\left-arrow.png" /></button>
                     </li>
                     <li id="month_title" class="flex_calendar_title_item">
                         Month
                     </li>
                     <li class="flex_calendar_title_item">
-                        <div id="next_month" class="meal_planner_button"><img class="button_image" src="images\controls\right-arrow.png" /></div>
+                        <button id="next_month" class="meal_planner_button"><img class="button_image" src="images\controls\right-arrow.png" /></button>
                     </li>
                 </ul>
             </div>
@@ -163,9 +196,9 @@
                 <div class="meal_list">
                     <div class="meal_editor_and_list_title">
                         Meals
-                        <div id="meal_list_garbage_button" class="meal_planner_button"><img class="button_image" src="images\controls\garbage.png" /></div>
-                        <div id="add_button" class="meal_planner_button"><img class="button_image" src="images\controls\add.png" /></div>
-                        <div id="share_meal_button" class="meal_planner_button"><img class="button_image" src="images\controls\share.png" /></div>
+                        <button id="meal_list_garbage_button" class="meal_planner_button"><img class="button_image" src="images\controls\garbage.png" /></button>
+                        <button id="add_button" class="meal_planner_button"><img class="button_image" src="images\controls\add.png" /></button>
+                        <button id="share_meal_button" class="meal_planner_button"><img class="button_image" src="images\controls\share.png" /></button>
                     </div>
                     <div class="meal_list_body">
                         <ul class="flex-meal-container" id="meal_unordered_list">
@@ -174,20 +207,19 @@
                     </div>
                 </div>
             </div>
-            <div class="side_panel_container" id="meal_editor_container">
+            <div class="side_panel_container meal_editor_container" id="meal_editor_container">
                 <div class="meal_editor">
                     <div class="meal_editor_and_list_title">
                         Recipe
-                        <div id="edit_button" class="meal_planner_button"><img class="button_image" src="images\controls\pen.png" /></div>
-                        <div id="confirm_button" class="meal_planner_button meal_editor_confirm_button"><img class="button_image" src="images\controls\check.png" /></div>
-                        <div id="cancel_button" class="meal_planner_button meal_editor_cancel_button"><img class="button_image" src="images\controls\cancel.png" /></div>
+                        <button id="edit_button" class="meal_planner_button"><img class="button_image" src="images\controls\pen.png" /></button>
+                        <button id="confirm_button" class="meal_planner_button meal_editor_confirm_button"><img class="button_image" src="images\controls\check.png" /></button>
+                        <button id="cancel_button" class="meal_planner_button meal_editor_cancel_button"><img class="button_image" src="images\controls\cancel.png" /></button>
                     </div>
-                    <progress id="meal_save_progress" class="meal_save_progress" value="0" max="100">0%</progress>
                     <div class="meal_editor_body">
                         <p class="meal_editor_form_header">Meal Name:</p>
                         <input class="meal_data_input" id="meal_name_input" type="text">
                         <p class="meal_editor_form_header">Meal Image:</p>
-                        <input id="meal_image_upload" class="meal_image_upload" type="file" value="upload" accept="image/*">
+                        <input class"meal_data_input" id="meal_image_input"  readonly="true" type="text"><button id="change_image_button" class="change_image_button" type="button">Change Image</button>
                         <p class="meal_editor_form_header">Ingredients:</p>
                         <div class="ingredient_list">
                             <ul class="flex-ingredient-container" id="ingredients_unordered_list">

@@ -18,10 +18,15 @@
     height: 50px;
     background-color: #33afff;
     border-radius: 200px;
-    /*display: inline-block;*/
     float: right;
     transition: .5s;
     margin: 5px;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    outline: none;
 }
 
 .meal_planner_button:hover {
@@ -37,9 +42,8 @@
 }
 
 .button_image {
-    height: 60%;
-    width: 60%;
-    margin: 10px;
+    height: 65%;
+    width: 65%;
 }
 
 .meal_editor_confirm_button {
@@ -54,19 +58,22 @@
 .remove_ingredient_button {
     margin: 3px;
     background-color: white;
-    color: #ff8333;
-    font-size: 1em;
-    text-align:center;
     border-radius: 200px;
     width: 20px;
+    height: 20px;
     float: right;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
 }
 
 .remove_ingredient_button:hover {
     transform: scale(1.09, 1.09);
     box-shadow: 0px 0px 8px 0px rgba(100,100,100,.8);
     transition-duration: .2s;
-    cursor: pointer;
 }
 
 .remove_ingredient_button:active {
@@ -122,6 +129,10 @@ html, body {
     font-size: 2em;
     color: white;
     font-weight: bold;
+}
+
+.title_logo{
+    height: 60px;
 }
 
 .main_box{
@@ -410,28 +421,6 @@ li.flex-meal-item:active {
     font-family: arial;
 }
 
-.meal_image_upload {
-    appearance: none;
-    background-color: #ff8333;
-    color: white;
-    width: 95%;
-}
-
-.meal_save_progress {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 99%;
-    height: 5px;
-    margin-left: 3px;
-    background-color: #33afff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
-}
-
-.meal_save_progress::-webkit-progress-value {
-    background: #33afff;
-}
-
-
 /******************************************************************************************
 * FRIEND REQUEST POP-UP
 ******************************************************************************************/
@@ -445,7 +434,7 @@ li.flex-meal-item:active {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
-    padding-top: 100px; /* Location of the box */
+    padding-top: 50px; /* Location of the box */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
@@ -471,6 +460,10 @@ li.flex-meal-item:active {
     border-radius: 50px;
 }
 
+.pop_up_content_big {
+    height: 750px;
+}
+
 .pop_up_header,
 .pop_up_footer {
     height: 60px;
@@ -478,6 +471,7 @@ li.flex-meal-item:active {
     color: white;
     line-height: 60px;
     text-align: center;
+    position: relative;
 }
 
 .pop_up_header{
@@ -492,6 +486,7 @@ li.flex-meal-item:active {
 
 .pop_up_body {
     height: 380px;
+    width: 90%;
     font-size: 1.25em;
     text-align: center;
     display: inline-block;
@@ -564,4 +559,77 @@ li.flex-meal-item:active {
 
 .pop_up_decline_button {
     background-color: tomato;
+}
+
+
+.image_category_list {
+    list-style: none;
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.image_category_list_item {
+    color: gray;
+    cursor: pointer;
+}
+
+.image_category_list_item_chosen {
+    color: #33afff;
+}
+
+.meal_image_picker_container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.meal_image_picker_list {
+    list-style: none;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    overflow-y: auto;
+    min-height: 300px;
+    max-height: 300px;
+    margin: 0 auto;
+}
+
+.image_picker_image {
+    width: 100px;
+    max-width: 100;
+    height: 100px;
+    max-height: 100px;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 3px white solid;
+    opacity: 0.8;
+}
+
+.selected_image {
+    border: 3px #33afff solid;
+}
+
+.meal_image_upload {
+    padding: 0;
+    margin: 0 auto;
+    appearance: none;
+    background-color: #ff8333;
+    color: white;
+    width: 100%;
+}
+
+.meal_save_progress {
+    padding: 0;
+    margin: 0 auto;
+    appearance: none;
+    width: 100%;
+    height: 5px;
+    background-color: #33afff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+
+.meal_save_progress::-webkit-progress-value {
+    background: #33afff;
 }

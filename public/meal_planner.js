@@ -59,6 +59,9 @@ var current_plannedMonth = { id: null, formatted_date: null };
 // Flag to know when the app and its controls have been initialized
 var is_app_initialized = false;
 
+// Flag to know if a new meal image file was selected for the meal's image
+is_meal_image_file_changed = false;
+
 // The list/array of user meals
 var meals = [];
 
@@ -167,7 +170,7 @@ function setup_app_controls() {
     document.getElementById("edit_button").onclick = edit_current_meal;
     document.getElementById("confirm_button").onclick = confirm_changes;
     document.getElementById("cancel_button").onclick = cancel_changes;
-    document.getElementById("meal_image_upload").addEventListener('change', upload_meal_image_to_storage);
+    document.getElementById("change_image_button").onclick = show_meal_image_picker_dialog;
     document.getElementById("confirm_button").classList.add("hide");
     document.getElementById("cancel_button").classList.add("hide");
     document.getElementById('meal_name_input').readOnly = true;
@@ -190,6 +193,13 @@ function setup_app_controls() {
     document.getElementById('share_meal_with_friend_button').onclick = share_meal_with_friend;
     populate_awaiting_meal_shares();
     populate_friend_list();
+
+    // Meal Image Picker Dialog/Pop-up
+    document.getElementById('meal_image_picker_pop_up_background').onclick = hide_meal_image_picker_dialog;
+    document.getElementById('confirm_meal_image_pick_button').onclick = confirm_meal_image_pick;
+    document.getElementById('image_category_list_item_my_images').onclick = populate_meal_image_picker_list_with_user_images;
+    document.getElementById('image_category_list_item_default_images').onclick = populate_meal_image_picker_list_with_default_images;
+    //populate_meal_image_picker_list();
 }
 
 /**
@@ -1088,11 +1098,16 @@ function show_hide_ingredeint_remove_buttons(isShow)
         for (var ingredient in current_meal.ingredients) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
                 // Setup the ingredient remove button (nested in the ingredient element)
-                var ingredient_remove_button = document.createElement("div");
+                var ingredient_remove_button = document.createElement("button");
                 ingredient_remove_button.classList.add("remove_ingredient_button");
                 ingredient_remove_button.id = "ingredient_remove_button_" + ingredient;
-                ingredient_remove_button.innerHTML = 'x';
                 ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+
+                // Setup the ingredient remove button image (in the button)
+                var ingredient_remove_button_image = document.createElement("img");
+                ingredient_remove_button_image.src = "images\\controls\\cancel_orange.png";
+                ingredient_remove_button_image.classList.add("button_image");
+                ingredient_remove_button.appendChild(ingredient_remove_button_image);
 
                 document.getElementById(ingredient).appendChild(ingredient_remove_button);
             }
@@ -1351,32 +1366,6 @@ function edit_current_meal()
     setup_input_onkeypress_function();
 }
 
-function upload_meal_image_to_storage(event) {
-    // Get the file
-    var file = event.target.files[0];
-
-    // Create a storage ref
-    var storage_ref = firebase_storage.ref('meal_images/user_images/' + user.uid + "/" + file.name);
-
-    // Upload the image
-    var upload_task = storage_ref.put(file);
-
-    // Update the progress bar
-    upload_task.on("state_changed",
-        function handl_progress(snapshot) {
-            var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            var progress_bar = document.getElementById('meal_save_progress');
-            progress_bar.value = percentage;
-        },
-        function handle_errors(error) {
-            console.log("ERROR: " + error.message);
-        },
-        function handle_completion() {
-            // Do something right here?
-        }
-    );
-}
-
 /**
 * Confirm Changes
 * Actions for when the edit button is clicked (
@@ -1397,7 +1386,7 @@ function confirm_changes()
 
         // Write user meal to database
         var db_users_meals_ref = firebase_database.ref('Users_Meals/' + user.uid);
-        var meal_object = { name: current_meal.name, image_path: "meal_images/default_images/default_image.jpg", recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+        var meal_object = { name: current_meal.name, image_path: image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
         var new_users_meals_record_ref = db_users_meals_ref.push();
         new_users_meals_record_ref.set(meal_object);
         current_meal.id = new_users_meals_record_ref.key;
@@ -1408,7 +1397,7 @@ function confirm_changes()
         if (is_selected_meal_from_meal_list) {
             // Save the changes to the database
             var db_users_meals_meal_ref = firebase_database.ref("Users_Meals/" + user.uid + "/" + current_meal.id);
-            var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
+            var meal_object = { name: current_meal.name, image_path: image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
             db_users_meals_meal_ref.set(meal_object);
 
             // Refresh the meal list with those changes
@@ -1419,6 +1408,46 @@ function confirm_changes()
         }
     }
     hide_edit_mode_controls();
+}
+
+function toggle_locking_meal_editor_controls(is_to_lock_controls) {
+    if (is_to_lock_controls) {
+        document.getElementById('edit_button').disabled = true;
+        document.getElementById('cancel_button').disabled = true;
+        document.getElementById('confirm_button').disabled = true;
+        document.getElementById('meal_name_input').disabled = true;
+        document.getElementById('recipe_text_area').disabled = true;
+        document.getElementById('meal_ingredient_input').readOnly = true;
+        document.getElementById('meal_ingredient_input').readOnly = true;
+        document.getElementById('ingredient_add_button').disabled = true;
+        for (var ingredient in current_meal.ingredients) {
+            if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+                // Check if the ingredient list item has a remove button
+                var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
+                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                    // If so, remove the button from the list item element
+                    ingredient_remove_button.disabled = true;
+                }
+            }
+        }
+    } else {
+        document.getElementById('edit_button').disabled = false;
+        document.getElementById('cancel_button').disabled = false;
+        document.getElementById('confirm_button').disabled = false;
+        document.getElementById('meal_name_input').disabled = false;
+        document.getElementById('recipe_text_area').disabled = false;
+        document.getElementById('ingredient_add_button').disabled = false;
+        for (var ingredient in current_meal.ingredients) {
+            if (current_meal.ingredients.hasOwnProperty(ingredient)) {
+                // Check if the ingredient list item has a remove button
+                var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
+                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                    // If so, remove the button from the list item element
+                    ingredient_remove_button.disabled = false;
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -1956,5 +1985,164 @@ function share_meal_with_friend() {
         new_mealShares_friend_record_ref.set(meal_share_object);
 
         alert(current_meal.name + " shared with " + friend_email + ".");
+    }
+}
+
+/***************
+* Image Picking Functions
+***************/
+
+/**
+* Populates the image picker list with user images
+*/
+function populate_meal_image_picker_list_with_user_images() {
+    //
+    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+    meal_image_picker_list.innerHTML = "";
+
+    firebase.database().ref("Users_Images/" + user.uid).on("value", function(snapshot) {
+        var filename_records = snapshot.val()
+
+        // Loop through each file name record and add them to the list
+        for (var id in filename_records) {
+            if (filename_records.hasOwnProperty(id)) {
+                firebase_storage.ref("meal_images/user_images/" + user.uid + "/" + filename_records[id].filename).getDownloadURL()
+                    .then(function(url) {
+                        // Setup list_item
+                        var list_item = document.createElement("li");
+
+                        // Setup image_element
+                        var image_element = document.createElement("img");
+                        image_element.id = id;
+                        image_element.src = url;
+                        image_element.classList.add("image_picker_image");
+                        image_element.onclick = select_meal_image;
+
+                        // Append the image an list item
+                        list_item.appendChild(image_element);
+                        meal_image_picker_list.appendChild(list_item);
+                    })
+                    .catch(function(error){
+                        console.log(error.message);
+                    })
+            }
+        }
+    })
+}
+
+/**
+* Populates the image picker list with default images
+*/
+function populate_meal_image_picker_list_with_default_images() {
+    //
+    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+    meal_image_picker_list.innerHTML = "";
+
+    firebase.database().ref("DefaultMealImages").on("value", function(snapshot) {
+        var filename_records = snapshot.val();
+
+        // Loop through each file name record and add them to the list
+        for (var id in filename_records) {
+            if (filename_records.hasOwnProperty(id)) {
+                firebase_storage.ref("meal_images/default_images/" + filename_records[id]).getDownloadURL()
+                    .then(function(url) {
+                        // Setup list_item
+                        var list_item = document.createElement("li");
+                        list_item.classList.add("meal_image_picker_list_item");
+
+                        // Setup image_element
+                        var image_element = document.createElement("img");
+                        image_element.id = url;
+                        image_element.src = url;
+                        image_element.classList.add("image_picker_image");
+                        image_element.onclick = select_meal_image;
+
+                        // Append the image an list item
+                        list_item.appendChild(image_element);
+                        meal_image_picker_list.appendChild(list_item);
+                    })
+                    .catch(function(error){
+                        console.log(error.message);
+                    })
+            }
+        }
+    })
+}
+
+/**
+* Shows the friend request pop-up dialog window
+*/
+function show_meal_image_picker_dialog() {
+    document.getElementById('meal_image_picker_pop_up_background').style.display = "block";
+}
+
+/**
+*
+*/
+function hide_meal_image_picker_dialog() {
+    var modal = document.getElementById('meal_image_picker_pop_up_background');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+function select_meal_image(event) {
+    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+    var previous_image_id = meal_image_picker_list.getAttribute("data-current-image-id");
+    var previous_selected_image = document.getElementById(previous_image_id);
+    var currently_selected_image = document.getElementById(event.target.id);
+
+    // Deselect the previous_selected_image
+    if (previous_selected_image != null && previous_selected_image != undefined) {
+        previous_selected_image.classList.remove("selected_image");
+    }
+
+    // Select the currently selected image
+    currently_selected_image.classList.add("selected_image");
+
+    meal_image_picker_list.setAttribute("data-current-image-id", currently_selected_image.id);
+}
+
+/**
+*
+*/
+function confirm_meal_image_pick() {
+    // Get the image path
+    var image_path = current_meal.image_path;
+    if (is_adding_new_meal) {
+        image_path = "meal_images/default_images/default_image.jpg";
+    }
+
+    // Get the file
+    var file = document.getElementById('meal_image_upload').files[0];
+
+    if (file != null && file != "" && file != undefined) {
+        // Create a storage ref
+        var image_path = 'meal_images/user_images/' + user.uid + "/" + file.name;
+        var storage_ref = firebase_storage.ref(image_path);
+
+        // Upload the image
+        var upload_task = storage_ref.put(file);
+
+        // Update the progress bar
+        upload_task.on("state_changed",
+            function handl_progress(snapshot) {
+                var percentage = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                var progress_bar = document.getElementById('meal_save_progress');
+                progress_bar.value = percentage;
+            },
+            function handle_errors(error) {
+                console.log("ERROR: " + error.message);
+            },
+            function handle_completion() {
+                document.getElementById('meal_image_upload').value = null;
+
+                // Continue with changes
+                finish_saving_and_updating_changes(image_path);
+            }
+        );
+    } else {
+        // Continue with changes
+        finish_saving_and_updating_changes(image_path);
     }
 }
