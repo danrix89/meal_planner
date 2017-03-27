@@ -2034,7 +2034,6 @@ function load_and_cache_meal_images() {
     firebase.database().ref("Users_Images/" + user.uid).on("value", function(snapshot) {
         var filename_records = snapshot.val()
         var user_storage_reference_path_prefix = "meal_images/user_images/" + user.uid + "/";
-        if (filename_records)
         // Loop through each file record and add the name to the array
         var user_filenames = [];
         for (var id in filename_records) {
