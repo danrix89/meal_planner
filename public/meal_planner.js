@@ -2043,6 +2043,7 @@ function load_and_cache_meal_images() {
             }
         }
         if (user_filenames.length > 0) {
+            document.getElementById("image_category_list_item_my_images").innerHTML = "My Images (" + user_filenames.length + ")";
             populate_cache(user_meal_images_url_cache, user_filenames, 0, user_storage_reference_path_prefix);
         }
     })
@@ -2059,6 +2060,7 @@ function load_and_cache_meal_images() {
             }
         }
         if (default_filenames.length > 0) {
+            document.getElementById("image_category_list_item_default_images").innerHTML = "Default Images (" + default_filenames.length + ")";
             populate_cache(default_meal_images_url_cache, default_filenames, 0, default_storage_reference_path_prefix);
         }
     })
