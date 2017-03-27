@@ -68,6 +68,12 @@ var meals = [];
 // The current user (if "null" then no one is logged in)
 var user = {};
 
+// Cache of user meal images (updated as user uploads new meal images)
+var user_meal_images_url_cache = {};
+
+// Cache of default meal images
+var default_meal_images_url_cache = {};
+
 // A reference to Firebase
 var firebase_ref = {};
 
@@ -203,7 +209,7 @@ function setup_app_controls() {
     document.getElementById('meal_upload_progress').classList.add('hide');
     document.getElementById('meal_upload_progress_label').classList.add('hide');
     setup_meal_image_file_uploader_change_actions();
-    populate_meal_image_picker_list_with_user_images();
+    load_and_cache_meal_images();
 }
 
 /**
@@ -2023,33 +2029,61 @@ function share_meal_with_friend() {
 /***************
 * Image Picking Functions
 ***************/
+function load_and_cache_meal_images() {
+    // Load user images
+    firebase.database().ref("Users_Images/" + user.uid).on("value", function(snapshot) {
+        var filename_records = snapshot.val()
+        var user_storage_reference_path_prefix = "meal_images/user_images/" + user.uid + "/";
+        if (filename_records)
+        // Loop through each file record and add the name to the array
+        var user_filenames = [];
+        for (var id in filename_records) {
+            if (filename_records.hasOwnProperty(id)) {
+                user_filenames.push(filename_records[id].filename);
+            }
+        }
+        populate_cache(user_meal_images_url_cache, user_filenames, 0, user_storage_reference_path_prefix);
+    })
+
+    // Load default images
+    firebase.database().ref("DefaultMealImages").on("value", function(snapshot) {
+        var filename_records = snapshot.val()
+        var default_storage_reference_path_prefix = "meal_images/default_images/";
+        // Loop through each file record and add the name to the array
+        var default_filenames = []
+        for (var id in filename_records) {
+            if (filename_records.hasOwnProperty(id)) {
+                default_filenames.push(filename_records[id]);
+            }
+        }
+        populate_cache(default_meal_images_url_cache, default_filenames, 0, default_storage_reference_path_prefix);
+    })
+}
+
+function populate_cache(cache_object, filenames, index, storage_reference_path_prefix) {
+    if (index >= filenames.length) {
+        return;
+    } else {
+        firebase_storage.ref(storage_reference_path_prefix + filenames[index]).getDownloadURL()
+            .then(function(url) {
+                // add it to the cache
+                cache_object[url] = storage_reference_path_prefix + filenames[index];
+                // Recursively call the function to not ensure proper indexing
+                populate_cache(cache_object, filenames, ++index, storage_reference_path_prefix);
+            })
+            .catch(function(error) {
+                console.log(error.message);
+            })
+    }
+}
+
 
 /**
 * Populates the image picker list with user images
 */
-//meal_images/user_images/1oRWD3Kw2ibbGJ69MsRysMsgjIe2
-//meal_images/user_images/1oRWD3Kw2ibbGJ69MsRysMsgjIe2/family_jan_2016.jpg
 function populate_meal_image_picker_list_with_user_images() {
     toggle_image_category_label_selected(false);
-
-    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
-    meal_image_picker_list.innerHTML = "";
-
-    firebase.database().ref("Users_Images/" + user.uid).on("value", function(snapshot) {
-        var filename_records = snapshot.val()
-
-
-        // Loop through each file record and add the name to the array
-        var filenames = [];
-        for (var id in filename_records) {
-            if (filename_records.hasOwnProperty(id)) {
-                filenames.push(filename_records[id].filename);
-            }
-        }
-        var storage_reference_path_prefix = "meal_images/user_images/" + user.uid + "/";
-        var list_elements = [];
-        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix, list_elements);
-    })
+    populate_meal_image_picker_list(user_meal_images_url_cache);
 }
 
 /**
@@ -2057,59 +2091,29 @@ function populate_meal_image_picker_list_with_user_images() {
 */
 function populate_meal_image_picker_list_with_default_images() {
     toggle_image_category_label_selected(true);
-
-    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
-    meal_image_picker_list.innerHTML = "";
-
-    firebase.database().ref("DefaultMealImages").on("value", function(snapshot) {
-        var filename_records = snapshot.val();
-
-        // Loop through each file record and add the name to the array
-        var filenames = [];
-        for (var id in filename_records) {
-            if (filename_records.hasOwnProperty(id)) {
-                filenames.push(filename_records[id]);
-            }
-        }
-        var storage_reference_path_prefix = "meal_images/default_images/";
-        var list_elements = [];
-        populate_meal_image_picker_list(filenames, 0, storage_reference_path_prefix, list_elements);
-    })
+    populate_meal_image_picker_list(default_meal_images_url_cache);
 }
 
-function populate_meal_image_picker_list(filenames, index, storage_reference_path_prefix, list_elements) {
-    if (index >= filenames.length) {
-        var meal_image_picker_list = document.getElementById('meal_image_picker_list');
-        for (var i = 0; i < list_elements.length; i++) {
-            meal_image_picker_list.appendChild(list_elements[i]);
+function populate_meal_image_picker_list(url_cache) {
+    var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+    meal_image_picker_list.innerHTML = "";
+    for (var url in url_cache) {
+        if (url_cache.hasOwnProperty(url)) {
+            var list_item = document.createElement("li");
+            list_item.classList.add("meal_image_picker_list_item");
+
+            // Setup image_element
+            var image_element = document.createElement("img");
+            image_element.id = url_cache[url];
+            image_element.src = url;
+            image_element.classList.add("image_picker_image");
+            image_element.onclick = select_meal_image;
+
+            // Append the image an list item
+            list_item.appendChild(image_element);
+
+            meal_image_picker_list.appendChild(list_item);
         }
-        return;
-    } else {
-        // firebase_storage.ref("meal_images/default_images/" + filename_records[id]).getDownloadURL()
-        firebase_storage.ref(storage_reference_path_prefix + filenames[index]).getDownloadURL()
-            .then(function(url) {
-                // Setup list_item
-                var list_item = document.createElement("li");
-                list_item.classList.add("meal_image_picker_list_item");
-
-                // Setup image_element
-                var image_element = document.createElement("img");
-                image_element.id = storage_reference_path_prefix + filenames[index];
-                image_element.src = url;
-                image_element.classList.add("image_picker_image");
-                image_element.onclick = select_meal_image;
-
-                // Append the image an list item
-                list_item.appendChild(image_element);
-
-                list_elements.push(list_item);
-
-                // Recursively call this function to go through all file names
-                populate_meal_image_picker_list(filenames, ++index, storage_reference_path_prefix, list_elements);
-            })
-            .catch(function(error){
-                console.log(error.message);
-            })
     }
 }
 
@@ -2118,19 +2122,64 @@ function toggle_image_category_label_selected(is_default_selected) {
     var default_images_category_label = document.getElementById("image_category_list_item_default_images");
 
     if (is_default_selected) {
+        user_images_category_label.setAttribute("data-is-selected", true);
         user_images_category_label.classList.remove("image_category_list_item_chosen");
         default_images_category_label.classList.add("image_category_list_item_chosen");
     } else {
+        user_images_category_label.setAttribute("data-is-selected", false);
         user_images_category_label.classList.add("image_category_list_item_chosen");
         default_images_category_label.classList.remove("image_category_list_item_chosen");
     }
 
+    // update the number of images in the label
+    user_images_category_label.innerHTML = "My Images (" + objectElementCount(user_images_category_label) + ")";
+    default_images_category_label.innerHTML = "Default Images (" + objectElementCount(default_meal_images_url_cache) + ")";
+}
+
+function add_image_to_user_meal_image_picker_list(url) {
+    var is_user_images_selected = document.getElementById("image_category_list_item_my_images").getAttribute("data-is-selected");
+
+    // Ensure the user images are being currenlty viewed
+    if (is_user_images_selected) {
+        var meal_image_picker_list = document.getElementById('meal_image_picker_list');
+
+        // Check to see if the images was already loaded in (asynchronously)
+        var already_has_image = false;
+        for (var i = 0; i < meal_image_picker_list.children.length; i++) {
+            if (meal_image_picker_list.children[i].src = url) {
+                already_has_image = true;
+                break;
+            }
+        }
+
+        // If not there, add it
+        if (!already_has_image) {
+            var list_item = document.createElement("li");
+            list_item.classList.add("meal_image_picker_list_item");
+
+            // Setup image_element
+            var image_element = document.createElement("img");
+            image_element.id = url_cache[url];
+            image_element.src = url;
+            image_element.classList.add("image_picker_image");
+            image_element.onclick = select_meal_image;
+
+            // Append elements (proper nesting)
+            list_item.appendChild(image_element);
+            meal_image_picker_list.appendChild(list_item);
+        }
+    }
 }
 
 /**
 * Shows the friend request pop-up dialog window
 */
 function show_meal_image_picker_dialog() {
+    if (!isEmpty(user_meal_images_url_cache)) {
+        populate_meal_image_picker_list_with_user_images();
+    } else {
+        populate_meal_image_picker_list_with_default_images();
+    }
     document.getElementById('meal_image_picker_pop_up_background').style.display = "block";
 }
 
@@ -2195,6 +2244,11 @@ function on_upload_images_button_click() {
 function upload_images_from_files(files, index) {
 
     if (index >= files.length) {
+        var progress_bar = document.getElementById('meal_upload_progress');
+        var progress_label = document.getElementById('meal_upload_progress_label');
+        progress_bar.value = 0;
+        progress_bar.classList.add("hide");
+        progress_label.classList.add("hide");
         return;
     } else {
         var progress_bar = document.getElementById('meal_upload_progress');
@@ -2223,16 +2277,16 @@ function upload_images_from_files(files, index) {
                 var new_user_image_record_ref = firebase_database.ref('Users_Images/' + user.uid).push();
                 new_user_image_record_ref.set({filename: files[index].name});
 
+                // Get image download url and ddd url to the cache
+                var storage_path = "meal_images/user_images/" + user.uid + "/" + files[index].name;
+                firebase_storage.ref(storage_path).getDownloadURL()
+                    .then(function(url) {
+                        user_meal_images_url_cache[url] = storage_path;
+                        populate_meal_image_picker_list_with_user_images();
+                    })
+
                 // Recursively upload
                 upload_images_from_files(files, ++index);
-
-                // Populates the list
-                if (index >= files.length) {
-                    populate_meal_image_picker_list_with_user_images();
-                    progress_bar.value = 0;
-                    progress_bar.classList.add("hide");
-                    progress_label.classList.add("hide");
-                }
             }
         );
     }
@@ -2245,4 +2299,27 @@ function confirm_meal_image_pick() {
     var image_path = document.getElementById('meal_image_picker_list').getAttribute("data-current-image-id");
     document.getElementById('meal_image_input').value = image_path;
     document.getElementById('meal_image_picker_pop_up_background').style.display = "none";
+}
+
+/*
+    Support Functions
+*/
+
+function isEmpty(object) {
+    for (var key in object) {
+        if (object.hasOwnProperty(key)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function objectElementCount(object) {
+    var count = 0;
+    for (var key in object) {
+        if (object.hasOwnProperty(key)) {
+            count++;
+        }
+    }
+    return count;
 }
