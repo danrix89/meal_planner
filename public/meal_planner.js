@@ -2042,7 +2042,9 @@ function load_and_cache_meal_images() {
                 user_filenames.push(filename_records[id].filename);
             }
         }
-        populate_cache(user_meal_images_url_cache, user_filenames, 0, user_storage_reference_path_prefix);
+        if (user_filenames.length > 0) {
+            populate_cache(user_meal_images_url_cache, user_filenames, 0, user_storage_reference_path_prefix);
+        }
     })
 
     // Load default images
@@ -2056,7 +2058,9 @@ function load_and_cache_meal_images() {
                 default_filenames.push(filename_records[id]);
             }
         }
-        populate_cache(default_meal_images_url_cache, default_filenames, 0, default_storage_reference_path_prefix);
+        if (default_filenames.length > 0) {
+            populate_cache(default_meal_images_url_cache, default_filenames, 0, default_storage_reference_path_prefix);
+        }
     })
 }
 
