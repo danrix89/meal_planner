@@ -397,33 +397,19 @@ function create_new_user_data(firebase_user) {
 * password length.
 */
 function log_in() {
-    var test_mode = false;
-    if (test_mode) {
-        ////////////////////////////////////////////////////////////////////////
-        //////////////////////////// TEST LOG IN ///////////////////////////////
-        ////////////////////////////////////////////////////////////////////////
-        user = {};
-        user.uid = "1oRWD3Kw2ibbGJ69MsRysMsgjIe2";
-        initialize_meal_planner_app();
-        document.getElementById("sign_in_page").setAttribute("class", "hide");
-        document.getElementById("main_box").classList.remove("hide");
-        ////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////////////////////////////
+    // Get the data from the fields
+    var txtEmail = document.getElementById("txtEmail");
+    var txtPassword = document.getElementById("txtPassword");
+
+    if (txtPassword.value.length >= 6) {
+        const promise = firebase_authentication.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
+
+        promise
+            .catch (function(event) {alert(event.message);
+        });
     } else {
-        // Get the data from the fields
-        var txtEmail = document.getElementById("txtEmail");
-        var txtPassword = document.getElementById("txtPassword");
-
-        if (txtPassword.value.length >= 6) {
-            const promise = firebase_authentication.signInWithEmailAndPassword(txtEmail.value, txtPassword.value);
-
-            promise
-                .catch (function(event) {alert(event.message);
-            });
-        } else {
-            txtPassword.focus();
-            alert("Passwords must be 6 or more characters");
-        }
+        txtPassword.focus();
+        alert("Passwords must be 6 or more characters");
     }
 }
 
