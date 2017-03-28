@@ -847,12 +847,12 @@ function drop_meal(event) {
                 }
             }
 
-            if (already_existing_plannedMonth_id != null) {
+            if (isValueSet(already_existing_plannedMonth_id)) {
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (snapshot.val()[plannedMonth_id]).formatted_date };
                 // Check if a meal is already is that spot
                 firebase_database.ref('PlannedMonths_MealPlans/' + already_existing_plannedMonth_id).once("value", function(db_snapshot) {
                     var meal_plans = db_snapshot.val();
-                    if (meal_plans != null && meal_plans != undefined) {
+                    if (isValueSet(meal_plans)) {
                         for (var meal_plan_id in meal_plans) {
                             if (meal_plans.hasOwnProperty(meal_plan_id) && meal_plans[meal_plan_id].day == target_day) {
                                 // Delete the meal in the database
@@ -923,7 +923,7 @@ function drop_meal(event) {
 */
 function overwrite_meal_plan_day(target_day, source_day) {
     // Check if current_plannedMonth is the same as the current month...
-    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
+    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (isValueSet(current_plannedMonth.id))) {
         // Save the changes to the database
         var db_plannedMonths_mealPlans_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id);
         db_plannedMonths_mealPlans_ref.once("value", function(db_snapshot) {
@@ -1013,7 +1013,7 @@ function delete_meal_from_calendar()
         meal_container_element.style.backgroundColor = "";
 
         // Delete the PlannedMonths_MealPlans record for that day
-        if (current_plannedMonth.id != null && current_plannedMonth.formatted_date == formatted_date(calendar_date)) {
+        if (isValueSet(current_plannedMonth.id) && current_plannedMonth.formatted_date == formatted_date(calendar_date)) {
             var mealPlan_record_to_remove = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
             mealPlan_record_to_remove.remove();
         } else {
@@ -1113,7 +1113,7 @@ function show_hide_ingredeint_remove_buttons(isShow)
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
                 // Check if the ingredient list item has a remove button
                 var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
-                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                if (isValueSet(ingredient_remove_button)) {
                     // If so, remove the button from the list item element
                     ingredient_remove_button.parentElement.removeChild(ingredient_remove_button);
                 }
@@ -1165,7 +1165,7 @@ function select_meal_in_meal_list(meal_id) {
 function select_meal_in_calendar(meal_id) {
     if (!is_edit_mode) {
         // Chage the current meal to the newly selected/clicked meal
-        if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null)) {
+        if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && isValueSet(current_plannedMonth.id)) {
             firebase_database.ref('PlannedMonths_MealPlans/' + current_plannedMonth.id + "/" + meal_id).once("value", function(db_snapshot) {
                 previous_meal = current_meal;
                 var meal_object = { id: meal_id, name: (db_snapshot.val())["name"], recipe: (db_snapshot.val())["recipe"], image_path: (db_snapshot.val())["image_path"], ingredients: (db_snapshot.val())["ingredients"]}
@@ -1323,7 +1323,7 @@ function add_ingredient()
     if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
     {
         var ingredient = document.getElementById('meal_ingredient_input').value;
-        if (current_meal.ingredients != null && current_meal.ingredients != undefined && current_meal != "") {
+        if (isValueSet(current_meal.ingredients)) {
             current_meal.ingredients[ingredient] = ingredient;
         } else {
             current_meal.ingredients = {};
@@ -1444,7 +1444,7 @@ function toggle_locking_meal_editor_controls(is_to_lock_controls) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
                 // Check if the ingredient list item has a remove button
                 var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
-                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                if (isValueSet(ingredient_remove_button)) {
                     // If so, remove the button from the list item element
                     ingredient_remove_button.disabled = true;
                 }
@@ -1461,7 +1461,7 @@ function toggle_locking_meal_editor_controls(is_to_lock_controls) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
                 // Check if the ingredient list item has a remove button
                 var ingredient_remove_button = document.getElementById("ingredient_remove_button_" + ingredient);
-                if (ingredient_remove_button != null && ingredient_remove_button != undefined) {
+                if (isValueSet(ingredient_remove_button)) {
                     // If so, remove the button from the list item element
                     ingredient_remove_button.disabled = false;
                 }
@@ -1475,7 +1475,7 @@ function toggle_locking_meal_editor_controls(is_to_lock_controls) {
 */
 function update_calendar_meal(id) {
     // Check if current_plannedMonth is the same as the current month...
-    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && (current_plannedMonth.id != null && current_plannedMonth.id != undefined)) {
+    if ((current_plannedMonth.formatted_date == formatted_date(calendar_date)) && isValueSet(current_plannedMonth.id)) {
         // Save the changes to the database
         var db_plannedMonths_mealPlans_meal_ref = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + id);
         db_plannedMonths_mealPlans_meal_ref.once("value", function(db_snapshot) {
@@ -1554,48 +1554,6 @@ function logout()
 * FUNCTION_NAME
 * Description
 * @param
-* @return
-*/
-function calendar_print_button_onclick(a_nothing)
-{
-    alert("Printing coming soon.")
-}
-
-/**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
-*/
-function calendar_grocery_list_button_onclick(a_nothing)
-{
-    alert("Grocery list coming soon.")
-}
-
-/**
-* FUNCTION_NAME
-* Description
-* @param
-* @return
-*/
-function calendar_save_button_onclick(a_nothing)
-{
-    save_meal_plan();
-    save_meal_list();
-
-    if (localStorage.user_meal_plan_data != null) {
-        alert("Your meal plan has been saved.")
-    }
-
-    if (localStorage.user_meal_list != null) {
-        alert("Your meal plan has been saved.")
-    }
-}
-
-/**
-* FUNCTION_NAME
-* Description
-* @param
 */
 function set_current_meal(meal_id)
 {
@@ -1664,14 +1622,14 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
 {
     // Remove the highlight on the last selected meal in the meal list (if any)
     var meal_list_element = document.getElementById("meal_list_item_" + previous_meal.id);
-    if (meal_list_element != null && meal_list_element != undefined) {
+    if (isValueSet(meal_list_element)) {
         meal_list_element.style.backgroundColor = "";
     }
 
     // Remove the highlight on the last selected meal in the calendar (if any)
     var meal_calendar_day_element = document.getElementById('drag_' + previous_meal.id + '_calendar');
-    if (meal_calendar_day_element != null && meal_calendar_day_element != undefined) {
-        if (meal_calendar_day_element.parentElement != null && meal_calendar_day_element.parentElement != undefined) {
+    if (isValueSet(meal_calendar_day_element)) {
+        if (isValueSet(meal_calendar_day_element.parentElement)) {
             meal_calendar_day_element.parentElement.style.backgroundColor  = "";
         }
     }
@@ -1680,13 +1638,13 @@ function highlight_current_meal(meal_id, is_being_selected_from_meal_list)
     if (is_being_selected_from_meal_list) {
         // Add the highlight on the meal with meal_id
         meal_list_element = document.getElementById("meal_list_item_" + meal_id);
-        if (meal_list_element != null && meal_list_element != undefined) {
+        if (isValueSet(meal_list_element)) {
             meal_list_element.style.backgroundColor = "#33afff";
         }
     } else {
         meal_calendar_day_element = document.getElementById('drag_' + meal_id + '_calendar');
-        if (meal_calendar_day_element != null && meal_calendar_day_element != undefined) {
-            if (meal_calendar_day_element.parentElement != null && meal_calendar_day_element.parentElement != undefined) {
+        if (isValueSet(meal_calendar_day_element)) {
+            if (isValueSet(meal_calendar_day_element.parentElement)) {
                 meal_calendar_day_element.parentElement.style.backgroundColor  = "#33afff";
             }
         }
@@ -1736,7 +1694,7 @@ function populate_awaiting_friend_requests() {
             }
         }
 
-        if (requests != null) {
+        if (isValueSet(requests)) {
             document.getElementById('friend_request_no_requests_placeholder').classList.add('hide');
         } else {
             document.getElementById('friend_request_list_container').classList.add('hide');
@@ -1819,10 +1777,10 @@ function send_friend_request() {
     // Get the email from the input field
     var email = document.getElementById('send_friend_request_input').value;
 
-    if (email != "" && email != null) {
+    if (isValueSet(email)) {
         // Query the database for user with the email and set up the callback
         firebase_database.ref('Users').orderByChild("email").equalTo(email).once("value", function(db_snapshot) {
-            if (db_snapshot != null) {
+            if (isValueSet(db_snapshot)) {
                 var users = db_snapshot.val();
                 var friend_id = "";
                 var friend_email = "";
@@ -1888,7 +1846,7 @@ function populate_awaiting_meal_shares() {
             }
         }
 
-        if (meal_shares != null) {
+        if (isValueSet(meal_shares)) {
             document.getElementById('no_awaiting_meal_shares_placeholder').classList.add('hide');
             awaiting_meal_share_selection_element.selectedIndex = 0;
         } else {
@@ -1918,7 +1876,7 @@ function populate_friend_list() {
 
         // Handle if the user has friends or not.
         var share_button = document.getElementById("share_meal_with_friend_button");
-        if (friends != null) {
+        if (isValueSet(friends)) {
             //
             friend_selection_element.selectedIndex = 0;
             share_button.disabled = false;
@@ -2191,7 +2149,7 @@ function select_meal_image(event) {
     var currently_selected_image = document.getElementById(event.target.id);
 
     // Deselect the previous_selected_image
-    if (previous_selected_image != null && previous_selected_image != undefined) {
+    if (isValueSet(previous_selected_image)) {
         previous_selected_image.classList.remove("selected_image");
     }
 
@@ -2313,4 +2271,8 @@ function objectElementCount(object) {
         }
     }
     return count;
+}
+
+function isValueSet(value) {
+    return value != null && value != undefined && value != "";
 }
