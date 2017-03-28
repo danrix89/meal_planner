@@ -1621,7 +1621,7 @@ function populate_meal_editor(meal)
     document.getElementById('ingredient_add_button').onclick = add_ingredient;
 }
 
-add_ingredient_element_to_list(ingredient_list, ingredient) {
+function add_ingredient_element_to_list(ingredient_list, ingredient) {
     // Create the HTML elements
     var ingredient_element = document.createElement("li");
     var ingredient_name_element = document.createElement("div");
