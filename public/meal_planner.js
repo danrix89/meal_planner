@@ -560,7 +560,7 @@ function advance_month(a_value) {
             for (var plannedMonth_record_id in plannedMonths) {
                 if (plannedMonths.hasOwnProperty(plannedMonth_record_id)) {
                     if (plannedMonths[plannedMonth_record_id].formatted_date == current_calendar_date) {
-                        current_plannedMonth = { id: plannedMonth_record_id, formatted_date: plannedMonth.formatted_date };
+                        current_plannedMonth = { id: plannedMonth_record_id, formatted_date: plannedMonths[plannedMonth_record_id].formatted_date };
                     }
                 }
             }
