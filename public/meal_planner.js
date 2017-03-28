@@ -1541,11 +1541,11 @@ function logout()
 */
 function set_current_meal(meal_id)
 {
-    previous_meal = current_meal;
+    previous_meal = copy_meal(current_meal);
     for (var i = 0; i < meals.length; i++)
     {
         if (meals[i].id == meal_id) {
-            current_meal = meals[i];
+            current_meal = copy_meal(meals[i]);
             break;
         }
     }
@@ -2278,6 +2278,6 @@ function copy_meal(meal) {
             ingredients[ingredient] = ingredient;
         }
     }
-    result = { "id": meal.id, "name": meal.name, "image_path": meal.image_path, "ingredients": ingredients, "recipe": meal.recipe };
+    result = { "id": meal.id, "name": meal.name, "image_path": meal.image_path, "ingredients": ingredients, "recipe": meal.recipe, "is_calendar_meal": meal.is_calendar_meal};
     return result;
 }
