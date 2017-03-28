@@ -1109,19 +1109,22 @@ function show_hide_ingredeint_remove_buttons(isShow)
     if (isShow) {
         for (var ingredient in current_meal.ingredients) {
             if (current_meal.ingredients.hasOwnProperty(ingredient)) {
-                // Setup the ingredient remove button (nested in the ingredient element)
-                var ingredient_remove_button = document.createElement("button");
-                ingredient_remove_button.classList.add("remove_ingredient_button");
-                ingredient_remove_button.id = "ingredient_remove_button_" + ingredient;
-                ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
+                // Ensure a remove button doesn't already exist
+                if (!isValueSet(document.getElementById("ingredient_remove_button_" + ingredient))) {
+                    // Setup the ingredient remove button (nested in the ingredient element)
+                    var ingredient_remove_button = document.createElement("button");
+                    ingredient_remove_button.classList.add("remove_ingredient_button");
+                    ingredient_remove_button.id = "ingredient_remove_button_" + ingredient;
+                    ingredient_remove_button.setAttribute("onclick", "remove_ingredient('" + ingredient + "')");
 
-                // Setup the ingredient remove button image (in the button)
-                var ingredient_remove_button_image = document.createElement("img");
-                ingredient_remove_button_image.src = "images\\controls\\cancel_orange.png";
-                ingredient_remove_button_image.classList.add("button_image");
-                ingredient_remove_button.appendChild(ingredient_remove_button_image);
+                    // Setup the ingredient remove button image (in the button)
+                    var ingredient_remove_button_image = document.createElement("img");
+                    ingredient_remove_button_image.src = "images\\controls\\cancel_orange.png";
+                    ingredient_remove_button_image.classList.add("button_image");
+                    ingredient_remove_button.appendChild(ingredient_remove_button_image);
 
-                document.getElementById(ingredient).appendChild(ingredient_remove_button);
+                    document.getElementById(ingredient).appendChild(ingredient_remove_button);
+                }
             }
         }
     } else {
