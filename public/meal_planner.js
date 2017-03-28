@@ -555,13 +555,9 @@ function advance_month(a_value) {
 
     // Set the current_plannedMonth from the database?
     firebase_database.ref('Users_PlannedMonths/' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(snapshot) {
-        if (isValueSet(snapshot) && snapshot.val().formatted_date == formatted_date(calendar_date)) {
-            var plannedMonths = snapshot.val();
-            for (var plannedMonth_id in plannedMonths) {
-                if (plannedMonths.hasOwnProperty(plannedMonth_id) && plannedMonths[plannedMonth_id].formatted_date == formatted_date(calendar_date)) {
-                    current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
-                }
-            }
+        var plannedMonth = snapshot.val();
+        if (isValueSet(plannedMonth) && plannedMonth.formatted_date == current_calendar_date) {
+            current_plannedMonth = { id: plannedMonth.key, formatted_date: plannedMonth.formatted_date };
         }
     })
 
