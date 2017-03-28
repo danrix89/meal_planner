@@ -553,7 +553,17 @@ function advance_month(a_value) {
     // Display the formatted date on the calendar title
     document.getElementById("month_title").innerHTML = current_calendar_date;
 
-    // TODO: Set the current_plannedMonth from the database?
+    // Set the current_plannedMonth from the database?
+    firebase_database.ref('Users_PlannedMonths/' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(snapshot) {
+        if (isValueSet(snapshot) && snapshot.val().formatted_date == formatted_date(calendar_date)) {
+            var plannedMonths = snapshot.val();
+            for (var plannedMonth_id in plannedMonths) {
+                if (plannedMonths.hasOwnProperty(plannedMonth_id) && plannedMonths[plannedMonth_id].formatted_date == formatted_date(calendar_date)) {
+                    current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
+                }
+            }
+        }
+    })
 
     // Repopulate the calander
     populate_calendar_days();
@@ -652,8 +662,7 @@ function populate_calendar_days() {
 *
 */
 function get_meal_plan_for_current_month() {
-    var db_users_plannedMonths_ref = firebase_database.ref('Users_PlannedMonths/' + user.uid);
-    db_users_plannedMonths_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+    firebase_database.ref('Users_PlannedMonths' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
         for (var plannedMonth_id in db_snapshot.val()) {
             if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (formatted_date(calendar_date) == (db_snapshot.val()[plannedMonth_id]).formatted_date)) {
                 current_plannedMonth = { id: plannedMonth_id, formatted_date: (db_snapshot.val()[plannedMonth_id]).formatted_date };
@@ -953,8 +962,7 @@ function overwrite_meal_plan_day(target_day, source_day) {
         });
     } else {
         // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
-        var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
-        firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+        firebase_database.ref('Users_PlannedMonths' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
             for (var plannedMonth_id in db_snapshot.val()) {
                 if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
                     current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
@@ -1017,8 +1025,7 @@ function delete_meal_from_calendar()
             var mealPlan_record_to_remove = firebase_database.ref("PlannedMonths_MealPlans/" + current_plannedMonth.id + "/" + meal_id);
             mealPlan_record_to_remove.remove();
         } else {
-            var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
-            db_plannedMonths_mealPlans_ref.orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+            firebase_database.ref('Users_PlannedMonths' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
                 for (var plannedMonth_id in db_snapshot.val()) {
                     if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
                         current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
@@ -1184,7 +1191,7 @@ function select_meal_in_calendar(meal_id) {
         } else {
             // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
             var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
-            firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+            firebase_database.ref('Users_PlannedMonths' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
                 for (var plannedMonth_id in db_snapshot.val()) {
                     if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
                         current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
@@ -1488,7 +1495,7 @@ function update_calendar_meal(id) {
     } else {
         // If the current_plannedMonth is not this month (or not set), then update in and recall this function (recursion)
         var db_plannedMonths_mealPlans_ref = firebase_database.ref('PlannedMonths_MealPlans');
-        firebase_database.ref('PlannedMonths_MealPlans').orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
+        firebase_database.ref('Users_PlannedMonths' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(db_snapshot) {
             for (var plannedMonth_id in db_snapshot.val()) {
                 if (db_snapshot.val().hasOwnProperty(plannedMonth_id) && (db_snapshot.val()[plannedMonth_id]).formatted_date == formatted_date(calendar_date)) {
                     current_plannedMonth = { id: plannedMonth_id, formatted_date: formatted_date(calendar_date) };
