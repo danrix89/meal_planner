@@ -877,8 +877,8 @@ function drop_meal(event) {
                 var new_plannedMonths_record_ref = db_users_plannedMonths_ref.push();
                 var plannedMonth_object = {formatted_date: formatted_date(calendar_date)};
                 new_plannedMonths_record_ref.set(plannedMonth_object);
+                current_plannedMonth = { id: new_plannedMonths_record_ref.key, formatted_date: formatted_date(calendar_date) };
                 add_new_meal_to_meal_plan(target_day, meal_id, new_plannedMonths_record_ref.key);
-                current_plannedMonth = { id: new_plannedMonths_record_ref.uid, formatted_date: formatted_date(calendar_date) };
             }
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
@@ -2250,9 +2250,9 @@ function confirm_meal_image_pick() {
     document.getElementById('meal_image_picker_pop_up_background').style.display = "none";
 }
 
-/*
+/*****************************************
     Support Functions
-*/
+*****************************************/
 
 function isEmpty(object) {
     for (var key in object) {
