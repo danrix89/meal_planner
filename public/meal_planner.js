@@ -1399,7 +1399,7 @@ function edit_current_meal()
 
     // Save the current meal before we edit it so we can recover if the user
     // decides to cancel their changes
-    meal_before_edit = current_meal;
+    meal_before_edit = copy_meal(current_meal);
 
     // Show the edit mode controls in the meal editor pane.
     show_edit_mode_controls();
@@ -1548,7 +1548,7 @@ function cancel_changes()
         // We aren't adding a new meal. This means we're editing
         // the current meal, so we need to put the current meal
         // back to the way it was before we started editing.
-        current_meal = meal_before_edit;
+        current_meal = copy_meal(meal_before_edit);
     }
 
     populate_meal_editor(current_meal);
@@ -2313,4 +2313,15 @@ function objectElementCount(object) {
 
 function isValueSet(value) {
     return value != null && value != undefined && value != "";
+}
+
+function copy_meal(meal) {
+    var ingredients = {};
+    for (var ingredient in meal.ingredients) {
+        if (meal.ingredients.hasOwnProperty(ingredient)) {
+            ingredients[ingredient] = ingredient;
+        }
+    }
+    result = { "id": meal.id, "name": meal.name, "image_path": meal.image_path, "ingredients": ingredients, "recipe": meal.recipe };
+    return result;
 }
