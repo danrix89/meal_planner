@@ -1641,6 +1641,11 @@ function add_ingredient_element_to_list(ingredient_list, ingredient) {
 
     // Add the ingredient to the ingredients list
     ingredient_list.appendChild(ingredient_element);
+
+    if (is_edit_mode) {
+        // Add a remove button
+        show_hide_ingredeint_remove_buttons (true);
+    }
 }
 
 /**
