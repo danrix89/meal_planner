@@ -1336,17 +1336,26 @@ function update_calendar_item_with_changes_from_db_snapshot(db_snapshot) {
 */
 function add_ingredient()
 {
-    if (is_edit_mode && !document.getElementById('meal_ingredient_input').value == '')
+    var ingredient_input_field = document.getElementById('meal_ingredient_input');
+    if (is_edit_mode && ingredient_input_field.value != '')
     {
-        var ingredient = document.getElementById('meal_ingredient_input').value;
+        // Get the value from the field
+        var ingredient = ingredient_input_field.value;
+
+        // Add it to the current meal
         if (isValueSet(current_meal.ingredients)) {
             current_meal.ingredients[ingredient] = ingredient;
         } else {
             current_meal.ingredients = {};
             current_meal.ingredients[ingredient] = ingredient;
         }
-        document.getElementById('meal_ingredient_input').value = '';
-        populate_meal_editor(current_meal);
+
+        // Add this ingredent to the ingredient list (HTML)
+        var ingredient_list = document.getElementById('ingredients_unordered_list');
+        add_ingredient_element_to_list(ingredient_list, ingredient);
+
+        // Clear the field
+        ingredient_input_field.value = '';
     }
 }
 
@@ -1599,34 +1608,39 @@ function populate_meal_editor(meal)
     meal_instructions_text_area.value = meal.recipe;
 
     // Clear the current ingredient list and then populate it with the ingredients
-    document.getElementById('ingredients_unordered_list').innerHTML = "";
+    var ingredient_list = document.getElementById('ingredients_unordered_list')
+    ingredient_list.innerHTML = "";
 
     for (var ingredient in meal.ingredients) {
         if (meal.ingredients.hasOwnProperty(ingredient)) {
-            // Create the HTML elements
-            var ingredient_element = document.createElement("li");
-            var ingredient_name_element = document.createElement("div");
-            var ingredient_name_text_node = document.createTextNode(ingredient);
-
-            // Setup the ingredient list item element
-            ingredient_element.id = ingredient;
-
-            // Setup the ingredient name element (nested in the ingredient element)
-            ingredient_name_element.classList.add("ingredient");
-            ingredient_name_element.id = "ingredient_name_" + ingredient;
-            ingredient_name_element.appendChild(ingredient_name_text_node);
-
-            // Setup the ingredient element (with the nested name and remove button)
-            ingredient_element.classList.add("flex-ingredient-item");
-            ingredient_element.appendChild(ingredient_name_element);
-
-            // Add the ingredient to the ingredients list
-            document.getElementById('ingredients_unordered_list').appendChild(ingredient_element);
+            add_ingredient_element_to_list(ingredient_list, ingredient)
         }
     }
 
     // Setup the onclick functionality
     document.getElementById('ingredient_add_button').onclick = add_ingredient;
+}
+
+add_ingredient_element_to_list(ingredient_list, ingredient) {
+    // Create the HTML elements
+    var ingredient_element = document.createElement("li");
+    var ingredient_name_element = document.createElement("div");
+    var ingredient_name_text_node = document.createTextNode(ingredient);
+
+    // Setup the ingredient list item element
+    ingredient_element.id = ingredient;
+
+    // Setup the ingredient name element (nested in the ingredient element)
+    ingredient_name_element.classList.add("ingredient");
+    ingredient_name_element.id = "ingredient_name_" + ingredient;
+    ingredient_name_element.appendChild(ingredient_name_text_node);
+
+    // Setup the ingredient element (with the nested name and remove button)
+    ingredient_element.classList.add("flex-ingredient-item");
+    ingredient_element.appendChild(ingredient_name_element);
+
+    // Add the ingredient to the ingredients list
+    ingredient_list.appendChild(ingredient_element);
 }
 
 /**
