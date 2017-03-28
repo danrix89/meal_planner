@@ -1404,6 +1404,14 @@ function confirm_changes()
             var meal_object = { name: current_meal.name, image_path: current_meal.image_path, recipe: current_meal.recipe, ingredients: current_meal.ingredients };
             db_users_meals_meal_ref.set(meal_object);
 
+            for (var i = 0; i < meals.length; i++)
+            {
+                if (meals[i].id == current_meal.id) {
+                    meals[i] = copy_meal(current_meal);
+                    break;
+                }
+            }
+
             // Refresh the meal list with those changes
             db_users_meals_meal_ref.once("value", update_meal_list_item_with_changes_from_db_snapshot);
         } else {
