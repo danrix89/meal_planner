@@ -554,10 +554,18 @@ function advance_month(a_value) {
     document.getElementById("month_title").innerHTML = current_calendar_date;
 
     // Set the current_plannedMonth from the database?
-    firebase_database.ref('Users_PlannedMonths/' + user.uid).orderByChild("formatted_date").equalTo(formatted_date(calendar_date)).once("value", function(snapshot) {
-        var plannedMonth = snapshot.val();
-        if (isValueSet(plannedMonth) && plannedMonth.formatted_date == current_calendar_date) {
-            current_plannedMonth = { id: plannedMonth.key, formatted_date: plannedMonth.formatted_date };
+    firebase_database.ref('Users_PlannedMonths/' + user.uid).orderByChild("formatted_date").equalTo(current_calendar_date).once("value", function(snapshot) {
+        var plannedMonths = snapshot.val();
+        if (isValueSet(plannedMonths)) {
+            for (var plannedMonth_record_id in plannedMonths) {
+                if (plannedMonths.hasOwnProperty(plannedMonth_record_id)) {
+                    if (plannedMonths[plannedMonth_record_id].formatted_date == current_calendar_date) {
+                        current_plannedMonth = { id: plannedMonth_record_id, formatted_date: plannedMonth.formatted_date };
+                    }
+                }
+            }
+        } else {
+            current_plannedMonth = { id: null, formatted_date: null };
         }
     })
 
