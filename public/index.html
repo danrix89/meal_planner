@@ -40,6 +40,26 @@
         </div>
     </div>
 
+    <!-- The User Feedback Dialog -->
+    <div id="user_feedback_pop_up_background" class="pop_up_background">
+        <!-- Actual Dialog Content -->
+        <div class="pop_up_content">
+            <div class="pop_up_header">
+                <h1 id="user_feedback_pop_up_title" class="pop_up_title">Feedback?</h1>
+            </div>
+            <div class="pop_up_body">
+                <div id="user_feedback_container">
+                    <div class="popup_section_title">Enter comments, questions, or suggestions.</div>
+                    <textarea id="user_feedback_textarea" class="user_feedback_textarea" name="user_feedback" rows="13" cols="50"></textarea>
+                    <div id="user_feedback_controls_container" class="pop_up_controls_container">
+                        <button id="send_user_feedback_button" class="pop_up_button">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!-- The Friend Request Dialog -->
     <div id="friend_request_pop_up_background" class="pop_up_background">
         <!-- Actual Dialog Content -->
@@ -69,8 +89,6 @@
                     </div>
                 </div>
             </div>
-            <!-- <div class="pop_up_footer">
-            </div> -->
         </div>
     </div>
 
@@ -169,6 +187,7 @@
         <div id="app_title" class="app_title">
             <button class="meal_planner_button" id="log_out_button"><img class="button_image" src="images\controls\log_out.png" /></button>
             <button class="meal_planner_button" id="friend_request_button"><img class="button_image" src="images\controls\add_friend.png" /></button>
+            <button class="meal_planner_button" id="comment_bubble_button"><img class="button_image" src="images\controls\comment_bubble.png" /></button>
             <img id="title_logo" class="title_logo" src="images/controls/logo.png">
         </div>
         <!-- The Calendar -->

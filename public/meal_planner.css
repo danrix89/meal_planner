@@ -674,3 +674,9 @@ li.flex-meal-item:active {
     color: #33afff;
     font-size: .75em;
 }
+
+.user_feedback_textarea {
+    font-family: arial;
+    color: #33afff;
+    font-size: 1em;
+}

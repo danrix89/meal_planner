@@ -160,6 +160,7 @@ function setup_sign_in_controls() {
 */
 function setup_app_controls() {
     // Menu bar controls
+    document.getElementById('comment_bubble_button').onclick = show_user_feedback_dialog;
     document.getElementById('friend_request_button').onclick = show_friend_request_dialog;
     document.getElementById('log_out_button').onclick = logout;
 
@@ -184,6 +185,10 @@ function setup_app_controls() {
     document.getElementById('meal_ingredient_input').value = '';
     document.getElementById('meal_ingredient_input').parentElement.style.visibility = "hidden";
     document.getElementById('ingredient_add_button').parentElement.style.visibility = "hidden";
+
+    // Friend Request Dialog/Pop-up
+    document.getElementById('user_feedback_pop_up_background').onclick = hide_user_feedback_dialog;
+    document.getElementById('send_user_feedback_button').onclick = send_user_feedback;
 
     // Friend Request Dialog/Pop-up
     document.getElementById('friend_request_pop_up_background').onclick = hide_friend_request_dialog;
@@ -1671,6 +1676,37 @@ function remove_ingredient(ingredient)
         // Remove the ingredient HTML element
         var ingredient_list_element = document.getElementById(ingredient);
         ingredient_list_element.parentElement.removeChild(ingredient_list_element);
+    }
+}
+
+/***************
+* User Feedback Functions
+***************/
+
+/**
+* Shows the friend request pop-up dialog window
+*/
+function show_user_feedback_dialog() {
+    document.getElementById('user_feedback_pop_up_background').style.display = "block";
+}
+
+/**
+* When the user clicks anywhere outside of the dialog/pop-up, close it (make it disappear)
+*/
+function hide_user_feedback_dialog(event) {
+    var modal = document.getElementById('user_feedback_pop_up_background');
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+
+function send_user_feedback() {
+    var user_feedback_text = document.getElementById("user_feedback_textarea").value;
+    if (user_feedback_text != "") {
+        var new_feedback_record_ref = firebase_database.ref('Feedback').push();
+        new_feedback_record_ref.set({user_id: user.uid, user_email: user.email, feedback: user_feedback_text});
+        document.getElementById("user_feedback_textarea").value = "";
+        alert("Thank you for you feedback. It will be reviewed soon.")
     }
 }
 
